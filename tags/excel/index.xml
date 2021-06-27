@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>excel on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/excel/</link>
+    <description>Recent content in excel on Luis Miguens Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 02 Mar 2018 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.miguens.one/tags/excel/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Remove the password protection of Excel Macros</title>
+      <link>https://blog.miguens.one/posts/2018/03/remove-the-password-protection-of-excel-macros/</link>
+      <pubDate>Fri, 02 Mar 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2018/03/remove-the-password-protection-of-excel-macros/</guid>
+      <description>Way too often, people find themselves trying to update an existing macro in an excel file to reflect the organisation&amp;rsquo;s procedure changes.
+In some of those cases, the author has protected the macro code with a password. Whatever the reason that author might have had for that, it does not prevent future use, modifications, or preserve the code&amp;rsquo;s secrecy.
+As shown below, it is straightforward to remove such a password.</description>
+    </item>
+    
+  </channel>
+</rss>

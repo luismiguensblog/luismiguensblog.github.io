@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>cpp on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/cpp/</link>
+    <description>Recent content in cpp on Luis Miguens Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 08 Apr 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.miguens.one/tags/cpp/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How to use C&#43;&#43; in Jupyter Lab</title>
+      <link>https://blog.miguens.one/posts/2021/04/how-to-use-c-in-jupyter-lab/</link>
+      <pubDate>Thu, 08 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2021/04/how-to-use-c-in-jupyter-lab/</guid>
+      <description>How to use C++ in Jupyter Lab One of the main extension points of the Jupyter stack is the kernel, the part of the infrastructure responsible for executing the user’s code. Jupyter kernels exist for numerous programming languages. Most Jupyter kernels are implemented in the target programming language: the reference implementation ipykernel in Python, IJulia in Julia
+Xeus is a C++ implementation of the Jupyter kernel protocol. It is not a kernel itself but a library that facilitates the authoring of kernels, and other applications making use of the Jupyter kernel protocol.</description>
+    </item>
+    
+    <item>
+      <title>Writing Python modules in C&#43;&#43;</title>
+      <link>https://blog.miguens.one/posts/2020/08/writing-python-modules-in-c-/</link>
+      <pubDate>Tue, 04 Aug 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/08/writing-python-modules-in-c-/</guid>
+      <description>How to build libraries in C++ and use them in Python In this post I will expose one way to create libraries in C++ and expose them to Python.
+This can be very useful when we want to integrate existing piece of code, or write new code that perform better than Python.
+The way exposed in this post will make use of Boost, a peer reviewed C++ set of libraries. In paticular, we will use Boost-Python</description>
+    </item>
+    
+    <item>
+      <title>Databases MySQL: C&#43;&#43;</title>
+      <link>https://blog.miguens.one/posts/2020/06/databases-mysql-c-/</link>
+      <pubDate>Wed, 17 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/06/databases-mysql-c-/</guid>
+      <description>Installation In the first place, we need to install the MySQL Connector for C++. I am using Ubuntu, so I will use apt-get. Please adapt if you are using another distro not based on Debian.
+sudo apt-get install libmysqlcppconn-dev libmysqlcppconn7v5 We can try our database, for that I will use the example 2 included in the MySQL Connector. You can find the source code here
+The test program is:
+/* Standard C++ includes */ #include &amp;lt;stdlib.</description>
+    </item>
+    
+    <item>
+      <title>Databases MySQL: Python Part 2</title>
+      <link>https://blog.miguens.one/posts/2020/06/databases-mysql-python-part-2/</link>
+      <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/06/databases-mysql-python-part-2/</guid>
+      <description>Introduction In previous post we saw how to use SQLAlchemy and execute SQL commands to operate our database.
+Now we will see that there is a more convenient way to operate in Python using the SQLAlchemy
+In case you have reset your environment, we can start installing the package
+!!pip3 install sqlalchemy [&#39;Requirement already satisfied: sqlalchemy in /home/luis/.local/lib/python3.8/site-packages (1.3.20)&#39;]  And before using the library, we need to import it</description>
+    </item>
+    
+    <item>
+      <title>Databases MySQL: Python Part 1</title>
+      <link>https://blog.miguens.one/posts/2020/06/databases-mysql-python-part-1/</link>
+      <pubDate>Tue, 09 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/06/databases-mysql-python-part-1/</guid>
+      <description>Introduction In previous post we saw how to install and use an SQL database, now I will introduce how to use inside Python
+We have several connectors from SQL to Python that are &amp;ldquo;flavour&amp;rdquo; dependant. For example, we can use psycopg2 to connect to a PostgreSQL database or MySQL Connector to connect to MySQL.
+I like to take a step back, and use a package that is not dependant of the brand of database we will install.</description>
+    </item>
+    
+    <item>
+      <title>Databases MySQL: Integrate SQL in Jupyter Lab</title>
+      <link>https://blog.miguens.one/posts/2020/06/databases-mysql-integrate-sql-in-jupyter-lab/</link>
+      <pubDate>Sat, 06 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/06/databases-mysql-integrate-sql-in-jupyter-lab/</guid>
+      <description>Preparation of Jupyter Notebook In the previous post we saw how to install MySQL and prepare the external programs needed to use SQL in our Jupyter Notebook.
+Now let&amp;rsquo;s load the module and establish the connection and let&amp;rsquo;s start
+%load_ext sql %sql mysql+pymysql://user:password@localhost/datab How to create a table Imagine that we want to build a database to identify pets. Every pet has an ID, a category (dog, cat, bird) and a name</description>
+    </item>
+    
+    <item>
+      <title>Databases MySQL: Installation</title>
+      <link>https://blog.miguens.one/posts/2020/06/databases-mysql-installation/</link>
+      <pubDate>Wed, 03 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/06/databases-mysql-installation/</guid>
+      <description>Introduction to Databases: MySQL During the following days I will write about databases SQL, how to install, debug and use them via Python and C++.
+Installation To install a MySQL I will use Docker, as it is the most easiest way in my opinion to quickly deploy a test database.
+In a Jupyter Notebook, let&amp;rsquo;s run:
+!!docker run --name mysql-test -e MYSQL_ROOT_PASSWORD=secret -d -p 3306:3306 mysql [&#39;b2946635401f23ee223861da235cc309af878dd0305d03285673b39962ca1311&#39;]  We can check that the database is running with docker ps</description>
+    </item>
+    
+    <item>
+      <title>Messages between applications: MQTT and C</title>
+      <link>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-and-c/</link>
+      <pubDate>Sun, 04 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-and-c/</guid>
+      <description>Installation To make use of MQTT in C, we need to install a library to communicate with the server. A populat choice is Paho from Eclipse.
+We need to follow the next steps to install it:
+git clone https://github.com/eclipse/paho.mqtt.c.git cd paho.mqtt.c make sudo make install Depending on your system, you might need to install the development package of OpenSSL (openssl-dev)
+Writing the test program We need to create two files, send.</description>
+    </item>
+    
+    <item>
+      <title>Messages between applications: MQTT and Python</title>
+      <link>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-and-python/</link>
+      <pubDate>Sat, 03 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-and-python/</guid>
+      <description>Installation To make use of MQTT in Python, we need to install a library to communicate with the server. A populat choice is Paho from Eclipse.
+As usual we can use pip to install it
+!!pip3 install paho-mqtt [&#39;Requirement already satisfied: paho-mqtt in /home/luis/.local/lib/python3.8/site-packages (1.5.1)&#39;]  Publish a message import paho.mqtt.client as mqtt help(mqtt.Client.publish) Help on function publish in module paho.mqtt.client: publish(self, topic, payload=None, qos=0, retain=False, properties=None) Publish a message on a topic.</description>
+    </item>
+    
+    <item>
+      <title>Messages between applications: MQTT Server</title>
+      <link>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-server/</link>
+      <pubDate>Fri, 02 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-server/</guid>
+      <description>MQTT In this series of post, I will explain how to use the message broker MQTT. From installation to submit and receive messages in Python and C++.
+A bit of history MQTT was created way back in 1999 by two engineers — Andy Stanford-Clark (IBM) and Arlen Nipper (Eurotech). They had to invent a new protocol for connecting oil pipelines over unreliable, satellite networks.
+The motivation for designing MQTT was to create a lightweight and bandwidth-efficient protocol that was data agnostic with support for multiple levels of Quality of Service (QoS).</description>
+    </item>
+    
+  </channel>
+</rss>
