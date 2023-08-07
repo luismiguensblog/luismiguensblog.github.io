@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>sql on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/sql/</link>
+    <description>Recent content in sql on Luis Miguens Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 17 Jun 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.miguens.one/tags/sql/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Databases MySQL: C&#43;&#43;</title>
+      <link>https://blog.miguens.one/posts/2020/06/databases-mysql-c-/</link>
+      <pubDate>Wed, 17 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/06/databases-mysql-c-/</guid>
+      <description>Installation In the first place, we need to install the MySQL Connector for C++. I am using Ubuntu, so I will use apt-get. Please adapt if you are using another distro not based on Debian.
+sudo apt-get install libmysqlcppconn-dev libmysqlcppconn7v5 We can try our database, for that I will use the example 2 included in the MySQL Connector. You can find the source code here
+The test program is:
+/* Standard C++ includes */ #include &amp;lt;stdlib.</description>
+    </item>
+    
+    <item>
+      <title>Databases MySQL: Python Part 2</title>
+      <link>https://blog.miguens.one/posts/2020/06/databases-mysql-python-part-2/</link>
+      <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/06/databases-mysql-python-part-2/</guid>
+      <description>Introduction In previous post we saw how to use SQLAlchemy and execute SQL commands to operate our database.
+Now we will see that there is a more convenient way to operate in Python using the SQLAlchemy
+In case you have reset your environment, we can start installing the package
+!!pip3 install sqlalchemy [&#39;Requirement already satisfied: sqlalchemy in /home/luis/.local/lib/python3.8/site-packages (1.3.20)&#39;]  And before using the library, we need to import it</description>
+    </item>
+    
+    <item>
+      <title>Databases MySQL: Python Part 1</title>
+      <link>https://blog.miguens.one/posts/2020/06/databases-mysql-python-part-1/</link>
+      <pubDate>Tue, 09 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/06/databases-mysql-python-part-1/</guid>
+      <description>Introduction In previous post we saw how to install and use an SQL database, now I will introduce how to use inside Python
+We have several connectors from SQL to Python that are &amp;ldquo;flavour&amp;rdquo; dependant. For example, we can use psycopg2 to connect to a PostgreSQL database or MySQL Connector to connect to MySQL.
+I like to take a step back, and use a package that is not dependant of the brand of database we will install.</description>
+    </item>
+    
+    <item>
+      <title>Databases MySQL: Integrate SQL in Jupyter Lab</title>
+      <link>https://blog.miguens.one/posts/2020/06/databases-mysql-integrate-sql-in-jupyter-lab/</link>
+      <pubDate>Sat, 06 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/06/databases-mysql-integrate-sql-in-jupyter-lab/</guid>
+      <description>Preparation of Jupyter Notebook In the previous post we saw how to install MySQL and prepare the external programs needed to use SQL in our Jupyter Notebook.
+Now let&amp;rsquo;s load the module and establish the connection and let&amp;rsquo;s start
+%load_ext sql %sql mysql+pymysql://user:password@localhost/datab How to create a table Imagine that we want to build a database to identify pets. Every pet has an ID, a category (dog, cat, bird) and a name</description>
+    </item>
+    
+    <item>
+      <title>Databases MySQL: Installation</title>
+      <link>https://blog.miguens.one/posts/2020/06/databases-mysql-installation/</link>
+      <pubDate>Wed, 03 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/06/databases-mysql-installation/</guid>
+      <description>Introduction to Databases: MySQL During the following days I will write about databases SQL, how to install, debug and use them via Python and C++.
+Installation To install a MySQL I will use Docker, as it is the most easiest way in my opinion to quickly deploy a test database.
+In a Jupyter Notebook, let&amp;rsquo;s run:
+!!docker run --name mysql-test -e MYSQL_ROOT_PASSWORD=secret -d -p 3306:3306 mysql [&#39;b2946635401f23ee223861da235cc309af878dd0305d03285673b39962ca1311&#39;]  We can check that the database is running with docker ps</description>
+    </item>
+    
+  </channel>
+</rss>

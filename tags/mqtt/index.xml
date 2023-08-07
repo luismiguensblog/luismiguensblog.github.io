@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>mqtt on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/mqtt/</link>
+    <description>Recent content in mqtt on Luis Miguens Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 04 Aug 2019 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.miguens.one/tags/mqtt/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Messages between applications: MQTT and C</title>
+      <link>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-and-c/</link>
+      <pubDate>Sun, 04 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-and-c/</guid>
+      <description>Installation To make use of MQTT in C, we need to install a library to communicate with the server. A populat choice is Paho from Eclipse.
+We need to follow the next steps to install it:
+git clone https://github.com/eclipse/paho.mqtt.c.git cd paho.mqtt.c make sudo make install Depending on your system, you might need to install the development package of OpenSSL (openssl-dev)
+Writing the test program We need to create two files, send.</description>
+    </item>
+    
+    <item>
+      <title>Messages between applications: MQTT and Python</title>
+      <link>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-and-python/</link>
+      <pubDate>Sat, 03 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-and-python/</guid>
+      <description>Installation To make use of MQTT in Python, we need to install a library to communicate with the server. A populat choice is Paho from Eclipse.
+As usual we can use pip to install it
+!!pip3 install paho-mqtt [&#39;Requirement already satisfied: paho-mqtt in /home/luis/.local/lib/python3.8/site-packages (1.5.1)&#39;]  Publish a message import paho.mqtt.client as mqtt help(mqtt.Client.publish) Help on function publish in module paho.mqtt.client: publish(self, topic, payload=None, qos=0, retain=False, properties=None) Publish a message on a topic.</description>
+    </item>
+    
+    <item>
+      <title>Messages between applications: MQTT Server</title>
+      <link>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-server/</link>
+      <pubDate>Fri, 02 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-server/</guid>
+      <description>MQTT In this series of post, I will explain how to use the message broker MQTT. From installation to submit and receive messages in Python and C++.
+A bit of history MQTT was created way back in 1999 by two engineers — Andy Stanford-Clark (IBM) and Arlen Nipper (Eurotech). They had to invent a new protocol for connecting oil pipelines over unreliable, satellite networks.
+The motivation for designing MQTT was to create a lightweight and bandwidth-efficient protocol that was data agnostic with support for multiple levels of Quality of Service (QoS).</description>
+    </item>
+    
+  </channel>
+</rss>

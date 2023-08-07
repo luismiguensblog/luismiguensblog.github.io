@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>c_cpp on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/c_cpp/</link>
+    <description>Recent content in c_cpp on Luis Miguens Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 29 Jun 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.miguens.one/tags/c_cpp/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>An Introduction to Mutexes and Multithreading in C</title>
+      <link>https://blog.miguens.one/posts/2023/06/an-introduction-to-mutexes-and-multithreading-in-c/</link>
+      <pubDate>Thu, 29 Jun 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2023/06/an-introduction-to-mutexes-and-multithreading-in-c/</guid>
+      <description>Title: An Introduction to Mutexes and Multithreading in C
+In the world of programming, threads are a crucial concept that allows for concurrent execution within a single process. This concurrent execution is made possible through multithreading, a widespread technique in modern programming. However, when multiple threads access a shared resource, synchronization problems can arise. In this blog post, we&amp;rsquo;ll explore how to use Mutexes in C for thread synchronization and delve into the concept of multithreading.</description>
+    </item>
+    
+  </channel>
+</rss>

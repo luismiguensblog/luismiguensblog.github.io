@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>python on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/python/</link>
+    <description>Recent content in python on Luis Miguens Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 16 May 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.miguens.one/tags/python/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Creating a Virtual File System with FUSE and Python</title>
+      <link>https://blog.miguens.one/posts/2023/05/creating-a-virtual-file-system-with-fuse-and-python/</link>
+      <pubDate>Tue, 16 May 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2023/05/creating-a-virtual-file-system-with-fuse-and-python/</guid>
+      <description>This is a continuation of my previous article: Save Snippets of Python code as single XML file
+Creating a Virtual File System with FUSE and Python FUSE (Filesystem in Userspace) is a software interface that allows user-level programs to create and manage file systems without requiring root privileges. This makes it possible to create custom file systems that can be mounted and accessed like regular file systems.
+In this article, we will create a virtual file system using FUSE and Python.</description>
+    </item>
+    
+    <item>
+      <title>Save Snippets of Python code as single XML file</title>
+      <link>https://blog.miguens.one/posts/2023/04/save-snippets-of-python-code-as-single-xml-file/</link>
+      <pubDate>Sat, 29 Apr 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2023/04/save-snippets-of-python-code-as-single-xml-file/</guid>
+      <description>How to Use an XML File to Store Multiple Portions of Python Code Have you ever needed to run several Python code snippets in the cloud and wished for an easy way to organize and package them? One way to accomplish this is by using an XML file to store your Python code snippets. An XML file is a file format that is used to store and transport data, and can be easily read and written by machines.</description>
+    </item>
+    
+    <item>
+      <title>Automatic Type Annotations in Python</title>
+      <link>https://blog.miguens.one/posts/2021/06/automatic-type-annotations-in-python/</link>
+      <pubDate>Thu, 17 Jun 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2021/06/automatic-type-annotations-in-python/</guid>
+      <description>In a previous post, I explained how to use type annotations in Python. You can find the post here.
+Now, we will see how to migrate code without type annotations using two tools: pyannotate and MonkeyType
+pyannotate Pyannotate is a project started by Dropbox and published in Github.
+It is intended to be used alongside your test scripts. It requires minor modifications to your existing code to add start and stop statements.</description>
+    </item>
+    
+    <item>
+      <title>How to download all certificates of UDEMY</title>
+      <link>https://blog.miguens.one/posts/2021/06/how-to-download-all-certificates-of-udemy/</link>
+      <pubDate>Sun, 06 Jun 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2021/06/how-to-download-all-certificates-of-udemy/</guid>
+      <description>A simple script using Selenium to download all the certicates of Udemy, as they do not provide API
+There is room for improvement, mostly removing the time.sleep calls. That part of code is there because the initial load of the page does not provide that data, as it is query via an internal API and the data fill with JavaScript.
+from selenium import webdriver import time import os from urllib.parse import urlparse import requests USERNAME=&amp;#34;xxxx@gmail.</description>
+    </item>
+    
+    <item>
+      <title>Type Annotations in Python</title>
+      <link>https://blog.miguens.one/posts/2021/05/type-annotations-in-python/</link>
+      <pubDate>Sat, 29 May 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2021/05/type-annotations-in-python/</guid>
+      <description>What are type annotations Python is a dynamic typed language, meaning that types are associated with the variable&amp;rsquo;s value, not the variable itself. This means that variables can take on any value at any point, and are only type checked before performing an action with them.
+Type Annotations are a new feature added in PEP 484 that allow for adding type hints to variables. They are used to inform someone reading the code what the type of a variable should be.</description>
+    </item>
+    
+    <item>
+      <title>Profiling a Python program</title>
+      <link>https://blog.miguens.one/posts/2021/03/profiling-a-python-program/</link>
+      <pubDate>Thu, 25 Mar 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2021/03/profiling-a-python-program/</guid>
+      <description>If we wish to know how long it takes for a portion of code to run, an obvious answer is to time it:
+For example:
+from time import time start = time() # do_something() end = time() print(&amp;#39;It took {end - start} seconds!&amp;#39;) When the program grows, doing this is impractical, but python provides us, by default, with the cProfile module to get information about the running time of our program&amp;rsquo;s functions.</description>
+    </item>
+    
+    <item>
+      <title>Parallelism in Python: Linux vs Windows.</title>
+      <link>https://blog.miguens.one/posts/2021/03/parallelism-in-python-linux-vs-windows./</link>
+      <pubDate>Wed, 24 Mar 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2021/03/parallelism-in-python-linux-vs-windows./</guid>
+      <description>In Linux, when you start a child process, it is Forked. It means that the child process inherits the memory state of the parent process. On Windows (and by default on Mac), however, processes are Spawned.
+Even though processes usually speed up the execution of a program by using multiple cores on a computer, starting each process can be time-consuming.
+The fact that on Windows and Mac Python needs to pickle the objects to create child processes adds an overhead that may offset the benefits of running on separated processes.</description>
+    </item>
+    
+    <item>
+      <title>Parallelism in Python.</title>
+      <link>https://blog.miguens.one/posts/2021/03/parallelism-in-python./</link>
+      <pubDate>Mon, 22 Mar 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2021/03/parallelism-in-python./</guid>
+      <description>In Python, by default we have three options to add parallel processing to our applications:
+ threading multiprocessing concurrent.futures  The first option, threading is useful with I/O and networking tasks, as the parallelization remains in a single core.
+The second option, multiprocessing, is used with intensive CPU tasks, and the processing will be distributed in all the cores of our machine. The disadvantage of multiprocessing is that all the information and objects should be serializable.</description>
+    </item>
+    
+    <item>
+      <title>Investing with Python: Part 2 - Stocks</title>
+      <link>https://blog.miguens.one/posts/2021/01/investing-with-python-part-2-stocks/</link>
+      <pubDate>Sun, 17 Jan 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2021/01/investing-with-python-part-2-stocks/</guid>
+      <description>This is a continuation of the previous post. Here I will apply the Black Litterman model to a portfolio of stocks.
+import pandas as pd import yfinance as yf import openpyxl from currency_converter import CurrencyConverter import numpy as np from pypfopt import BlackLittermanModel from pypfopt import black_litterman, risk_models # Declare constants PORTFOLIO=&amp;#39;/mnt/wd-bigfoot/share/luis/OneDrive/Documents/Portfolio/00 portfolio.xlsx&amp;#39; STOCKS_SHEET=&amp;#39;Stocks&amp;#39; START_DATE=&amp;#39;2010-01-01&amp;#39; END_DATE=&amp;#39;2021-01-08&amp;#39; ALL_WORLD=&amp;#39;IWDA.AS&amp;#39; TOTAL_FUNDS=40e3 # 40.000 EUR # Open the portfolio and get the stocks stocks_pd = pd.</description>
+    </item>
+    
+    <item>
+      <title>Investing with Python: Part 1 - ETFs</title>
+      <link>https://blog.miguens.one/posts/2021/01/investing-with-python-part-1-etfs/</link>
+      <pubDate>Sat, 16 Jan 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2021/01/investing-with-python-part-1-etfs/</guid>
+      <description>What Is the Black-Litterman Model? The Black-Litterman (BL) Model is an analytical tool used by portfolio managers to optimize asset allocation within an investor’s risk tolerance and market views.
+The BL model starts from a neutral position using modern portfolio theory (MPT), and then takes additional input from investors&#39; views to determine how the ultimate asset allocation should deviate from the initial portfolio weights.
+I will use the PyPortfolioOpt is a library that implements portfolio optimization methods, including classical efficient frontier techniques and Black-Litterman allocation.</description>
+    </item>
+    
+    <item>
+      <title>Trading in Python: Part 2</title>
+      <link>https://blog.miguens.one/posts/2020/12/trading-in-python-part-2/</link>
+      <pubDate>Tue, 15 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/12/trading-in-python-part-2/</guid>
+      <description>In the previous post, we wrote the basics of stock trading in Python. We saw how to make a small wallet to record transactions, how to fetch data from investing.com in a python object and we wrote some generic classes to buy and sell when a security crosses a thresold.
+Now we will continue our exercise writing a program to run several strategias over a period of time.
+As we are going to run different scenarios, it is a good idea to use parallelisation in our design.</description>
+    </item>
+    
+    <item>
+      <title>Trading in Python: Part 1</title>
+      <link>https://blog.miguens.one/posts/2020/12/trading-in-python-part-1/</link>
+      <pubDate>Sun, 13 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/12/trading-in-python-part-1/</guid>
+      <description>What is the difference between Trading and Investing? Trading and investing both involve seeking profit in the stock market, but they pursue that goal in different ways.
+Traders jump in and out of stocks within weeks, days, even minutes, with the aim of short-term profits. They often focus on a stock’s technical factors rather than a company’s long-term prospects. What matters to traders is which direction the stock will move next and how the trader can profit from that move.</description>
+    </item>
+    
+    <item>
+      <title>Writing Python modules in C&#43;&#43;</title>
+      <link>https://blog.miguens.one/posts/2020/08/writing-python-modules-in-c-/</link>
+      <pubDate>Tue, 04 Aug 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/08/writing-python-modules-in-c-/</guid>
+      <description>How to build libraries in C++ and use them in Python In this post I will expose one way to create libraries in C++ and expose them to Python.
+This can be very useful when we want to integrate existing piece of code, or write new code that perform better than Python.
+The way exposed in this post will make use of Boost, a peer reviewed C++ set of libraries. In paticular, we will use Boost-Python</description>
+    </item>
+    
+    <item>
+      <title>Databases MySQL: C&#43;&#43;</title>
+      <link>https://blog.miguens.one/posts/2020/06/databases-mysql-c-/</link>
+      <pubDate>Wed, 17 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/06/databases-mysql-c-/</guid>
+      <description>Installation In the first place, we need to install the MySQL Connector for C++. I am using Ubuntu, so I will use apt-get. Please adapt if you are using another distro not based on Debian.
+sudo apt-get install libmysqlcppconn-dev libmysqlcppconn7v5 We can try our database, for that I will use the example 2 included in the MySQL Connector. You can find the source code here
+The test program is:
+/* Standard C++ includes */ #include &amp;lt;stdlib.</description>
+    </item>
+    
+    <item>
+      <title>Databases MySQL: Python Part 2</title>
+      <link>https://blog.miguens.one/posts/2020/06/databases-mysql-python-part-2/</link>
+      <pubDate>Sun, 14 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/06/databases-mysql-python-part-2/</guid>
+      <description>Introduction In previous post we saw how to use SQLAlchemy and execute SQL commands to operate our database.
+Now we will see that there is a more convenient way to operate in Python using the SQLAlchemy
+In case you have reset your environment, we can start installing the package
+!!pip3 install sqlalchemy [&#39;Requirement already satisfied: sqlalchemy in /home/luis/.local/lib/python3.8/site-packages (1.3.20)&#39;]  And before using the library, we need to import it</description>
+    </item>
+    
+    <item>
+      <title>Databases MySQL: Python Part 1</title>
+      <link>https://blog.miguens.one/posts/2020/06/databases-mysql-python-part-1/</link>
+      <pubDate>Tue, 09 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/06/databases-mysql-python-part-1/</guid>
+      <description>Introduction In previous post we saw how to install and use an SQL database, now I will introduce how to use inside Python
+We have several connectors from SQL to Python that are &amp;ldquo;flavour&amp;rdquo; dependant. For example, we can use psycopg2 to connect to a PostgreSQL database or MySQL Connector to connect to MySQL.
+I like to take a step back, and use a package that is not dependant of the brand of database we will install.</description>
+    </item>
+    
+    <item>
+      <title>Databases MySQL: Integrate SQL in Jupyter Lab</title>
+      <link>https://blog.miguens.one/posts/2020/06/databases-mysql-integrate-sql-in-jupyter-lab/</link>
+      <pubDate>Sat, 06 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/06/databases-mysql-integrate-sql-in-jupyter-lab/</guid>
+      <description>Preparation of Jupyter Notebook In the previous post we saw how to install MySQL and prepare the external programs needed to use SQL in our Jupyter Notebook.
+Now let&amp;rsquo;s load the module and establish the connection and let&amp;rsquo;s start
+%load_ext sql %sql mysql+pymysql://user:password@localhost/datab How to create a table Imagine that we want to build a database to identify pets. Every pet has an ID, a category (dog, cat, bird) and a name</description>
+    </item>
+    
+    <item>
+      <title>Databases MySQL: Installation</title>
+      <link>https://blog.miguens.one/posts/2020/06/databases-mysql-installation/</link>
+      <pubDate>Wed, 03 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/06/databases-mysql-installation/</guid>
+      <description>Introduction to Databases: MySQL During the following days I will write about databases SQL, how to install, debug and use them via Python and C++.
+Installation To install a MySQL I will use Docker, as it is the most easiest way in my opinion to quickly deploy a test database.
+In a Jupyter Notebook, let&amp;rsquo;s run:
+!!docker run --name mysql-test -e MYSQL_ROOT_PASSWORD=secret -d -p 3306:3306 mysql [&#39;b2946635401f23ee223861da235cc309af878dd0305d03285673b39962ca1311&#39;]  We can check that the database is running with docker ps</description>
+    </item>
+    
+    <item>
+      <title>Messages between applications: MQTT and C</title>
+      <link>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-and-c/</link>
+      <pubDate>Sun, 04 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-and-c/</guid>
+      <description>Installation To make use of MQTT in C, we need to install a library to communicate with the server. A populat choice is Paho from Eclipse.
+We need to follow the next steps to install it:
+git clone https://github.com/eclipse/paho.mqtt.c.git cd paho.mqtt.c make sudo make install Depending on your system, you might need to install the development package of OpenSSL (openssl-dev)
+Writing the test program We need to create two files, send.</description>
+    </item>
+    
+    <item>
+      <title>Messages between applications: MQTT and Python</title>
+      <link>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-and-python/</link>
+      <pubDate>Sat, 03 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-and-python/</guid>
+      <description>Installation To make use of MQTT in Python, we need to install a library to communicate with the server. A populat choice is Paho from Eclipse.
+As usual we can use pip to install it
+!!pip3 install paho-mqtt [&#39;Requirement already satisfied: paho-mqtt in /home/luis/.local/lib/python3.8/site-packages (1.5.1)&#39;]  Publish a message import paho.mqtt.client as mqtt help(mqtt.Client.publish) Help on function publish in module paho.mqtt.client: publish(self, topic, payload=None, qos=0, retain=False, properties=None) Publish a message on a topic.</description>
+    </item>
+    
+    <item>
+      <title>Messages between applications: MQTT Server</title>
+      <link>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-server/</link>
+      <pubDate>Fri, 02 Aug 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2019/08/messages-between-applications-mqtt-server/</guid>
+      <description>MQTT In this series of post, I will explain how to use the message broker MQTT. From installation to submit and receive messages in Python and C++.
+A bit of history MQTT was created way back in 1999 by two engineers — Andy Stanford-Clark (IBM) and Arlen Nipper (Eurotech). They had to invent a new protocol for connecting oil pipelines over unreliable, satellite networks.
+The motivation for designing MQTT was to create a lightweight and bandwidth-efficient protocol that was data agnostic with support for multiple levels of Quality of Service (QoS).</description>
+    </item>
+    
+  </channel>
+</rss>
