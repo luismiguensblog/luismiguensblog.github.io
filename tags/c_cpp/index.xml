@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>c_cpp on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/c_cpp/</link>
+    <description>Recent content in c_cpp on Luis Miguens Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 07 Oct 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.miguens.one/tags/c_cpp/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Exploring Templates and Generic Programming in C&#43;&#43;17</title>
+      <link>https://blog.miguens.one/posts/2024/10/exploring-templates-and-generic-programming-in-c-17/</link>
+      <pubDate>Mon, 07 Oct 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2024/10/exploring-templates-and-generic-programming-in-c-17/</guid>
+      <description>In my experience with C++ programming, templates and generic programming have proven to be indispensable tools for creating flexible and efficient code. The introduction of templates revolutionised the way we write code by allowing functions and classes to operate with generic types. In this blog post, I will delve into function templates, class templates, and template specialisation, illustrating how they contribute to the power of generic programming in C++17.
+Function Templates Function templates enable us to write functions that can operate with any data type.</description>
+    </item>
+    
+    <item>
+      <title>Object-Oriented Programming Concepts in C&#43;&#43;17</title>
+      <link>https://blog.miguens.one/posts/2024/09/object-oriented-programming-concepts-in-c-17/</link>
+      <pubDate>Thu, 12 Sep 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2024/09/object-oriented-programming-concepts-in-c-17/</guid>
+      <description>In my experience, object-oriented programming (OOP) stands as a cornerstone in the realm of software development, offering a paradigm that models real-world entities through classes and objects. C++17, being a modern iteration of the C++ language, enriches this paradigm with advanced features and improved functionalities. In this blog post, I aim to delve deep into the fundamental principles of OOP in C++17—covering classes, objects, inheritance, polymorphism, encapsulation, and access specifiers—while providing illustrative examples to elucidate these concepts.</description>
+    </item>
+    
+    <item>
+      <title>Understanding Pointers and References in C&#43;&#43;17</title>
+      <link>https://blog.miguens.one/posts/2024/07/understanding-pointers-and-references-in-c-17/</link>
+      <pubDate>Tue, 30 Jul 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2024/07/understanding-pointers-and-references-in-c-17/</guid>
+      <description>In my experience with C++17, pointers and references are fundamental concepts that, when mastered, can significantly enhance one&amp;rsquo;s ability to write efficient and effective code. In this blog post, I aim to delve into the intricacies of pointers and references, discuss pointer arithmetic, explore null pointers and smart pointers, and elucidate the use of references, all while providing code examples to clarify each point.
+Table of Contents  Introduction to Pointers Pointer Arithmetic Null Pointers Smart Pointers Understanding References Conclusion   Introduction to Pointers A pointer in C++ is a variable that holds the memory address of another variable.</description>
+    </item>
+    
+    <item>
+      <title>Handling Arrays and Strings in C&#43;&#43;17: A Comprehensive Guide</title>
+      <link>https://blog.miguens.one/posts/2024/06/handling-arrays-and-strings-in-c-17-a-comprehensive-guide/</link>
+      <pubDate>Mon, 03 Jun 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2024/06/handling-arrays-and-strings-in-c-17-a-comprehensive-guide/</guid>
+      <description>The efficient manipulation of arrays and strings is fundamental to proficient programming in C++17. In this discourse, I shall delve into fixed-size arrays, dynamic arrays, std::array, std::vector, and std::string. Through illustrative examples, we will explore common operations and best practices.
+ Introduction Arrays and strings are pivotal data structures in C++, serving as the cornerstone for data storage and manipulation. C++17 offers a rich set of features that enhance these structures, providing both flexibility and efficiency.</description>
+    </item>
+    
+    <item>
+      <title>Functions in C&#43;&#43;17: A Comprehensive Analysis</title>
+      <link>https://blog.miguens.one/posts/2024/05/functions-in-c-17-a-comprehensive-analysis/</link>
+      <pubDate>Thu, 23 May 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2024/05/functions-in-c-17-a-comprehensive-analysis/</guid>
+      <description>In the realm of C++17, functions remain a cornerstone of effective programming, offering a means to encapsulate code for reusability and clarity. In this blog post, I will delve into the intricacies of function declaration and definition, default arguments, overloading, inline functions, and recursion. Through detailed explanations and illustrative examples, we shall explore these concepts, critically analysing their applications and nuances.
+Function Declaration and Definition At the heart of any C++ program lies the function, a block of code designed to perform a specific task.</description>
+    </item>
+    
+    <item>
+      <title>Mastering Control Flow Statements in C&#43;&#43;17</title>
+      <link>https://blog.miguens.one/posts/2024/04/mastering-control-flow-statements-in-c-17/</link>
+      <pubDate>Fri, 05 Apr 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2024/04/mastering-control-flow-statements-in-c-17/</guid>
+      <description>In the realm of C++ programming, control flow statements are indispensable tools that enable us to dictate the execution path of our code. They provide the means to make decisions, iterate over data, and manage the flow of execution based on specific conditions. In this post, I will delve into the intricacies of control flow statements in C++17, including if-else, switch-case, traditional loops (for, while, do-while), and the modern range-based for loop.</description>
+    </item>
+    
+    <item>
+      <title>Exploring Operators and Expressions in C&#43;&#43;17: An In-Depth Analysis</title>
+      <link>https://blog.miguens.one/posts/2024/02/exploring-operators-and-expressions-in-c-17-an-in-depth-analysis/</link>
+      <pubDate>Fri, 02 Feb 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2024/02/exploring-operators-and-expressions-in-c-17-an-in-depth-analysis/</guid>
+      <description>In my journey with C++17, I have found that a comprehensive understanding of operators and expressions is indispensable for writing efficient and effective code. Operators are the building blocks that allow us to manipulate data and construct complex logic. In this blog post, I aim to delve into the various types of operators available in C++17—arithmetic, relational, logical, bitwise operators, and the concept of operator overloading—providing detailed explanations and illustrative examples to showcase their practical applications.</description>
+    </item>
+    
+    <item>
+      <title>Variables and Data Types in C&#43;&#43;17: An In-Depth Exploration</title>
+      <link>https://blog.miguens.one/posts/2023/12/variables-and-data-types-in-c-17-an-in-depth-exploration/</link>
+      <pubDate>Fri, 22 Dec 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2023/12/variables-and-data-types-in-c-17-an-in-depth-exploration/</guid>
+      <description>Understanding variables and data types is quintessential for any programming endeavour, particularly in a language as robust and nuanced as C++17. In this discourse, I shall delve into the fundamental types, elucidate the mechanisms of type inference with auto, and examine the utilisation of constexpr. Through code snippets and critical analysis, we will navigate the intricacies of variable declaration and initialisation in modern C++.
+Fundamental Types in C++17 C++17, being a statically-typed language, necessitates that the type of every variable is known at compile-time (Stroustrup, 2013).</description>
+    </item>
+    
+    <item>
+      <title>Understanding the Basic Structure of a C&#43;&#43; Program</title>
+      <link>https://blog.miguens.one/posts/2023/11/understanding-the-basic-structure-of-a-c-program/</link>
+      <pubDate>Wed, 29 Nov 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2023/11/understanding-the-basic-structure-of-a-c-program/</guid>
+      <description>In my experience as a software developer, grasping the fundamental structure of a C++ program is pivotal for writing efficient and maintainable code. This article delves into the essential components of a C++ program, including headers, namespaces, the main function, and compilation units. By examining these elements in detail, we can better understand how they interact to form a cohesive application.
+ Headers Headers in C++ are files that contain declarations of functions, classes, variables, and other identifiers.</description>
+    </item>
+    
+    <item>
+      <title>Embracing C&#43;&#43;17: A Comprehensive Guide to Its Evolution and Key Features</title>
+      <link>https://blog.miguens.one/posts/2023/10/embracing-c-17-a-comprehensive-guide-to-its-evolution-and-key-features/</link>
+      <pubDate>Mon, 16 Oct 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2023/10/embracing-c-17-a-comprehensive-guide-to-its-evolution-and-key-features/</guid>
+      <description>As a software developer with a keen interest in programming languages&#39; evolution, I have observed the significant strides C++ has made over the years. C++17, in particular, represents a substantial advancement from its predecessors, introducing features that enhance efficiency, readability, and performance. In this blog post, I aim to delve into the evolution of C++ leading up to C++17, explore its key features, and discuss why integrating it into your development projects could be highly beneficial.</description>
+    </item>
+    
+    <item>
+      <title>Understanding Reflective Memory via Software: A Deep Dive</title>
+      <link>https://blog.miguens.one/posts/2023/09/understanding-reflective-memory-via-software-a-deep-dive/</link>
+      <pubDate>Thu, 14 Sep 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2023/09/understanding-reflective-memory-via-software-a-deep-dive/</guid>
+      <description>In modern computing environments, the need for real-time data synchronization across multiple systems or processors is increasingly critical. One technology that facilitates this is Reflective Memory (RM). Traditionally, Reflective Memory has been associated with hardware solutions—dedicated memory modules and fiber-optic networks ensuring that changes in one node’s memory are instantly reflected across all nodes. However, with the advancement of software technologies, reflective memory is no longer confined to hardware implementations. This article explores how reflective memory can be achieved through software, its applications, and the challenges that come with it.</description>
+    </item>
+    
+    <item>
+      <title>An Introduction to Mutexes and Multithreading in C</title>
+      <link>https://blog.miguens.one/posts/2023/06/an-introduction-to-mutexes-and-multithreading-in-c/</link>
+      <pubDate>Thu, 29 Jun 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2023/06/an-introduction-to-mutexes-and-multithreading-in-c/</guid>
+      <description>Title: An Introduction to Mutexes and Multithreading in C
+In the world of programming, threads are a crucial concept that allows for concurrent execution within a single process. This concurrent execution is made possible through multithreading, a widespread technique in modern programming. However, when multiple threads access a shared resource, synchronization problems can arise. In this blog post, we&amp;rsquo;ll explore how to use Mutexes in C for thread synchronization and delve into the concept of multithreading.</description>
+    </item>
+    
+  </channel>
+</rss>

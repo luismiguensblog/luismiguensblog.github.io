@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>linux on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/linux/</link>
+    <description>Recent content in linux on Luis Miguens Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 16 May 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.miguens.one/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Creating a Virtual File System with FUSE and Python</title>
+      <link>https://blog.miguens.one/posts/2023/05/creating-a-virtual-file-system-with-fuse-and-python/</link>
+      <pubDate>Tue, 16 May 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2023/05/creating-a-virtual-file-system-with-fuse-and-python/</guid>
+      <description>This is a continuation of my previous article: Save Snippets of Python code as single XML file
+Creating a Virtual File System with FUSE and Python FUSE (Filesystem in Userspace) is a software interface that allows user-level programs to create and manage file systems without requiring root privileges. This makes it possible to create custom file systems that can be mounted and accessed like regular file systems.
+In this article, we will create a virtual file system using FUSE and Python.</description>
+    </item>
+    
+    <item>
+      <title>Save Snippets of Python code as single XML file</title>
+      <link>https://blog.miguens.one/posts/2023/04/save-snippets-of-python-code-as-single-xml-file/</link>
+      <pubDate>Sat, 29 Apr 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2023/04/save-snippets-of-python-code-as-single-xml-file/</guid>
+      <description>How to Use an XML File to Store Multiple Portions of Python Code Have you ever needed to run several Python code snippets in the cloud and wished for an easy way to organize and package them? One way to accomplish this is by using an XML file to store your Python code snippets. An XML file is a file format that is used to store and transport data, and can be easily read and written by machines.</description>
+    </item>
+    
+    <item>
+      <title>Speed Up I/O Performance with RAMDisk and LVM Cache</title>
+      <link>https://blog.miguens.one/posts/2023/04/speed-up-i/o-performance-with-ramdisk-and-lvm-cache/</link>
+      <pubDate>Fri, 14 Apr 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2023/04/speed-up-i/o-performance-with-ramdisk-and-lvm-cache/</guid>
+      <description>In this blog article, we will discuss various methods to speed up I/O performance and ultimately settle on using LVM to mount a fast I/O device with a RAMDisk as cache. This approach is beneficial when you don&amp;rsquo;t care about retaining data in the location between reboots.
+Options Considered  Only use RAM (i.e., tmpfs of 20 or 30GB): This option has the problem that if RAM is not enough, the build will fail.</description>
+    </item>
+    
+  </channel>
+</rss>

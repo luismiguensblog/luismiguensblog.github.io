@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>automation on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/automation/</link>
+    <description>Recent content in automation on Luis Miguens Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 02 Nov 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.miguens.one/tags/automation/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Web automation with Selenium</title>
+      <link>https://blog.miguens.one/posts/2020/11/web-automation-with-selenium/</link>
+      <pubDate>Mon, 02 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2020/11/web-automation-with-selenium/</guid>
+      <description>If you are a fellow student of The Open University, you have realized that sometimes the emails notifying of the results of your module are sent up to two days after the result have actually being published.
+That situation leave you with checking manually the website of the Open University for your result, but there is a better way.
+Selenium is a web automation suite that can be used in any language.</description>
+    </item>
+    
+    <item>
+      <title>Automate Plex Clean-up</title>
+      <link>https://blog.miguens.one/posts/2018/11/automate-plex-clean-up/</link>
+      <pubDate>Fri, 02 Nov 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2018/11/automate-plex-clean-up/</guid>
+      <description>In an old post I teach how to create your own Netflix with Docker Compose. The problem is that over time you can download several movies with really low rating, or from a genre you are not a fan.
+I have created a small Jupyter Notebook to help me with my spring-cleaning (in this case winter). Feel free to modify it to your case.
+from plexapi.myplex import MyPlexAccount account = MyPlexAccount(&amp;#39;USERNAME&amp;#39;, &amp;#39;PASSWORD&amp;#39;) plex = account.</description>
+    </item>
+    
+  </channel>
+</rss>
