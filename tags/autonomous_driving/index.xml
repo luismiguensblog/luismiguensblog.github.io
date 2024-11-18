@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>autonomous_driving on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/autonomous_driving/</link>
+    <description>Recent content in autonomous_driving on Luis Miguens Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 30 Jan 2018 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.miguens.one/tags/autonomous_driving/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Challenges of fully autonomous driving</title>
+      <link>https://blog.miguens.one/posts/2018/01/challenges-of-fully-autonomous-driving/</link>
+      <pubDate>Tue, 30 Jan 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2018/01/challenges-of-fully-autonomous-driving/</guid>
+      <description>From Level 4 and onwards, we can face challenges in the adoption of autonomous driving technology. These can be classified into (1) Legal challenges, (2) Certification and intellectual property, (3) Ethical challenges, (4) Social challenges.
+Legal challenges We can note two cases in which society should adapt to this innovation. In the first case, if we apply autonomous driving to trucks to make the transportation of goods more cost-efficient, it will be natural to cross the country&amp;rsquo;s borders.</description>
+    </item>
+    
+    <item>
+      <title>Roadmap: Technology Innovation for fully autonomous car</title>
+      <link>https://blog.miguens.one/posts/2018/01/roadmap-technology-innovation-for-fully-autonomous-car/</link>
+      <pubDate>Sun, 28 Jan 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2018/01/roadmap-technology-innovation-for-fully-autonomous-car/</guid>
+      <description>Many cars sold today are capable of some level of automated operation.
+This roadmap&amp;rsquo;s objective is to show the relevant events in technology innovation that have allowed current day features, and we will try to draw the future designs required for a fully autonomous car.
+The automation of driving has several steps. We can range between the autonomous system&amp;rsquo;s levels of operation from no control (human driver has to remain in control all the time) to fully autonomous driving (the occupant is only required to set the destination).</description>
+    </item>
+    
+  </channel>
+</rss>

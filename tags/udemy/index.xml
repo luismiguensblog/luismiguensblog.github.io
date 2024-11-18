@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>udemy on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/udemy/</link>
+    <description>Recent content in udemy on Luis Miguens Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 06 Jun 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.miguens.one/tags/udemy/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How to download all certificates of UDEMY</title>
+      <link>https://blog.miguens.one/posts/2021/06/how-to-download-all-certificates-of-udemy/</link>
+      <pubDate>Sun, 06 Jun 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2021/06/how-to-download-all-certificates-of-udemy/</guid>
+      <description>A simple script using Selenium to download all the certicates of Udemy, as they do not provide API
+There is room for improvement, mostly removing the time.sleep calls. That part of code is there because the initial load of the page does not provide that data, as it is query via an internal API and the data fill with JavaScript.
+from selenium import webdriver import time import os from urllib.parse import urlparse import requests USERNAME=&amp;#34;xxxx@gmail.</description>
+    </item>
+    
+  </channel>
+</rss>

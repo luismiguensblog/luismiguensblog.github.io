@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>parallel on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/parallel/</link>
+    <description>Recent content in parallel on Luis Miguens Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 24 Mar 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://blog.miguens.one/tags/parallel/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Parallelism in Python: Linux vs Windows.</title>
+      <link>https://blog.miguens.one/posts/2021/03/parallelism-in-python-linux-vs-windows./</link>
+      <pubDate>Wed, 24 Mar 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2021/03/parallelism-in-python-linux-vs-windows./</guid>
+      <description>In Linux, when you start a child process, it is Forked. It means that the child process inherits the memory state of the parent process. On Windows (and by default on Mac), however, processes are Spawned.
+Even though processes usually speed up the execution of a program by using multiple cores on a computer, starting each process can be time-consuming.
+The fact that on Windows and Mac Python needs to pickle the objects to create child processes adds an overhead that may offset the benefits of running on separated processes.</description>
+    </item>
+    
+    <item>
+      <title>Parallelism in Python.</title>
+      <link>https://blog.miguens.one/posts/2021/03/parallelism-in-python./</link>
+      <pubDate>Mon, 22 Mar 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.miguens.one/posts/2021/03/parallelism-in-python./</guid>
+      <description>In Python, by default we have three options to add parallel processing to our applications:
+ threading multiprocessing concurrent.futures  The first option, threading is useful with I/O and networking tasks, as the parallelization remains in a single core.
+The second option, multiprocessing, is used with intensive CPU tasks, and the processing will be distributed in all the cores of our machine. The disadvantage of multiprocessing is that all the information and objects should be serializable.</description>
+    </item>
+    
+  </channel>
+</rss>
