@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Profiling on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/profiling/</link>
+    <description>Recent content in Profiling on Luis Miguens Blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 25 Mar 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://blog.miguens.one/tags/profiling/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Profiling a Python program</title>
+      <link>https://blog.miguens.one/posts/2021/03/profiling-a-python-program/</link>
+      <pubDate>Thu, 25 Mar 2021 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2021/03/profiling-a-python-program/</guid>
+      <description>&lt;p&gt;If we wish to know how long it takes for a portion of code to run, an obvious answer is to time it:&lt;/p&gt;&#xA;&lt;p&gt;For example:&lt;/p&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;from&lt;/span&gt; time &lt;span style=&#34;color:#f92672&#34;&gt;import&lt;/span&gt; time&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;start &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; time()&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# do_something()&lt;/span&gt;&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;end &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; time()&#xA;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;print(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#39;It took {end - start} seconds!&amp;#39;&lt;/span&gt;)&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When the program grows, doing this is impractical, but python provides us, by default, with the cProfile module to get information about the running time of our program&amp;rsquo;s functions.&lt;/p&gt;&#xA;&lt;p&gt;Using cProfile is to import it into our program and pass the python code we wish to analyse.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
