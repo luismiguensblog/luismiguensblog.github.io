@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>General on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/general/</link>
+    <description>Recent content in General on Luis Miguens Blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 21 May 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://blog.miguens.one/tags/general/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How to use Two-Factor Authentication (2FA)</title>
+      <link>https://blog.miguens.one/posts/2021/05/how-to-use-two-factor-authentication-2fa/</link>
+      <pubDate>Fri, 21 May 2021 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2021/05/how-to-use-two-factor-authentication-2fa/</guid>
+      <description>&lt;p&gt;Two-Factor Authentication (2FA) works by adding a layer of security to your online accounts. It requires an additional log in credential &amp;ndash; beyond just the username and password &amp;ndash; to gain account access. Getting that second credential requires access to something that belongs to you, for example, a mobile phone.&lt;/p&gt;&#xA;&lt;p&gt;In this article, I will explain how to set up 2FA on your mobile phone. Several apps can generate the codes (additional login credentials) to be used with 2FA. The three most popular choices are:&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Why I am writing a blog</title>
+      <link>https://blog.miguens.one/posts/2017/02/why-i-am-writing-a-blog/</link>
+      <pubDate>Thu, 02 Feb 2017 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2017/02/why-i-am-writing-a-blog/</guid>
+      <description>&lt;p&gt;The benefits of journaling have been discussed worldwide (ex. &lt;a href=&#34;https://www.huffpost.com/entry/benefits-of-journaling-_b_6648884&#34;&gt;Benefits of Journaling&lt;/a&gt;).&lt;/p&gt;&#xA;&lt;p&gt;Most authors emphasise the improved creativity and self-reflection aspects of journaling. While we could stop there and always use our journal to record feeling, ideas and, in general, record everything we consider worth analysing, we could take a step further and make some of our entries public.&lt;/p&gt;&#xA;&lt;p&gt;Like that, a blog is born!&lt;/p&gt;&#xA;&lt;p&gt;Making our thoughts available for the world to read come with some side-effects: We will become better writers.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
