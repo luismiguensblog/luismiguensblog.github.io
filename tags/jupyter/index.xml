@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Jupyter on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/jupyter/</link>
+    <description>Recent content in Jupyter on Luis Miguens Blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 08 Apr 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://blog.miguens.one/tags/jupyter/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How to use C&#43;&#43; in Jupyter Lab</title>
+      <link>https://blog.miguens.one/posts/2021/04/how-to-use-c-in-jupyter-lab/</link>
+      <pubDate>Thu, 08 Apr 2021 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2021/04/how-to-use-c-in-jupyter-lab/</guid>
+      <description>&lt;h2 id=&#34;how-to-use-c-in-jupyter-lab&#34;&gt;How to use C++ in Jupyter Lab&lt;/h2&gt;&#xA;&lt;p&gt;One of the main extension points of the Jupyter stack is the kernel, the part of the infrastructure responsible for executing the user’s code. Jupyter kernels exist for numerous programming languages.&#xA;Most Jupyter kernels are implemented in the target programming language: the reference implementation ipykernel in Python, IJulia in Julia&lt;/p&gt;&#xA;&lt;p&gt;Xeus is a C++ implementation of the Jupyter kernel protocol. It is not a kernel itself but a library that facilitates the authoring of kernels, and other applications making use of the Jupyter kernel protocol.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
