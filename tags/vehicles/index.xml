@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Vehicles on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/vehicles/</link>
+    <description>Recent content in Vehicles on Luis Miguens Blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 27 Feb 2018 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://blog.miguens.one/tags/vehicles/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Eco-innovation discussion for modern vehicles</title>
+      <link>https://blog.miguens.one/posts/2018/02/eco-innovation-discussion-for-modern-vehicles/</link>
+      <pubDate>Tue, 27 Feb 2018 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2018/02/eco-innovation-discussion-for-modern-vehicles/</guid>
+      <description>&lt;p&gt;During my MBA in Technology Management, I have studied three approaches to Eco-innovation:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;(1) Life cycle thinking&lt;/li&gt;&#xA;&lt;li&gt;(2) Close loop production and&lt;/li&gt;&#xA;&lt;li&gt;(3) Industrial ecology.&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;When dealing with an eco-innovation discussion for batteries or hydrogen cell of electric vehicles, it is my opinion that the primary approach is (1) trying to incorporate some elements of (2) when possible. Point (3) will be relevant from the point of view of the manufacturing process.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Discussion of Project Management Approaches for Ecological Vehicles</title>
+      <link>https://blog.miguens.one/posts/2018/02/discussion-of-project-management-approaches-for-ecological-vehicles/</link>
+      <pubDate>Sun, 18 Feb 2018 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2018/02/discussion-of-project-management-approaches-for-ecological-vehicles/</guid>
+      <description>&lt;p&gt;From the point of view of a car manufacturer that wishes to create a network of recharging stations for its ecological vehicle, whatever it is electric or hydrogen cell-based, it will find some elements that it cannot fully control, such as:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;(1) Public reception of the new technology&lt;/li&gt;&#xA;&lt;li&gt;(2) Economic situation&lt;/li&gt;&#xA;&lt;li&gt;(3) Public policies.&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;Those three factors are not the same in all countries and can even change inside the same country&amp;rsquo;s regions.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Challenges of fully autonomous driving</title>
+      <link>https://blog.miguens.one/posts/2018/01/challenges-of-fully-autonomous-driving/</link>
+      <pubDate>Tue, 30 Jan 2018 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2018/01/challenges-of-fully-autonomous-driving/</guid>
+      <description>&lt;p&gt;From Level 4 and onwards, we can face challenges in the adoption of autonomous driving technology. These can be classified into (1) Legal challenges, (2) Certification and intellectual property, (3) Ethical challenges, (4) Social challenges.&lt;/p&gt;&#xA;&lt;h2 id=&#34;legal-challenges&#34;&gt;Legal challenges&lt;/h2&gt;&#xA;&lt;p&gt;We can note two cases in which society should adapt to this innovation. In the first case, if we apply autonomous driving to trucks to make the transportation of goods more cost-efficient, it will be natural to cross the country&amp;rsquo;s borders.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Roadmap: Technology Innovation for fully autonomous car</title>
+      <link>https://blog.miguens.one/posts/2018/01/roadmap-technology-innovation-for-fully-autonomous-car/</link>
+      <pubDate>Sun, 28 Jan 2018 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2018/01/roadmap-technology-innovation-for-fully-autonomous-car/</guid>
+      <description>&lt;p&gt;Many cars sold today are capable of some level of automated operation.&lt;/p&gt;&#xA;&lt;p&gt;This roadmap&amp;rsquo;s objective is to show the relevant events in technology innovation that have allowed current day features, and we will try to draw the future designs required for a fully autonomous car.&lt;/p&gt;&#xA;&lt;p&gt;The automation of driving has several steps. We can range between the autonomous system&amp;rsquo;s levels of operation from no control (human driver has to remain in control all the time) to fully autonomous driving (the occupant is only required to set the destination).&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
