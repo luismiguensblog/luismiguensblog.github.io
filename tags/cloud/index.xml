@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Cloud on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/cloud/</link>
+    <description>Recent content in Cloud on Luis Miguens Blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 05 Jun 2021 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://blog.miguens.one/tags/cloud/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Distributed Storage with CEPH</title>
+      <link>https://blog.miguens.one/posts/2021/06/distributed-storage-with-ceph/</link>
+      <pubDate>Sat, 05 Jun 2021 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2021/06/distributed-storage-with-ceph/</guid>
+      <description>&lt;h2 id=&#34;what-is-ceph&#34;&gt;What is ceph&lt;/h2&gt;&#xA;&lt;p&gt;Ceph is a software-defined storage solution designed to address the object, block, and file storage needs of data centers adopting open source as the new norm for high-growth block storage, object stores, and data lakes.&lt;/p&gt;&#xA;&lt;p&gt;Ceph aims primarily for entirely distributed operation without a single point of failure, scalable to the exabyte level, and freely available.&lt;/p&gt;&#xA;&lt;p&gt;In this way, administrators have a single, consolidated system that avoids silos and collects the storage within a common management framework. As a result, Ceph consolidates several storage use cases and improves resource utilization. It also lets an organization deploy servers where needed.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

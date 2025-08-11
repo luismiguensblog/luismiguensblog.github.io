@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>C_cpp on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/c_cpp/</link>
+    <description>Recent content in C_cpp on Luis Miguens Blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 11 Jul 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://blog.miguens.one/tags/c_cpp/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Parallel Algorithms in C&#43;&#43;17 – Execution Policies, Advantages, and Limitations</title>
+      <link>https://blog.miguens.one/posts/2025/07/parallel-algorithms-in-c-17-execution-policies-advantages-and-limitations/</link>
+      <pubDate>Fri, 11 Jul 2025 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2025/07/parallel-algorithms-in-c-17-execution-policies-advantages-and-limitations/</guid>
+      <description>&lt;p&gt;Modern C++ embraces the reality of multicore processors by providing high-level tools for parallelism. The C++17 standard introduced &lt;em&gt;parallel algorithms&lt;/em&gt;, essentially parallelised versions of existing STL algorithms, to help programs take advantage of multiple cores for improved performance. In this post, we explore how C++17 parallel algorithms work, focusing on the &lt;strong&gt;execution policies&lt;/strong&gt; (&lt;code&gt;std::execution::seq&lt;/code&gt;, &lt;code&gt;par&lt;/code&gt;, and &lt;code&gt;par_unseq&lt;/code&gt;), with examples of their use. We also discuss the performance benefits of parallel execution and critically examine the limitations – including overhead, portability, and scenarios where parallelism may not pay off. The tone is analytical and formal, with a viewpoint that whilst parallelism is powerful, it must be applied judiciously.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Embracing Type Safety in C&#43;&#43;17: std::optional, std::variant, and std::any</title>
+      <link>https://blog.miguens.one/posts/2025/07/embracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany/</link>
+      <pubDate>Fri, 04 Jul 2025 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2025/07/embracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany/</guid>
+      <description>&lt;p&gt;Modern C++ has placed increasing emphasis on &lt;strong&gt;type safety&lt;/strong&gt; and expressiveness. C++17 introduced three powerful utilities – &lt;strong&gt;&lt;code&gt;std::optional&lt;/code&gt;&lt;/strong&gt;, &lt;strong&gt;&lt;code&gt;std::variant&lt;/code&gt;&lt;/strong&gt;, and &lt;strong&gt;&lt;code&gt;std::any&lt;/code&gt;&lt;/strong&gt; – that enhance the language&amp;rsquo;s flexibility while making code safer and more self-documenting. These facilities allow programmers to represent &amp;ldquo;optional&amp;rdquo; values, to use type-safe unions for variant types, and to perform type erasure for arbitrary types, respectively, all with the rigour of compile-time type checking or controlled runtime checks. In this article, we delve into each of these C++17 features in detail, examining how they improve upon pre-C++17 techniques, demonstrate their usage with practical code examples, discuss real-world applications, and consider edge cases, performance implications, and pitfalls. We also touch on how C++20/C++23 have further refined these utilities, all while keeping a focus on C++17.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>The Filesystem Library in C&#43;&#43;17: A Comprehensive Introduction</title>
+      <link>https://blog.miguens.one/posts/2025/06/the-filesystem-library-in-c-17-a-comprehensive-introduction/</link>
+      <pubDate>Mon, 30 Jun 2025 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2025/06/the-filesystem-library-in-c-17-a-comprehensive-introduction/</guid>
+      <description>&lt;p&gt;In modern C++ development, managing files and directories is a common requirement – from reading configuration files to generating logs or processing batches of data files. Until C++17, the language lacked a standard, platform-neutral way to perform filesystem operations. C++ developers either resorted to operating system APIs or relied on third-party libraries, leading to non-portable code or extra dependencies. With C++17, the new &lt;strong&gt;&lt;code&gt;&amp;lt;filesystem&amp;gt;&lt;/code&gt;&lt;/strong&gt; library (in namespace &lt;code&gt;std::filesystem&lt;/code&gt;) filled this gap by providing a rich set of tools for files and directories. In this post, I will introduce the C++17 filesystem library, examine its historical background, detail its components, and demonstrate how to use it with code examples. Along the way, I will offer a critical perspective on its design decisions, impact, and limitations, using British English spelling and an analytical tone targeted at experienced C++ developers.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Template Argument Deduction for Class Templates in C&#43;&#43;17</title>
+      <link>https://blog.miguens.one/posts/2025/06/template-argument-deduction-for-class-templates-in-c-17/</link>
+      <pubDate>Thu, 26 Jun 2025 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2025/06/template-argument-deduction-for-class-templates-in-c-17/</guid>
+      <description>&lt;h2 id=&#34;background-templates-in-c1114-and-the-need-for-change&#34;&gt;Background: Templates in C++11/14 and the Need for Change&lt;/h2&gt;&#xA;&lt;p&gt;Prior to C++17, when using class templates in C++, developers had to explicitly specify all template arguments for the class. The compiler did not deduce class template parameters from constructor arguments as it did for function templates. For example, constructing a &lt;code&gt;std::pair&lt;/code&gt; of two &lt;code&gt;int&lt;/code&gt; values required writing &lt;code&gt;std::pair&amp;lt;int, int&amp;gt; p(11, 22);&lt;/code&gt; – even though the compiler “already knows” the types of &lt;code&gt;11&lt;/code&gt; and &lt;code&gt;22&lt;/code&gt; are &lt;code&gt;int&lt;/code&gt;. In contrast, function templates benefited from &lt;em&gt;template argument deduction&lt;/em&gt; since C++98: given a function template like &lt;code&gt;sort(RanIt first, RanIt last)&lt;/code&gt;, the compiler can deduce the iterator type from the call &lt;code&gt;sort(v.begin(), v.end());&lt;/code&gt; without explicit template arguments. This discrepancy meant extra verbosity for class templates and led to &lt;em&gt;workarounds&lt;/em&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Inline Variables in C&#43;&#43;17: ODR-Safe Header Definitions</title>
+      <link>https://blog.miguens.one/posts/2025/06/inline-variables-in-c-17-odr-safe-header-definitions/</link>
+      <pubDate>Thu, 19 Jun 2025 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2025/06/inline-variables-in-c-17-odr-safe-header-definitions/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;&#xA;&lt;p&gt;C++17 introduced &lt;strong&gt;inline variables&lt;/strong&gt;, a feature designed to address a long-standing challenge in C++: defining variables in header files without violating the One Definition Rule (ODR). Before C++17, placing a global variable definition in a header and including it in multiple source files would violate ODR, leading to linker errors or undefined behaviour. Developers had to rely on workarounds like &lt;code&gt;extern&lt;/code&gt; declarations or the use of function templates and static variables to avoid multiple definitions. With inline variables, C++ now permits certain variables to be defined in headers (and included in multiple translation units) while treating those definitions as one single entity at link time. This article provides a detailed examination of inline variables, explaining what they are, how they work, why they were introduced, and their implications – both positive and negative – for C++ development.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Fold Expressions in C&#43;&#43;17: Simplifying Variadic Template Code</title>
+      <link>https://blog.miguens.one/posts/2025/06/fold-expressions-in-c-17-simplifying-variadic-template-code/</link>
+      <pubDate>Wed, 11 Jun 2025 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2025/06/fold-expressions-in-c-17-simplifying-variadic-template-code/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;&#xA;&lt;p&gt;Variadic templates, introduced in C++11, enabled functions and classes to accept an arbitrary number of arguments, but using them often required cumbersome recursion or expansion tricks. C++17 addressed this complexity by introducing &lt;strong&gt;fold expressions&lt;/strong&gt;, which provide a concise way to &lt;strong&gt;reduce (or &amp;ldquo;fold&amp;rdquo;) a parameter pack over a binary operator&lt;/strong&gt; (&lt;a href=&#34;https://en.cppreference.com/w/cpp/language/fold#:~:text=Reduces%20,a%20binary%20operator&#34;&gt;Fold expressions (since C++17) - cppreference.com&lt;/a&gt;). In this article, I explore what fold expressions are, how they simplify variadic template code, and how to use them effectively. I will explain their syntax (unary left/right folds vs. binary folds), demonstrate several examples (summing values, computing logical conjunctions, finding a minimum value), and discuss common use cases, best practices, and pitfalls. The tone is analytical and professional, assuming an intermediate to advanced understanding of C++. By the end, you should have a thorough grasp of fold expressions and be ready to apply them in your modern C++ code.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Introduction to Structured Bindings</title>
+      <link>https://blog.miguens.one/posts/2025/06/introduction-to-structured-bindings/</link>
+      <pubDate>Tue, 03 Jun 2025 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2025/06/introduction-to-structured-bindings/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;&#xA;&lt;p&gt;Structured bindings, introduced in &lt;strong&gt;C++17&lt;/strong&gt;, allow developers to bind &lt;strong&gt;multiple variables&lt;/strong&gt; to the elements of a tuple-like object in a single, declarative statement. This feature was proposed by Herb Sutter, Bjarne Stroustrup, and Gabriel Dos Reis as part of the C++17 standardisation process. In essence, structured bindings enable &lt;strong&gt;decomposing&lt;/strong&gt; an object (such as an &lt;code&gt;std::tuple&lt;/code&gt;, &lt;code&gt;std::pair&lt;/code&gt;, or a struct) into separate named variables without explicit getters or &lt;code&gt;std::tie&lt;/code&gt;. As Herb Sutter described, it’s &lt;em&gt;“much like &lt;code&gt;std::tie&lt;/code&gt;, except without having to have variables of the correct type already available”&lt;/em&gt;. This simplification enhances both &lt;strong&gt;readability&lt;/strong&gt; and &lt;strong&gt;safety&lt;/strong&gt;, especially when handling multiple return values or complex data structures.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>if constexpr in C&#43;&#43;17 – Enabling Compile-Time Conditionals</title>
+      <link>https://blog.miguens.one/posts/2025/05/if-constexpr-in-c-17-enabling-compile-time-conditionals/</link>
+      <pubDate>Mon, 12 May 2025 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2025/05/if-constexpr-in-c-17-enabling-compile-time-conditionals/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;&#xA;&lt;p&gt;C++17 introduced &lt;strong&gt;&lt;code&gt;if constexpr&lt;/code&gt;&lt;/strong&gt;, a language feature that brings &lt;strong&gt;compile-time conditional logic&lt;/strong&gt; into the core of C++ template programming. This construct – officially known as a &lt;em&gt;constexpr if statement&lt;/em&gt; – allows the compiler to evaluate a condition during compilation and &lt;strong&gt;discard one of the branches&lt;/strong&gt; based on a constant expression (&lt;a href=&#34;https://en.cppreference.com/w/cpp/language/if#:~:text=If%20condition%20yields%20true%2C%20then,true%20is%20discarded&#34;&gt;if statement - cppreference.com&lt;/a&gt;). For intermediate and advanced C++ developers, &lt;code&gt;if constexpr&lt;/code&gt; offers a more &lt;em&gt;natural&lt;/em&gt; way to express conditional code in templates, eliminating much of the verbosity and complexity previously associated with template metaprogramming. This post provides an analytical exploration of &lt;code&gt;if constexpr&lt;/code&gt;: how it works mechanically, how it differs from a traditional runtime &lt;code&gt;if&lt;/code&gt;, comparisons with older techniques (like &lt;code&gt;std::enable_if&lt;/code&gt;, SFINAE, and tag dispatching), illustrative examples, and a critical look at its benefits and limitations.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Concurrency and Multithreading in C&#43;&#43;17</title>
+      <link>https://blog.miguens.one/posts/2025/04/concurrency-and-multithreading-in-c-17/</link>
+      <pubDate>Tue, 22 Apr 2025 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2025/04/concurrency-and-multithreading-in-c-17/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;&#xA;&lt;p&gt;Concurrent programming allows a C++ program to execute multiple tasks &lt;em&gt;simultaneously&lt;/em&gt; (or at least appear to). In practice, this means breaking a program into &lt;strong&gt;threads&lt;/strong&gt; that run independently. Threads are units of execution that can run concurrently and potentially in parallel on multi-core systems. C++17 builds on the threading facilities introduced in C++11, providing standard tools to create threads, synchronise access to shared data, and avoid race conditions. In this post, we&amp;rsquo;ll explore key multithreading concepts in modern C++: starting threads with &lt;code&gt;std::thread&lt;/code&gt;, using mutual exclusion with &lt;code&gt;std::mutex&lt;/code&gt;, coordinating threads with condition variables (&lt;code&gt;std::condition_variable&lt;/code&gt;), and leveraging atomic operations with &lt;code&gt;std::atomic&lt;/code&gt;. Along the way, we&amp;rsquo;ll look at code examples and discuss best practices to write safe and efficient multi-threaded C++17 code.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Smart Pointers and Memory Management in C&#43;&#43;17</title>
+      <link>https://blog.miguens.one/posts/2025/03/smart-pointers-and-memory-management-in-c-17/</link>
+      <pubDate>Fri, 07 Mar 2025 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2025/03/smart-pointers-and-memory-management-in-c-17/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;&#xA;&lt;p&gt;Memory management in C++ has traditionally required careful use of dynamic allocation and manual deallocation. Mistakes in managing memory (such as forgetting to delete allocated memory or deleting it twice) can lead to resource leaks, dangling pointers, or crashes. Modern C++ addresses these issues with &lt;strong&gt;RAII&lt;/strong&gt; (Resource Acquisition Is Initialisation) and &lt;strong&gt;smart pointers&lt;/strong&gt;, which automatically manage the lifetime of dynamically allocated objects and help prevent resource leaks (&lt;a href=&#34;https://cpp-core-guidelines-docs.vercel.app/resource#:~:text=They%20can%20prevent%20resource%20leaks&#34;&gt;R: Resource management – C++&lt;/a&gt;). This article provides an in-depth look at C++17 smart pointers – &lt;code&gt;std::unique_ptr&lt;/code&gt;, &lt;code&gt;std::shared_ptr&lt;/code&gt;, and &lt;code&gt;std::weak_ptr&lt;/code&gt; – explaining their functionalities, benefits, and best use cases. We will also discuss best practices for dynamic memory allocation, including ownership semantics, avoiding leaks, and performance considerations. The discussion assumes you are an intermediate or advanced C++ developer familiar with basic pointers and memory concepts.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>A Comprehensive Examination of Exception Handling in C&#43;&#43;17</title>
+      <link>https://blog.miguens.one/posts/2025/02/a-comprehensive-examination-of-exception-handling-in-c-17/</link>
+      <pubDate>Mon, 10 Feb 2025 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2025/02/a-comprehensive-examination-of-exception-handling-in-c-17/</guid>
+      <description>&lt;h3 id=&#34;introduction&#34;&gt;Introduction&lt;/h3&gt;&#xA;&lt;p&gt;Exception handling is an essential aspect of robust software development in C++. In my experience, well-structured exception handling can significantly improve a program’s reliability and maintainability, particularly when dealing with complex error scenarios. In this post, I examine the fundamentals of exception handling in C++17, discussing &lt;code&gt;try-catch&lt;/code&gt; blocks, exception specifications, the standard exception hierarchy, and best practices for error handling. I also illustrate key concepts with code examples and references to relevant authoritative sources (Stroustrup, &lt;em&gt;The C++ Programming Language&lt;/em&gt;, 4th ed.; ISO/IEC 14882:2017; cppreference.com).&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Lambda Expressions and Functional Programming in C&#43;&#43;17</title>
+      <link>https://blog.miguens.one/posts/2024/12/lambda-expressions-and-functional-programming-in-c-17/</link>
+      <pubDate>Mon, 09 Dec 2024 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2024/12/lambda-expressions-and-functional-programming-in-c-17/</guid>
+      <description>&lt;h2 id=&#34;embracing-lambda-expressions-in-c17-a-step-towards-more-functional-programming&#34;&gt;Embracing Lambda Expressions in C++17: A Step Towards More Functional Programming**&lt;/h2&gt;&#xA;&lt;p&gt;Lambda expressions (anonymous functions) have long been a critical element of functional programming languages, and with the introduction of lambdas in C++11—subsequently refined in C++14 and C++17—this paradigmatic approach has firmly rooted itself in the modern C++ ecosystem. In my experience, embracing lambda expressions can profoundly simplify complex code structures, encourage more declarative patterns, and pave the way towards a more functional style of programming. In this blog post, I will critically examine the syntax and semantics of lambda expressions, discuss their capturing mechanisms, and demonstrate how they can be effectively leveraged in conjunction with the Standard Template Library (STL) algorithms to produce cleaner, more concise, and maintainable code. Throughout, I will reference authoritative sources and cite industry best practices, while offering my personal perspective on the benefits and potential pitfalls of this feature.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>An In-Depth Exploration of the Standard Template Library (STL) in C&#43;&#43;17</title>
+      <link>https://blog.miguens.one/posts/2024/11/an-in-depth-exploration-of-the-standard-template-library-stl-in-c-17/</link>
+      <pubDate>Mon, 18 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2024/11/an-in-depth-exploration-of-the-standard-template-library-stl-in-c-17/</guid>
+      <description>&lt;p&gt;As a software developer with a penchant for C++, I have often found the Standard Template Library (STL) to be an indispensable component of efficient programming. Introduced to provide a collection of generic classes and functions, the STL has evolved significantly, particularly with the enhancements brought by C++17. In this blog post, I aim to provide a comprehensive overview of the STL, focusing on its core components: containers, iterators, algorithms, and function objects. Through detailed explanations and practical examples, we will explore how these components can be leveraged to write more robust and maintainable code.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Exploring Templates and Generic Programming in C&#43;&#43;17</title>
+      <link>https://blog.miguens.one/posts/2024/10/exploring-templates-and-generic-programming-in-c-17/</link>
+      <pubDate>Mon, 07 Oct 2024 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2024/10/exploring-templates-and-generic-programming-in-c-17/</guid>
+      <description>&lt;p&gt;In my experience with C++ programming, templates and generic programming have proven to be indispensable tools for creating flexible and efficient code. The introduction of templates revolutionised the way we write code by allowing functions and classes to operate with generic types. In this blog post, I will delve into function templates, class templates, and template specialisation, illustrating how they contribute to the power of generic programming in C++17.&lt;/p&gt;&#xA;&lt;h2 id=&#34;function-templates&#34;&gt;Function Templates&lt;/h2&gt;&#xA;&lt;p&gt;Function templates enable us to write functions that can operate with any data type. This is particularly useful when the same logic applies to different types, and rewriting code for each type would be inefficient.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Object-Oriented Programming Concepts in C&#43;&#43;17</title>
+      <link>https://blog.miguens.one/posts/2024/09/object-oriented-programming-concepts-in-c-17/</link>
+      <pubDate>Thu, 12 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2024/09/object-oriented-programming-concepts-in-c-17/</guid>
+      <description>&lt;p&gt;In my experience, object-oriented programming (OOP) stands as a cornerstone in the realm of software development, offering a paradigm that models real-world entities through classes and objects. C++17, being a modern iteration of the C++ language, enriches this paradigm with advanced features and improved functionalities. In this blog post, I aim to delve deep into the fundamental principles of OOP in C++17—covering classes, objects, inheritance, polymorphism, encapsulation, and access specifiers—while providing illustrative examples to elucidate these concepts.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Understanding Pointers and References in C&#43;&#43;17</title>
+      <link>https://blog.miguens.one/posts/2024/07/understanding-pointers-and-references-in-c-17/</link>
+      <pubDate>Tue, 30 Jul 2024 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2024/07/understanding-pointers-and-references-in-c-17/</guid>
+      <description>&lt;p&gt;In my experience with C++17, pointers and references are fundamental concepts that, when mastered, can significantly enhance one&amp;rsquo;s ability to write efficient and effective code. In this blog post, I aim to delve into the intricacies of pointers and references, discuss pointer arithmetic, explore null pointers and smart pointers, and elucidate the use of references, all while providing code examples to clarify each point.&lt;/p&gt;&#xA;&lt;h2 id=&#34;table-of-contents&#34;&gt;Table of Contents&lt;/h2&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://blog.miguens.one/posts/2024/07/understanding-pointers-and-references-in-c-17/#introduction-to-pointers&#34;&gt;Introduction to Pointers&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://blog.miguens.one/posts/2024/07/understanding-pointers-and-references-in-c-17/#pointer-arithmetic&#34;&gt;Pointer Arithmetic&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://blog.miguens.one/posts/2024/07/understanding-pointers-and-references-in-c-17/#null-pointers&#34;&gt;Null Pointers&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://blog.miguens.one/posts/2024/07/understanding-pointers-and-references-in-c-17/#smart-pointers&#34;&gt;Smart Pointers&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://blog.miguens.one/posts/2024/07/understanding-pointers-and-references-in-c-17/#understanding-references&#34;&gt;Understanding References&lt;/a&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;a href=&#34;https://blog.miguens.one/posts/2024/07/understanding-pointers-and-references-in-c-17/#conclusion&#34;&gt;Conclusion&lt;/a&gt;&lt;/li&gt;&#xA;&lt;/ol&gt;&#xA;&lt;hr&gt;&#xA;&lt;h2 id=&#34;introduction-to-pointers&#34;&gt;Introduction to Pointers&lt;/h2&gt;&#xA;&lt;p&gt;A pointer in C++ is a variable that holds the memory address of another variable. Pointers are powerful tools that allow for dynamic memory management, efficient array handling, and the creation of complex data structures like linked lists and trees.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Handling Arrays and Strings in C&#43;&#43;17: A Comprehensive Guide</title>
+      <link>https://blog.miguens.one/posts/2024/06/handling-arrays-and-strings-in-c-17-a-comprehensive-guide/</link>
+      <pubDate>Mon, 03 Jun 2024 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2024/06/handling-arrays-and-strings-in-c-17-a-comprehensive-guide/</guid>
+      <description>&lt;p&gt;The efficient manipulation of arrays and strings is fundamental to proficient programming in C++17. In this discourse, I shall delve into fixed-size arrays, dynamic arrays, &lt;code&gt;std::array&lt;/code&gt;, &lt;code&gt;std::vector&lt;/code&gt;, and &lt;code&gt;std::string&lt;/code&gt;. Through illustrative examples, we will explore common operations and best practices.&lt;/p&gt;&#xA;&lt;hr&gt;&#xA;&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;&#xA;&lt;p&gt;Arrays and strings are pivotal data structures in C++, serving as the cornerstone for data storage and manipulation. C++17 offers a rich set of features that enhance these structures, providing both flexibility and efficiency. While fixed-size and dynamic arrays offer granular control, the Standard Template Library (STL) introduces containers like &lt;code&gt;std::array&lt;/code&gt;, &lt;code&gt;std::vector&lt;/code&gt;, and &lt;code&gt;std::string&lt;/code&gt; that simplify usage and improve safety.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Functions in C&#43;&#43;17: A Comprehensive Analysis</title>
+      <link>https://blog.miguens.one/posts/2024/05/functions-in-c-17-a-comprehensive-analysis/</link>
+      <pubDate>Thu, 23 May 2024 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2024/05/functions-in-c-17-a-comprehensive-analysis/</guid>
+      <description>&lt;p&gt;In the realm of C++17, functions remain a cornerstone of effective programming, offering a means to encapsulate code for reusability and clarity. In this blog post, I will delve into the intricacies of function declaration and definition, default arguments, overloading, inline functions, and recursion. Through detailed explanations and illustrative examples, we shall explore these concepts, critically analysing their applications and nuances.&lt;/p&gt;&#xA;&lt;h2 id=&#34;function-declaration-and-definition&#34;&gt;Function Declaration and Definition&lt;/h2&gt;&#xA;&lt;p&gt;At the heart of any C++ program lies the function, a block of code designed to perform a specific task. The distinction between function declaration and definition is fundamental.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Mastering Control Flow Statements in C&#43;&#43;17</title>
+      <link>https://blog.miguens.one/posts/2024/04/mastering-control-flow-statements-in-c-17/</link>
+      <pubDate>Fri, 05 Apr 2024 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2024/04/mastering-control-flow-statements-in-c-17/</guid>
+      <description>&lt;p&gt;In the realm of C++ programming, control flow statements are indispensable tools that enable us to dictate the execution path of our code. They provide the means to make decisions, iterate over data, and manage the flow of execution based on specific conditions. In this post, I will delve into the intricacies of control flow statements in C++17, including &lt;code&gt;if-else&lt;/code&gt;, &lt;code&gt;switch-case&lt;/code&gt;, traditional loops (&lt;code&gt;for&lt;/code&gt;, &lt;code&gt;while&lt;/code&gt;, &lt;code&gt;do-while&lt;/code&gt;), and the modern range-based &lt;code&gt;for&lt;/code&gt; loop. Through detailed explanations and code examples, we will explore how these constructs function and how they can be effectively utilised in your code.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Exploring Operators and Expressions in C&#43;&#43;17: An In-Depth Analysis</title>
+      <link>https://blog.miguens.one/posts/2024/02/exploring-operators-and-expressions-in-c-17-an-in-depth-analysis/</link>
+      <pubDate>Fri, 02 Feb 2024 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2024/02/exploring-operators-and-expressions-in-c-17-an-in-depth-analysis/</guid>
+      <description>&lt;p&gt;In my journey with C++17, I have found that a comprehensive understanding of operators and expressions is indispensable for writing efficient and effective code. Operators are the building blocks that allow us to manipulate data and construct complex logic. In this blog post, I aim to delve into the various types of operators available in C++17—arithmetic, relational, logical, bitwise operators, and the concept of operator overloading—providing detailed explanations and illustrative examples to showcase their practical applications.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Variables and Data Types in C&#43;&#43;17: An In-Depth Exploration</title>
+      <link>https://blog.miguens.one/posts/2023/12/variables-and-data-types-in-c-17-an-in-depth-exploration/</link>
+      <pubDate>Fri, 22 Dec 2023 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2023/12/variables-and-data-types-in-c-17-an-in-depth-exploration/</guid>
+      <description>&lt;p&gt;Understanding variables and data types is quintessential for any programming endeavour, particularly in a language as robust and nuanced as C++17. In this discourse, I shall delve into the fundamental types, elucidate the mechanisms of type inference with &lt;code&gt;auto&lt;/code&gt;, and examine the utilisation of &lt;code&gt;constexpr&lt;/code&gt;. Through code snippets and critical analysis, we will navigate the intricacies of variable declaration and initialisation in modern C++.&lt;/p&gt;&#xA;&lt;h2 id=&#34;fundamental-types-in-c17&#34;&gt;Fundamental Types in C++17&lt;/h2&gt;&#xA;&lt;p&gt;C++17, being a statically-typed language, necessitates that the type of every variable is known at compile-time (Stroustrup, 2013). The language offers a rich tapestry of data types, categorised broadly into built-in (fundamental) types and user-defined types.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Understanding the Basic Structure of a C&#43;&#43; Program</title>
+      <link>https://blog.miguens.one/posts/2023/11/understanding-the-basic-structure-of-a-c-program/</link>
+      <pubDate>Wed, 29 Nov 2023 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2023/11/understanding-the-basic-structure-of-a-c-program/</guid>
+      <description>&lt;p&gt;In my experience as a software developer, grasping the fundamental structure of a C++ program is pivotal for writing efficient and maintainable code. This article delves into the essential components of a C++ program, including headers, namespaces, the &lt;code&gt;main&lt;/code&gt; function, and compilation units. By examining these elements in detail, we can better understand how they interact to form a cohesive application.&lt;/p&gt;&#xA;&lt;hr&gt;&#xA;&lt;h2 id=&#34;headers&#34;&gt;Headers&lt;/h2&gt;&#xA;&lt;p&gt;Headers in C++ are files that contain declarations of functions, classes, variables, and other identifiers. They allow us to share these declarations across multiple source files, promoting code reusability and modularity.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Embracing C&#43;&#43;17: A Comprehensive Guide to Its Evolution and Key Features</title>
+      <link>https://blog.miguens.one/posts/2023/10/embracing-c-17-a-comprehensive-guide-to-its-evolution-and-key-features/</link>
+      <pubDate>Mon, 16 Oct 2023 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2023/10/embracing-c-17-a-comprehensive-guide-to-its-evolution-and-key-features/</guid>
+      <description>&lt;p&gt;As a software developer with a keen interest in programming languages&amp;rsquo; evolution, I have observed the significant strides C++ has made over the years. C++17, in particular, represents a substantial advancement from its predecessors, introducing features that enhance efficiency, readability, and performance. In this blog post, I aim to delve into the evolution of C++ leading up to C++17, explore its key features, and discuss why integrating it into your development projects could be highly beneficial.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Understanding Reflective Memory via Software: A Deep Dive</title>
+      <link>https://blog.miguens.one/posts/2023/09/understanding-reflective-memory-via-software-a-deep-dive/</link>
+      <pubDate>Thu, 14 Sep 2023 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2023/09/understanding-reflective-memory-via-software-a-deep-dive/</guid>
+      <description>&lt;p&gt;In modern computing environments, the need for real-time data synchronization across multiple systems or processors is increasingly critical. One technology that facilitates this is Reflective Memory (RM). Traditionally, Reflective Memory has been associated with hardware solutions—dedicated memory modules and fiber-optic networks ensuring that changes in one node’s memory are instantly reflected across all nodes. However, with the advancement of software technologies, reflective memory is no longer confined to hardware implementations. This article explores how reflective memory can be achieved through software, its applications, and the challenges that come with it.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>An Introduction to Mutexes and Multithreading in C</title>
+      <link>https://blog.miguens.one/posts/2023/06/an-introduction-to-mutexes-and-multithreading-in-c/</link>
+      <pubDate>Thu, 29 Jun 2023 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2023/06/an-introduction-to-mutexes-and-multithreading-in-c/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;Title: An Introduction to Mutexes and Multithreading in C&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;In the world of programming, threads are a crucial concept that allows for concurrent execution within a single process. This concurrent execution is made possible through multithreading, a widespread technique in modern programming. However, when multiple threads access a shared resource, synchronization problems can arise. In this blog post, we&amp;rsquo;ll explore how to use Mutexes in C for thread synchronization and delve into the concept of multithreading.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
