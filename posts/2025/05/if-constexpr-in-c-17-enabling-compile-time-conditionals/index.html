@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Introduction C&#43;&#43;17 introduced if constexpr, a language feature that brings compile-time conditional logic into the core of C&#43;&#43; template programming. This construct – officially known as a constexpr if statement – allows the compiler to evaluate a condition during compilation and discard one of the branches based on a constant expression (if statement - cppreference.com). For intermediate and advanced C&#43;&#43; developers, if constexpr offers a more natural way to express conditional code in templates, eliminating much of the verbosity and complexity previously associated with template metaprogramming. This post provides an analytical exploration of if constexpr: how it works mechanically, how it differs from a traditional runtime if, comparisons with older techniques (like std::enable_if, SFINAE, and tag dispatching), illustrative examples, and a critical look at its benefits and limitations.
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2025/05/if-constexpr-in-c-17-enabling-compile-time-conditionals/" />
+
+
+    <title>
+        
+            if constexpr in C&#43;&#43;17 – Enabling Compile-Time Conditionals :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="if constexpr in C&#43;&#43;17 – Enabling Compile-Time Conditionals">
+  <meta itemprop="description" content="Introduction C&#43;&#43;17 introduced if constexpr, a language feature that brings compile-time conditional logic into the core of C&#43;&#43; template programming. This construct – officially known as a constexpr if statement – allows the compiler to evaluate a condition during compilation and discard one of the branches based on a constant expression (if statement - cppreference.com). For intermediate and advanced C&#43;&#43; developers, if constexpr offers a more natural way to express conditional code in templates, eliminating much of the verbosity and complexity previously associated with template metaprogramming. This post provides an analytical exploration of if constexpr: how it works mechanically, how it differs from a traditional runtime if, comparisons with older techniques (like std::enable_if, SFINAE, and tag dispatching), illustrative examples, and a critical look at its benefits and limitations.">
+  <meta itemprop="datePublished" content="2025-05-12T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2025-05-12T00:00:00+00:00">
+  <meta itemprop="wordCount" content="5143">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="C_cpp,Programming">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="if constexpr in C&#43;&#43;17 – Enabling Compile-Time Conditionals">
+  <meta name="twitter:description" content="Introduction C&#43;&#43;17 introduced if constexpr, a language feature that brings compile-time conditional logic into the core of C&#43;&#43; template programming. This construct – officially known as a constexpr if statement – allows the compiler to evaluate a condition during compilation and discard one of the branches based on a constant expression (if statement - cppreference.com). For intermediate and advanced C&#43;&#43; developers, if constexpr offers a more natural way to express conditional code in templates, eliminating much of the verbosity and complexity previously associated with template metaprogramming. This post provides an analytical exploration of if constexpr: how it works mechanically, how it differs from a traditional runtime if, comparisons with older techniques (like std::enable_if, SFINAE, and tag dispatching), illustrative examples, and a critical look at its benefits and limitations.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2025/05/if-constexpr-in-c-17-enabling-compile-time-conditionals/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="if constexpr in C&#43;&#43;17 – Enabling Compile-Time Conditionals">
+  <meta property="og:description" content="Introduction C&#43;&#43;17 introduced if constexpr, a language feature that brings compile-time conditional logic into the core of C&#43;&#43; template programming. This construct – officially known as a constexpr if statement – allows the compiler to evaluate a condition during compilation and discard one of the branches based on a constant expression (if statement - cppreference.com). For intermediate and advanced C&#43;&#43; developers, if constexpr offers a more natural way to express conditional code in templates, eliminating much of the verbosity and complexity previously associated with template metaprogramming. This post provides an analytical exploration of if constexpr: how it works mechanically, how it differs from a traditional runtime if, comparisons with older techniques (like std::enable_if, SFINAE, and tag dispatching), illustrative examples, and a critical look at its benefits and limitations.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-05-12T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-05-12T00:00:00+00:00">
+    <meta property="article:tag" content="C_cpp">
+    <meta property="article:tag" content="Programming">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2025-05-12 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        25 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2025/05/if-constexpr-in-c-17-enabling-compile-time-conditionals/">if constexpr in C++17 – Enabling Compile-Time Conditionals</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="introduction">Introduction</h2>
+<p>C++17 introduced <strong><code>if constexpr</code></strong>, a language feature that brings <strong>compile-time conditional logic</strong> into the core of C++ template programming. This construct – officially known as a <em>constexpr if statement</em> – allows the compiler to evaluate a condition during compilation and <strong>discard one of the branches</strong> based on a constant expression (<a href="https://en.cppreference.com/w/cpp/language/if#:~:text=If%20condition%20yields%20true%2C%20then,true%20is%20discarded">if statement - cppreference.com</a>). For intermediate and advanced C++ developers, <code>if constexpr</code> offers a more <em>natural</em> way to express conditional code in templates, eliminating much of the verbosity and complexity previously associated with template metaprogramming. This post provides an analytical exploration of <code>if constexpr</code>: how it works mechanically, how it differs from a traditional runtime <code>if</code>, comparisons with older techniques (like <code>std::enable_if</code>, SFINAE, and tag dispatching), illustrative examples, and a critical look at its benefits and limitations.</p>
+<h2 id="what-is-if-constexpr-and-how-does-it-work">What is <code>if constexpr</code> and How Does It Work?</h2>
+<p>The <strong>mechanics of <code>if constexpr</code></strong> are straightforward yet powerful. It behaves similar to an ordinary <code>if</code> statement, with the crucial difference that its condition is evaluated <strong>at compile time</strong>. The condition must be a compile-time constant (a contextually converted constant <code>bool</code> expression) (<a href="https://en.cppreference.com/w/cpp/language/if#:~:text=In%20a%20constexpr%20if%20statement%2C,since%20C%2B%2B23">if statement - cppreference.com</a>). If the condition is <code>true</code>, the compiler <strong>compiles only the “then” branch</strong> and discards the “else” branch; if the condition is <code>false</code>, it discards the “then” branch and compiles the “else” instead (<a href="https://en.cppreference.com/w/cpp/language/if#:~:text=If%20condition%20yields%20true%2C%20then,true%20is%20discarded">if statement - cppreference.com</a>). In other words, one of the two branches is entirely omitted from the compiled code. This is unlike a normal runtime <code>if</code>, where both branches must be <strong>well-formed</strong> (type-correct) and are compiled into the program, with the decision of which branch to execute made at runtime.</p>
+<p>To illustrate, consider a simple function template using <code>if constexpr</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;type_traits&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> T<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> printTypeInfo(<span style="color:#66d9ef">const</span> T<span style="color:#f92672">&amp;</span> value) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">constexpr</span> (std<span style="color:#f92672">::</span>is_integral_v<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Integral: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> value <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Non-integral: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> value <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In this example, the condition <code>std::is_integral_v&lt;T&gt;</code> is a <code>constexpr</code> boolean determined by the template parameter <code>T</code>. When the compiler instantiates <code>printTypeInfo&lt;int&gt;</code>, the condition is <code>true</code>, so only the first branch (for integrals) is compiled into the function. For <code>printTypeInfo&lt;std::string&gt;</code>, the condition is <code>false</code>, so the integral-handling branch is discarded and only the second branch is compiled. The discarded branch can even contain code that would not compile for the given <code>T</code> – and that code is simply ignored by the compiler for that instantiation. This ability to include type-specific code that is <em>compiled only when applicable</em> is the hallmark of <code>if constexpr</code>.</p>
+<p>It is important to note that <strong><code>if constexpr</code> differs from a preprocessor <code>#if</code></strong>. The <code>#if</code> directive operates purely in the preprocessor, blindly including or excluding code before the compiler sees it. In contrast, <code>if constexpr</code> is part of the C++ language proper and still requires <strong>syntactically valid code</strong> in both branches. The compiler will parse and ensure the discarded branch is well-formed at least in terms of syntax (and in some cases, basic semantics) (<a href="https://www.cppstories.com/2018/03/ifconstexpr/#:~:text=,in%20one%20of%20the%20branches">Simplify Code with if constexpr and Concepts in C++17/C++20 - C++ Stories</a>). For example, even if a branch is not taken, the code must not have syntax errors or references to nonexistent symbols. However, any <em>dependent</em> code (such as code that would only be valid for certain types) is not instantiated for the false branch, preventing template instantiation errors. Thus, <code>if constexpr</code> strikes a balance: it <em>discards</em> a branch so that ill-formed code specific to that branch doesn’t cause errors, but it’s not as unrestrained as a macro preprocessor cut-out. Notably, outside of templates (in non-dependent contexts), a discarded branch is still checked fully by the compiler (<a href="https://en.cppreference.com/w/cpp/language/if#:~:text=Outside%20a%20template%2C%20a%20discarded,if%20preprocessing%20directive">if statement - cppreference.com</a>). This means <code>if constexpr</code> is <strong>not</strong> a drop-in replacement for compile-time configuration via <code>#if</code> in every scenario – if used in regular code with a constant false condition, the compiler will skip code generation for that block but will still report errors for clearly invalid code inside it. In summary, <code>if constexpr</code> gives us a <strong>compile-time selection</strong> mechanism within the C++ type system and compilation process, enabling more expressive and safer template code.</p>
+<h3 id="compile-time-vs-runtime-if">Compile-Time vs Runtime <code>if</code></h3>
+<p>Given the above, we can summarise the <strong>key differences between <code>if constexpr</code> and a traditional <code>if</code></strong>:</p>
+<ul>
+<li>
+<p><strong>Compile-Time Evaluation:</strong> The condition in <code>if constexpr</code> <em>must</em> be a compile-time constant (e.g. a <code>constexpr</code> variable or a trait like <code>std::is_same_v&lt;T, U&gt;</code>). A normal <code>if</code> can take any boolean expression (including runtime values). Attempting to use a non-constant condition in <code>if constexpr</code> will not compile.</p>
+</li>
+<li>
+<p><strong>Discarding Branches:</strong> In a <code>constexpr if</code>, the unused branch is discarded <em>at compile time</em>. The compiler does not generate code for it, and for template instantiations it does not even instantiate templates or evaluate expressions in that branch. By contrast, a regular <code>if</code> always compiles both branches — even if a condition is constant, the standard requires both branches to be well-formed. Only at runtime does a normal <code>if</code> decide which branch to execute (though compilers might optimise out unused branches, they still must be semantically correct in the code).</p>
+</li>
+<li>
+<p><strong>Validity of Code in Branches:</strong> Because <code>if constexpr</code> can discard a branch, it allows us to include code that might not be valid for all types or scenarios, guarded by the appropriate condition. As long as that code is never instantiated for an incompatible type, it’s fine. With an ordinary <code>if</code>, every branch’s code must be valid <strong>in all cases</strong>, or else the program won’t compile. This is why prior to C++17, template metaprogramming tricks were needed — such as SFINAE — to make code <em>appear</em> or <em>disappear</em> depending on types. <code>if constexpr</code> formalises that pattern in a more readable way.</p>
+</li>
+<li>
+<p><strong>Syntax and Scope:</strong> Syntactically, writing <code>if constexpr (condition) { ... } else { ... }</code> is just like an <code>if-else</code>. One subtle difference is that <code>if constexpr</code> <em>still introduces a scope</em> for each branch (just as a normal if-else does), which means you cannot declare a variable inside one branch and use it in the other branch or after the if-statement. Some other languages’ compile-time if (such as D’s <code>static if</code>) do not introduce a new scope (<a href="https://brevzin.github.io/C%5C&#43;&#43;/2019/01/15/if-constexpr-isnt-broken/#:~:text=One%20very%20significant%20thing%20that,28%29%20looks%20like%20this">if constexpr isn&rsquo;t broken | Barry&rsquo;s C++ Blog</a>), but in C++17 each branch is a separate scope block. This can occasionally affect how you structure code (for example, you cannot conditionally add a new member variable to a class with <code>if constexpr</code> – that use case still requires partial specialisation or other techniques).</p>
+</li>
+</ul>
+<h2 id="pre-c17-approaches-to-compile-time-conditional-coding">Pre-C++17 Approaches to Compile-Time Conditional Coding</h2>
+<p>Before C++17, achieving the effect of compile-time conditional execution required more convoluted techniques. There was no direct analogue of <code>if constexpr</code>, so template metaprogrammers resorted to patterns like <strong>SFINAE</strong>, <code>std::enable_if</code>, and <strong>tag dispatching</strong> to simulate compile-time branching. These techniques worked, but they were often <em>verbose and harder to follow</em>, effectively encoding “static if” logic in indirect ways. As one modern C++ commentary puts it: <em>“Before C++17, we had a few quite ugly-looking ways to write static if&hellip; you could use tag dispatching or SFINAE. Fortunately, that’s changed, and we can now benefit from if constexpr&hellip;”</em> (<a href="https://www.cppstories.com/2018/03/ifconstexpr/#:~:text=Before%20C%2B%2B17%2C%20we%20had%20a,and%20concepts%20from%20C%2B%2B20">Simplify Code with if constexpr and Concepts in C++17/C++20 - C++ Stories</a>). In this section, we will briefly examine those pre-C++17 approaches and highlight how <code>if constexpr</code> improves upon them.</p>
+<ul>
+<li>
+<p><strong>SFINAE and <code>std::enable_if</code>:</strong> <em>Substitution Failure Is Not An Error (SFINAE)</em> is a core principle of C++ templates that allows the compiler to exclude certain template overloads from consideration if they are ill-formed for a given set of template arguments. Practically, SFINAE was often used via the standard utility <code>std::enable_if</code> (found in <code>&lt;type_traits&gt;</code>). By adding an <code>enable_if</code> condition to a template’s signature, one could enable or disable that overload based on a compile-time predicate. For example, you might write two overloads of a function <code>process()</code> – one that is enabled only if <code>T</code> is an integral type, and another enabled only if <code>T</code> is not integral. The compiler, during overload resolution, would remove the inappropriate one. This achieves a form of <em>static dispatch</em>: only the matching implementation is compiled and chosen. While powerful, SFINAE-based solutions have a reputation for being <strong>difficult to read and write</strong>. The logic of “if this trait holds, use this overload” is not written in the function body, but rather encoded in the type system (often as template parameter defaults or return-type tricks). Error messages for SFINAE failures can be cryptic, and maintaining such code requires careful attention. SFINAE also typically operates at function granularity – enabling or disabling entire overloads – rather than allowing a clean <em>branching logic within one function</em>.</p>
+</li>
+<li>
+<p><strong>Tag Dispatching:</strong> Tag dispatching is another technique to simulate compile-time branching. It involves calling different helper functions or overloads based on <strong>tag types</strong> that carry compile-time information. Typically, one might use <code>std::true_type</code> and <code>std::false_type</code> (from <code>&lt;type_traits&gt;</code>) as tags. For instance, you could write an implementation <code>foo_impl(T, std::true_type)</code> for the case when a condition is true, and <code>foo_impl(T, std::false_type)</code> for the false case, then call <code>foo_impl(x, ConditionTrait&lt;T&gt;{})</code> in the main function. The appropriate overload is resolved at compile time by matching the type of the tag. Tag dispatching achieves the goal but at the cost of extra functions and structures; the intent is not as immediately clear as an <code>if</code> condition in code. It also introduces more symbols and, in some cases, slight overhead (though usually optimised away). Essentially, tag dispatching defers the decision to overload resolution using dummy types, whereas <code>if constexpr</code> allows writing the decision in-place.</p>
+</li>
+<li>
+<p><strong>Compile-Time <code>bool</code> Constants and Partial Specialisation:</strong> Another pattern was to use compile-time boolean constants (like <code>std::integral_constant</code>) or template non-type parameters to choose implementations. For example, one could have a primary template and a partially specialised template class, where the specialisation is selected when a condition is true. This is often how type traits themselves are implemented (using partial specialisation on conditions). Functionally, this is similar to SFINAE, in that the compiler picks a template instantiation based on what’s available. Partial specialisations and explicit specialisations increase code duplication and can make logic less linear to follow.</p>
+</li>
+</ul>
+<p><strong>In summary, prior to C++17, expressing an “if-like” compile-time choice meant</strong> writing multiple overloads or specialisations with enabling conditions, or delegating to internal helper functions via tags. This indirection made code harder to read and maintain. Modern C++ guidance often suggests that <strong><code>if constexpr</code> or concepts (in C++20) should be preferred</strong> where possible, instead of heavy SFINAE metaprogramming (<a href="https://en.cppreference.com/w/cpp/language/sfinae#:~:text=Where%20applicable%2C%20tag%20dispatch%20%2C,preferred%20over%20use%20of%20SFINAE">SFINAE - cppreference.com</a>). The arrival of <code>if constexpr</code> thus addresses a long-standing need: a <em>clear, in-code conditional</em> that the compiler can evaluate during compilation.</p>
+<h2 id="if-constexpr-vs-stdenable_if-and-sfinae-example"><code>if constexpr</code> vs. <code>std::enable_if</code> and SFINAE: Example</h2>
+<p>To concretely see the difference, let’s compare a simple use case implemented with pre-C++17 techniques and with C++17’s <code>if constexpr</code>. Imagine we want a function <code>get_value()</code> that, given a variable, will return the “pointed-to” value if the argument is a pointer, but return the value itself if it’s not a pointer. In other words, we want to dereference pointers but leave other types unchanged. This is a toy problem, but it nicely demonstrates conditional code based on a type trait.</p>
+<h3 id="pre-c17-approach-sfinae-with-stdenable_if">Pre-C++17 Approach (SFINAE with <code>std::enable_if</code>)</h3>
+<p>Before C++17, one way to write <code>get_value</code> was to use <strong>two overloads</strong> and <code>std::enable_if</code> to activate the appropriate one:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;type_traits&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Overload for pointer types
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> T<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> get_value(T ptr) 
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span> std<span style="color:#f92672">::</span>enable_if_t<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>is_pointer_v<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>, <span style="color:#66d9ef">typename</span> std<span style="color:#f92672">::</span>remove_pointer<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;::</span>type<span style="color:#f92672">&gt;</span> 
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#f92672">*</span>ptr;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Overload for non-pointer types
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> T<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> get_value(T val) 
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">-&gt;</span> std<span style="color:#f92672">::</span>enable_if_t<span style="color:#f92672">&lt;!</span>std<span style="color:#f92672">::</span>is_pointer_v<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>, T<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> val;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Here we define two templates. The first is enabled only if <code>T</code> is a pointer (using the condition in <code>enable_if_t</code>), and it dereferences the pointer. The second is enabled for non-pointers and returns the value directly. The appropriate template is chosen by the compiler. This code works, but notice the ceremony: the condition is not in the function body but in the template signature, and we had to carefully craft two overloads. If the logic had more cases (imagine three or four different type categories), the number of overloads would grow, or we’d need to use nested <code>enable_if</code> conditions or tag dispatching with multiple tags, which complicates things.</p>
+<h3 id="modern-c17-approach-if-constexpr-in-one-function">Modern C++17 Approach (<code>if constexpr</code> in one function)</h3>
+<p>Now, using <code>if constexpr</code>, we can express the same logic <strong>in a single function template</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;type_traits&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> T<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> get_value(T x) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">constexpr</span> (std<span style="color:#f92672">::</span>is_pointer_v<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#f92672">*</span>x;            <span style="color:#75715e">// T is pointer: return the object pointed to
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> x;             <span style="color:#75715e">// T is not a pointer: return the value itself
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This one function template handles both cases. The <code>if constexpr</code> checks <code>std::is_pointer_v&lt;T&gt;</code>, which is a compile-time constant. If true, the <code>return *x;</code> is compiled, and the <code>else</code> branch is discarded; if false, the <code>else</code> branch is compiled and the <code>if</code> branch discarded. Crucially, if <code>T</code> is not a pointer, the <code>return *x;</code> is never compiled – so we don’t get an error for trying to dereference a non-pointer. And if <code>T</code> <em>is</em> a pointer, the <code>return x;</code> in the else branch is discarded (but that would have been fine anyway). The function templates above achieve the same functionality, but the <code>if constexpr</code> version is <strong>more concise and readable</strong>. The intent (“if T is a pointer, do this, otherwise do that”) is plainly visible in the code. This aligns with the advice from experts: <em>“If you can get away with using <code>if constexpr</code> instead of SFINAE, you should certainly do it. It’s way simpler and more readable.”</em> (<a href="https://platis.solutions/blog/2024/01/27/lets-get-comfortable-with-sfinae/#:~:text=match%20at%20L261%20If%20you,way%20simpler%20and%20more%20readable">Tutorial: Let&rsquo;s get comfortable with SFINAE | Dimitris Platis</a>).</p>
+<p>It’s worth noting that in the <code>if constexpr</code> version, the compiler deduces the return type of <code>get_value</code> appropriately for each instantiation. For example, <code>get_value&lt;int*&gt;(int* p)</code> will return an <code>int</code> (the pointed type), whereas <code>get_value&lt;double&gt;(double x)</code> returns a <code>double</code>. The C++17 rules specify that the <em>discarded branch’s return statements do not participate in type deduction</em> (<a href="https://en.cppreference.com/w/cpp/language/if#:~:text=If%20condition%20yields%20true%2C%20then,true%20is%20discarded">if statement - cppreference.com</a>). This means there’s no conflict between the types of <code>*x</code> and <code>x</code> – each template instantiation sees only one return. In earlier C++ standards, if you attempted a similar thing with a normal <code>if</code>, both returns would be considered, likely causing a deduction failure or requiring them to have the same type. <code>if constexpr</code> neatly sidesteps that issue.</p>
+<h2 id="example-variadic-template-recursion-with-if-constexpr">Example: Variadic Template Recursion with <code>if constexpr</code></h2>
+<p>Another common scenario where <code>if constexpr</code> shines is in <strong>ending recursion or choosing between multiple compile-time cases</strong> without needing separate specialisations. Consider a function template to print all arguments passed to it (a simple variadic template example). We want <code>printAll(a, b, c, ...)</code> to print each argument, separated by commas. Implementing this using recursion on parameter packs traditionally required a base case overload. With <code>if constexpr</code>, we can incorporate the recursion stop condition into the function itself:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> T, <span style="color:#66d9ef">typename</span>... Rest<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> printAll(<span style="color:#66d9ef">const</span> T<span style="color:#f92672">&amp;</span> first, <span style="color:#66d9ef">const</span> Rest<span style="color:#f92672">&amp;</span>... rest) {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> first;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">constexpr</span> (<span style="color:#66d9ef">sizeof</span>...(rest) <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {            <span style="color:#75715e">// compile-time check: are there more arguments?
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;, &#34;</span>;
+</span></span><span style="display:flex;"><span>        printAll(rest...);                          <span style="color:#75715e">// recursive call with the rest of the pack
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In this code, <code>sizeof...(rest)</code> is a compile-time constant indicating how many arguments remain. If there are more arguments, the <code>if constexpr</code> condition is true and we output a comma and recursively call <code>printAll</code> on the remaining parameters. If <code>sizeof...(rest)</code> is zero (meaning <code>printAll</code> was called with only one argument), the condition is false and the compiler discards the entire <code>if</code> body – notably, it <strong>does not instantiate a recursive call at all</strong> in that case. This means we don’t need to write a separate <code>printAll()</code> overload for the base case of zero arguments. The template will compile for any non-zero pack and stop recursion automatically when done. Without <code>if constexpr</code>, one might attempt a runtime <code>if</code>, but that would still require that the <code>printAll(rest...)</code> call is syntactically present, leading to a compile error when no parameters remain (or necessitating a dummy base function to call). Thanks to <code>if constexpr</code>, the compiler treats the recursive call as <em>discarded code</em> when not needed. This example demonstrates how <code>if constexpr</code> can simplify code by <strong>combining what used to be multiple function overloads into one template</strong>. The intent is clear and maintenance is easier – adding additional logging or formatting can be done in one place.</p>
+<h2 id="benefits-of-if-constexpr">Benefits of <code>if constexpr</code></h2>
+<p>The introduction of <code>if constexpr</code> has been widely appreciated in the C++ community for several reasons:</p>
+<ul>
+<li>
+<p><strong>Simpler, More Readable Code:</strong> As shown above, many tasks that once required multiple templates or complex metaprogramming now can be written in a straightforward manner. The code’s logic flows almost like normal runtime logic, which makes it easier for humans to read. Even less experienced template programmers can follow an <code>if constexpr</code> branch without having to mentally expand trait logic or recall SFINAE rules. In fact, modern C++ references state that features like tag dispatch and <code>if constexpr</code> are <em>“usually preferred over use of SFINAE”</em> for cleaner code (<a href="https://en.cppreference.com/w/cpp/language/sfinae#:~:text=Where%20applicable%2C%20tag%20dispatch%20%2C,preferred%20over%20use%20of%20SFINAE">SFINAE - cppreference.com</a>).</p>
+</li>
+<li>
+<p><strong>Unified Implementation:</strong> With <code>if constexpr</code>, you often need only <em>one function or class template</em> to handle all cases, rather than splitting functionality across specialisations. This can reduce code duplication. For example, instead of writing separate specialisations of a class for different template parameters, one can write a single class template that contains <code>if constexpr</code> in its constructor or member functions to handle variations. Maintenance improves because there’s a single definition to update for common code, and the divergent parts are embedded as conditional blocks.</p>
+</li>
+<li>
+<p><strong>Greater Safety and Less Error-Prone:</strong> Although template metaprogramming will always have some complexity, <code>if constexpr</code> localises the conditional logic. In older code, a minor mistake in an <code>enable_if</code> condition or a template specialization could lead to puzzling compile errors or unintended function selections. With <code>if constexpr</code>, the failure modes tend to be simpler (e.g. a static assertion inside a false branch firing when you expected a true branch), and the compiler error often points to the specific line in the function rather than an indirect substitution failure. Also, because the unused branch is discarded, you can prevent certain illegal operations from ever being compiled when they don’t apply. This avoids the need for workarounds like dummy template parameters or tricks to make code SFINAE-friendly.</p>
+</li>
+<li>
+<p><strong>Performance (Compile-Time and Run-Time):</strong> In terms of <em>runtime</em> performance, <code>if constexpr</code> incurs <strong>no overhead at all</strong> for the branch that is discarded; it’s completely removed from the compiled binary (just as if it were never written for that instantiation). At runtime, the resulting code has no branching cost for the <code>if constexpr</code> itself – the decision was made during compilation. Compared to some tag dispatch implementations, this can eliminate function call overhead (though most compilers would inline those anyway). In terms of <em>compile-time performance</em>, using <code>if constexpr</code> can sometimes speed up compilation by reducing the number of instantiations (since you need fewer overloads). However, heavy use of template metaprogramming still impacts compile time, and <code>if constexpr</code> is not magic in that regard – it simply streamlines the code the compiler has to process.</p>
+</li>
+<li>
+<p><strong>Replacing Workarounds with Intent-Expressive Code:</strong> Developers used many idioms to simulate compile-time conditionals: partial specialisations, overload sets with <code>enable_if</code>, even abusing the preprocessor in some cases. Now, <code>if constexpr</code> provides a single, intention-revealing construct for conditional instantiation. It aligns C++ with what other languages (such as D or even older ones with static branching) provide, but in a manner that fits C++’s compile-time evaluation model. As one article title aptly put it, <strong>“Farewell SFINAE, welcome if constexpr”</strong>, emphasising the community’s relief at having this cleaner solution (<a href="https://medium.com/@sireanu.roland/farewell-sfinae-welcome-if-constexpr-d405b6ea7b41#:~:text=Farewell%20SFINAE%2C%20welcome%20if%20constexpr,and%20easier%20to%20maintain">Farewell SFINAE, welcome if constexpr | by Sireanu Roland - Medium</a>).</p>
+</li>
+</ul>
+<p>Real-world code has eagerly adopted <code>if constexpr</code>. The feature is not only for toy examples; even the C++ standard library implementation uses it to simplify internals. Instances of <code>if constexpr</code> appear in template-heavy library code to handle traits or different code paths for iterators, enabling more maintainable implementations (<a href="https://www.cppstories.com/2018/03/ifconstexpr/#:~:text=,its%20place%20in%20production%20code">Simplify Code with if constexpr and Concepts in C++17/C++20 - C++ Stories</a>). In summary, the consensus is that <code>if constexpr</code> improves both <strong>readability and maintainability</strong> of template code, and it reduces the mental burden on programmers by allowing a more imperative style for what is still purely compile-time logic.</p>
+<h2 id="limitations-and-potential-misuse">Limitations and Potential Misuse</h2>
+<p>While <code>if constexpr</code> is a powerful addition, it is not without limitations or caveats. To use it effectively, one should be aware of a few points and potential pitfalls:</p>
+<ul>
+<li>
+<p><strong>Must Have a Compile-Time Condition:</strong> By design, <code>if constexpr</code> only works with a condition that the compiler can evaluate at compile time. This typically means using <code>constexpr</code> variables, template parameters, or type traits. If a programmer mistakenly attempts to use a runtime condition (say, a regular function argument or a non-constexpr global) in an <code>if constexpr</code>, the code simply won’t compile. In practice, this is usually not an issue – its use cases are inherently compile-time decisions – but newcomers sometimes try to use <code>if constexpr</code> in contexts where a normal <code>if</code> is needed.</p>
+</li>
+<li>
+<p><strong>Both Branches Must Be Well-Formed (Syntax and Scope):</strong> Although the <em>content</em> of the unused branch is not compiled, the code still needs to be syntactically correct. The compiler will parse both the true and false branch. If there are blatant syntax errors or if you refer to a name that doesn’t exist at all, you’ll get a compile error even if that branch is discarded. For example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#a6e22e">constexpr</span> (false) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>p <span style="color:#f92672">=</span> <span style="color:#ae81ff">42</span>;   <span style="color:#75715e">// error: invalid conversion from int to int*
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span></code></pre></div><p>In a template, if the condition is dependent on a template parameter, the compiler’s instantiation may delay checking inside the false branch. But in non-template code (or if the condition is a known constant), the above invalid code would produce a compile error despite the <code>if constexpr (false)</code> because the compiler still sees an ill-formed definition (<a href="https://en.cppreference.com/w/cpp/language/if#:~:text=Outside%20a%20template%2C%20a%20discarded,if%20preprocessing%20directive">if statement - cppreference.com</a>). Thus, one <strong>cannot use <code>if constexpr</code> to bypass the language’s syntax rules or create truly “optional” code that doesn’t at least parse</strong>. This is unlike a preprocessor block <code>#if 0 ... #endif</code> which the compiler never sees at all. In practice, this means you should only put code in a branch that is valid for the intended case. If some code is <em>never</em> valid for any case, it can’t simply be hidden behind <code>if constexpr</code>; you might instead use template tricks (like a dependent <code>false</code> value) to ensure the branch is dependent and so skipped during instantiation.</p>
+</li>
+<li>
+<p><strong>Not a Replacement for Concepts or Overload Constraints:</strong> <code>if constexpr</code> operates inside function bodies (or in initialiser lists, etc.), but it does not provide a way to constrain <em>which template is chosen</em>. If you need to <em>prevent</em> a template from being instantiated with certain types altogether, SFINAE or C++20 Concepts are more appropriate. For instance, if you want to exclude a template from ever being called with a certain type, an <code>if constexpr</code> with a <code>static_assert(false)</code> in the else branch might trigger a compile error when instantiated, but it’s often clearer to use a <code>static_assert</code> at the top of the function or a concept to outright disable the template for those types. In other words, <code>if constexpr</code> is great for <em>branching implementations</em>, but not designed for <em>overload resolution control</em>. It works in tandem with Concepts in C++20: concepts can constrain <em>which</em> function template is chosen, and inside the function, <code>if constexpr</code> can fine-tune the behaviour further if needed.</p>
+</li>
+<li>
+<p><strong>Potential for Code Bloat or Complexity:</strong> A possible misuse of <code>if constexpr</code> is to create a single monolithic function that handles many different cases via many <code>if constexpr</code> branches. While this is technically fine, it could lead to a function that is lengthy and harder to maintain, essentially inlining what might have been separate logical units. In some scenarios, breaking the logic into smaller functions or using polymorphism could still be a better design. There is a readability trade-off: one big function with many compile-time branches versus multiple specialised functions. The best choice can depend on context. The key is to use <code>if constexpr</code> where it genuinely simplifies the code. If one finds themselves writing a dozen <code>else if constexpr</code> chains, each handling widely different code paths, it might indicate that some of those could be refactored into separate templates or classes. In short, <strong>overusing <code>if constexpr</code> can harm readability</strong> if it becomes a dumping ground for too many cases. As with any powerful feature, moderation and clear organisation are important.</p>
+</li>
+<li>
+<p><strong>Scope and Lifetime Surprises:</strong> Because each branch introduces a scope, be mindful of object lifetimes and declarations. For example, you cannot do <code>if constexpr(...) { Type x; } else { Type x; }</code> and expect <code>x</code> to be accessible after the if – each <code>x</code> is confined to its branch. This is the same as a normal if-statement, but some might expect compile-time branches to behave differently. Additionally, if a branch allocates resources or has side effects (in <code>constexpr</code> functions or such), remember that if it’s discarded, those side effects won’t occur. This is normally obvious, but in <code>constexpr</code> evaluation contexts (like inside a <code>constexpr</code> function that is evaluated at compile time), an <code>if constexpr</code> false branch’s code is not executed at all, which is exactly as intended.</p>
+</li>
+<li>
+<p><strong>Not Applicable Everywhere (No Structural Changes):</strong> One limitation compared to some other languages’ compile-time if is that C++17’s <code>if constexpr</code> cannot appear at class scope to conditionally declare member variables or functions. You cannot, for instance, write a class with an <code>if constexpr</code> inside it to include a member only for certain template parameters – such code wouldn’t compile. You must still use partial class template specialisation or inheritance tricks for that use case. Likewise, you cannot use <code>if constexpr</code> to selectively inherit from a base class or to omit a base class (again, partial specialisation or tag dispatch can help there). So while <code>if constexpr</code> greatly eases function template logic and certain class template methods, it doesn’t 100% eliminate the need for other template metaprogramming techniques in all scenarios. That said, the most common uses (conditional function code and selecting among algorithms or operations) are covered by <code>if constexpr</code>, which significantly reduces the frequency of needing those heavier techniques.</p>
+</li>
+</ul>
+<p>In summary, the limitations of <code>if constexpr</code> are mostly about knowing its scope: it is a compile-time <strong>flow control</strong> inside templates and constexpr functions, not a silver bullet for all conditional template design. Its misuse is uncommon because its syntax naturally guides you to the intended use cases. As long as one remains <em>objective</em> about where it simplifies code and avoids turning it into a sprawling maze of conditions, <code>if constexpr</code> remains a very positive feature in the C++ toolkit.</p>
+<h2 id="conclusion-and-future-developments">Conclusion and Future Developments</h2>
+<p>The addition of <code>if constexpr</code> in C++17 marked a significant evolution in template metaprogramming. It provides C++ developers with an <strong>expressive, compile-time conditional</strong> that makes template code more akin to ordinary code in terms of readability and structure. We have seen how it differs from traditional runtime <code>if</code> statements by performing decisions at compile time and discarding unused code paths, enabling patterns that were previously handled by tricks like SFINAE, <code>std::enable_if</code>, or tag dispatching. The benefits in clarity and maintainability are well substantiated by examples and have been embraced in modern C++ coding standards (<a href="https://platis.solutions/blog/2024/01/27/lets-get-comfortable-with-sfinae/#:~:text=match%20at%20L261%20If%20you,way%20simpler%20and%20more%20readable">Tutorial: Let&rsquo;s get comfortable with SFINAE | Dimitris Platis</a>). At the same time, we acknowledge that <code>if constexpr</code> doesn’t entirely replace all older techniques – for certain situations like conditional class members or controlling overload sets, one must still use partial specialisations or (better) C++20 Concepts. It’s also important to use this feature judiciously to keep code comprehensible.</p>
+<p>Looking beyond C++17, the language has continued to advance compile-time programming capabilities. C++20 introduced <strong>Concepts</strong>, which complement <code>if constexpr</code> by allowing explicit template requirements and cleaner overload resolution. In fact, Concepts can often prevent the instantiation of a template on invalid types altogether, meaning <code>if constexpr</code> might become an internal detail rather than a front-line check. Another C++20 feature, <strong>consteval</strong> (and the related <em>immediate functions</em> concept), along with C++23’s <strong><code>if consteval</code></strong>, allows detection of compile-time evaluation context inside functions. This is a more specialised tool, but it shows the direction: C++ is providing finer control over compile-time vs runtime execution. For instance, <em><code>if consteval</code></em> (C++23) lets a function decide a branch if it’s being executed during compile time, which is useful for writing functions that produce different outcomes or optimisations in constexpr contexts. This works hand-in-hand with <code>if constexpr</code> for advanced metaprogramming scenarios.</p>
+<p>We should also expect ongoing developments in <strong>compile-time reflection</strong> and code generation in future C++ standards. Proposals for <em>static reflection</em> (allowing programs to introspect their own structure at compile time) are in the works. If those become reality, one could imagine writing <code>if constexpr</code> conditions that check, say, whether a struct has a certain member variable or how many fields it has, all at compile time, and then branch accordingly – eliminating a lot of manual trait writing. In essence, <code>if constexpr</code> opened the door to more intuitive compile-time logic, and future enhancements will likely build on that foundation.</p>
+<p>In conclusion, <code>if constexpr</code> stands as a prime example of modern C++ evolving to make template metaprogramming <strong>more accessible and robust</strong>. It empowers developers to write <em>cleaner</em> and <em>safer</em> code for compile-time decisions, bridging the gap between template magic and everyday coding. Its introduction has been largely successful: code that once required arcane tricks can now be written in a straightforward manner. As with any powerful feature, it comes with rules and gotchas, but those are well-understood and easy to manage with experience. Going forward, C++ programmers can look forward to even more capabilities in constexpr and template metaprogramming, but <code>if constexpr</code> will surely remain a fundamental tool for compile-time conditional logic – a clear win for expressiveness in C++17 and beyond.</p>
+<p><strong>References:</strong></p>
+<ul>
+<li>C++17 standard (ISO/IEC 14882:2017) – §7.1.6 and §8.5 (constexpr and if statements), for the formal specification of <code>if constexpr</code>.</li>
+<li>cppreference.com – <em>If statement (constexpr if)</em> (<a href="https://en.cppreference.com/w/cpp/language/if#:~:text=In%20a%20constexpr%20if%20statement%2C,since%20C%2B%2B23">if statement - cppreference.com</a>) (<a href="https://en.cppreference.com/w/cpp/language/if#:~:text=If%20condition%20yields%20true%2C%20then,true%20is%20discarded">if statement - cppreference.com</a>), which concisely describes the rules and behaviour of <code>if constexpr</code>.</li>
+<li>cppreference.com – <em>SFINAE</em> (<a href="https://en.cppreference.com/w/cpp/language/sfinae#:~:text=Where%20applicable%2C%20tag%20dispatch%20%2C,preferred%20over%20use%20of%20SFINAE">SFINAE - cppreference.com</a>), noting that modern C++ prefers constructs like <code>if constexpr</code> over the SFINAE pattern in many cases.</li>
+<li>“Simplify Code with if constexpr and Concepts” – C++ Stories blog, 2018 (<a href="https://www.cppstories.com/2018/03/ifconstexpr/#:~:text=Before%20C%2B%2B17%2C%20we%20had%20a,and%20concepts%20from%20C%2B%2B20">Simplify Code with if constexpr and Concepts in C++17/C++20 - C++ Stories</a>) (<a href="https://www.cppstories.com/2018/03/ifconstexpr/#:~:text=,in%20one%20of%20the%20branches">Simplify Code with if constexpr and Concepts in C++17/C++20 - C++ Stories</a>), illustrating how <code>if constexpr</code> improves upon earlier techniques and the necessity of code in discarded branches being syntactically valid.</li>
+<li>Dimitris Platis, “Tutorial: Let’s get comfortable with SFINAE”, 2024 (<a href="https://platis.solutions/blog/2024/01/27/lets-get-comfortable-with-sfinae/#:~:text=match%20at%20L261%20If%20you,way%20simpler%20and%20more%20readable">Tutorial: Let&rsquo;s get comfortable with SFINAE | Dimitris Platis</a>) – advice highlighting the readability advantage of <code>if constexpr</code> compared to SFINAE.</li>
+<li>J. C. (JC) on Medium, <em>“Template metaprogramming or constexpr, a primer&hellip;”</em>, 2019 (<a href="https://medium.com/@joao_vaz/template-metaprograming-or-constexpr-a-primer-and-comparison-in-c-17-beeaf2d7f0af#:~:text=if%20constexpr">Template-metaprograming or constexpr, a primer and comparison in C++17, part 2 | by JC | Medium</a>) – explanation of how <code>if constexpr</code> can exclude code after overload resolution, which is not possible with SFINAE alone.</li>
+<li>Barry Revzin, <em>“if constexpr isn’t broken”</em>, 2019 (<a href="https://brevzin.github.io/C%5C&#43;&#43;/2019/01/15/if-constexpr-isnt-broken/#:~:text=Andrei%20Alexandrescu%E2%80%99s%20Meeting%20C%2B%2B%20Keynote,is%20selling%20in%20the%20talk">if constexpr isn&rsquo;t broken | Barry&rsquo;s C++ Blog</a>) (<a href="https://brevzin.github.io/C%5C&#43;&#43;/2019/01/15/if-constexpr-isnt-broken/#:~:text=One%20very%20significant%20thing%20that,28%29%20looks%20like%20this">if constexpr isn&rsquo;t broken | Barry&rsquo;s C++ Blog</a>) – a discussion on the design decisions of <code>if constexpr</code> and comparison with D’s <code>static if</code>, providing insight into the limitations (such as scoping rules) and why they exist.</li>
+</ul>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        5143 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2025-05-12
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f05%2fif-constexpr-in-c-17-enabling-compile-time-conditionals%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f05%2fif-constexpr-in-c-17-enabling-compile-time-conditionals%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=if%20constexpr%20in%20C%2b%2b17%20%e2%80%93%20Enabling%20Compile-Time%20Conditionals&amp;caption=if%20constexpr%20in%20C%2b%2b17%20%e2%80%93%20Enabling%20Compile-Time%20Conditionals&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f05%2fif-constexpr-in-c-17-enabling-compile-time-conditionals%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=if%20constexpr%20in%20C%2b%2b17%20%e2%80%93%20Enabling%20Compile-Time%20Conditionals&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f05%2fif-constexpr-in-c-17-enabling-compile-time-conditionals%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f05%2fif-constexpr-in-c-17-enabling-compile-time-conditionals%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f05%2fif-constexpr-in-c-17-enabling-compile-time-conditionals%2f;description=if%20constexpr%20in%20C%2b%2b17%20%e2%80%93%20Enabling%20Compile-Time%20Conditionals" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f05%2fif-constexpr-in-c-17-enabling-compile-time-conditionals%2f&amp;title=if%20constexpr%20in%20C%2b%2b17%20%e2%80%93%20Enabling%20Compile-Time%20Conditionals&amp;summary=if%20constexpr%20in%20C%2b%2b17%20%e2%80%93%20Enabling%20Compile-Time%20Conditionals&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f05%2fif-constexpr-in-c-17-enabling-compile-time-conditionals%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f05%2fif-constexpr-in-c-17-enabling-compile-time-conditionals%2f&amp;resubmit=true&amp;title=if%20constexpr%20in%20C%2b%2b17%20%e2%80%93%20Enabling%20Compile-Time%20Conditionals" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f05%2fif-constexpr-in-c-17-enabling-compile-time-conditionals%2f;title=if%20constexpr%20in%20C%2b%2b17%20%e2%80%93%20Enabling%20Compile-Time%20Conditionals" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=if%20constexpr%20in%20C%2b%2b17%20%e2%80%93%20Enabling%20Compile-Time%20Conditionals%20https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f05%2fif-constexpr-in-c-17-enabling-compile-time-conditionals%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f05%2fif-constexpr-in-c-17-enabling-compile-time-conditionals%2f&amp;t=if%20constexpr%20in%20C%2b%2b17%20%e2%80%93%20Enabling%20Compile-Time%20Conditionals" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=if%20constexpr%20in%20C%2b%2b17%20%e2%80%93%20Enabling%20Compile-Time%20Conditionals&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f05%2fif-constexpr-in-c-17-enabling-compile-time-conditionals%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2025/06/introduction-to-structured-bindings/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">Introduction to Structured Bindings</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2025/04/concurrency-and-multithreading-in-c-17/">
+                    <span class="button__text">Concurrency and Multithreading in C&#43;&#43;17</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

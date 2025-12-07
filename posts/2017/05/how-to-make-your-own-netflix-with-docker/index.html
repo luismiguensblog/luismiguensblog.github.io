@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="How to create your own Netflix This is post is only for educational purposes. I am not condoning media piracy in any way
+I was asking myself, how can I build my own Netflix. That questions derived in more specific questions like &ldquo;how can I&hellip;&rdquo;:
+easily stream content from my storage device to my TV? automate the gathering of content to put onto my storage device? securely control the resulting system? In this post, we will see how I managed to answer such questions, while at the same time, it was an excellent exercise to learn about Docker, combining several open sources or free programs.
+" />
+<meta name="keywords" content=", docker, entertainment" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2017/05/how-to-make-your-own-netflix-with-docker/" />
+
+
+    <title>
+        
+            How to make your own Netflix with Docker :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="How to make your own Netflix with Docker">
+  <meta itemprop="description" content="How to create your own Netflix This is post is only for educational purposes. I am not condoning media piracy in any way
+I was asking myself, how can I build my own Netflix. That questions derived in more specific questions like “how can I…”:
+easily stream content from my storage device to my TV? automate the gathering of content to put onto my storage device? securely control the resulting system? In this post, we will see how I managed to answer such questions, while at the same time, it was an excellent exercise to learn about Docker, combining several open sources or free programs.">
+  <meta itemprop="datePublished" content="2017-05-01T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2017-05-01T00:00:00+00:00">
+  <meta itemprop="wordCount" content="1606">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="Docker,Entertainment">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="How to make your own Netflix with Docker">
+  <meta name="twitter:description" content="How to create your own Netflix This is post is only for educational purposes. I am not condoning media piracy in any way
+I was asking myself, how can I build my own Netflix. That questions derived in more specific questions like “how can I…”:
+easily stream content from my storage device to my TV? automate the gathering of content to put onto my storage device? securely control the resulting system? In this post, we will see how I managed to answer such questions, while at the same time, it was an excellent exercise to learn about Docker, combining several open sources or free programs.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2017/05/how-to-make-your-own-netflix-with-docker/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="How to make your own Netflix with Docker">
+  <meta property="og:description" content="How to create your own Netflix This is post is only for educational purposes. I am not condoning media piracy in any way
+I was asking myself, how can I build my own Netflix. That questions derived in more specific questions like “how can I…”:
+easily stream content from my storage device to my TV? automate the gathering of content to put onto my storage device? securely control the resulting system? In this post, we will see how I managed to answer such questions, while at the same time, it was an excellent exercise to learn about Docker, combining several open sources or free programs.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2017-05-01T00:00:00+00:00">
+    <meta property="article:modified_time" content="2017-05-01T00:00:00+00:00">
+    <meta property="article:tag" content="Docker">
+    <meta property="article:tag" content="Entertainment">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2017-05-01 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        8 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2017/05/how-to-make-your-own-netflix-with-docker/">How to make your own Netflix with Docker</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <h1 id="how-to-create-your-own-netflix">How to create your own Netflix</h1>
+<p><strong>This is post is only for educational purposes. I am not condoning media piracy in any way</strong></p>
+<p>I was asking myself, how can I build my own Netflix. That questions derived in more specific questions like &ldquo;how can I&hellip;&rdquo;:</p>
+<ul>
+<li>easily stream content from my storage device to my TV?</li>
+<li>automate the gathering of content to put onto my storage device?</li>
+<li>securely control the resulting system?</li>
+</ul>
+<p>In this post, we will see how I managed to answer such questions, while at the same time, it was an excellent exercise to learn about Docker, combining several open sources or free programs.</p>
+<p>To carry out this project, you will need:</p>
+<ul>
+<li>A Linux OS and Docker</li>
+<li>A PC or Laptop turned on 24 hours.</li>
+</ul>
+<p>In my case, I used:</p>
+<ul>
+<li>Ubuntu 16.04 LTS (LTS stands for Long Term Support)</li>
+<li>Gigabyte Barebone</li>
+</ul>
+<p>I choose an Ubuntu with long term support, as once the system is set-up, it will be connected to the Internet 24 hours. With that in mind, I want a stable operating system. You are free to choose other Linux distributions, such as Debian or CentOS, only make sure that the distribution is stable and maintained for the following years, as you do not wish to update the OS too frequently.</p>
+<p>I also bought a Mini-Barebone and RAM on Amazon:</p>
+<ul>
+<li><a href="https://www.amazon.de/gp/product/B015EV086U/">Gigabyte Brix BACE-3000 Ultra-Compact Barebone PC</a></li>
+<li><a href="https://www.amazon.de/gp/product/B00CQ35HBQ/">Kingston ValueRam 8 GB DDR3L 1600 MHz SODIMM CL11 Memory Module</a></li>
+</ul>
+<p>I recycled one 512 GB internal hard disk for my project, two USB hard disks of 1 TB, and one USB hard disk of 2 TB.</p>
+<p>After assembling the barebone, I <a href="https://ubuntu.com/#download">download</a> an ISO image of Ubuntu, and follow the instructions to copy the installation image in one of the USB hard drives, following the instructions at the Ubuntu webpage: <a href="https://ubuntu.com/tutorials/create-a-usb-stick-on-windows">Create a USB Stick on Windows</a>. Similar instructions are available is your main computer runs on Linux or macOS.</p>
+<p>Installing Ubuntu is out of this post&rsquo;s scope, but it is a relatively straightforward process of answering some questions and click Next several times.</p>
+<h2 id="installing-docker">Installing Docker</h2>
+<p>Docker offers us the possibility of installing a small operating system with some libraries and a program and everything encapsulated in a container. This encapsulation allows us to deploy programs consistently.</p>
+<p>The official definition of Docker, according to Wikipedia:</p>
+<p>Docker is a platform as a service (PaaS) products that use OS-level virtualization to deliver software packages called containers. Containers are isolated from one another and bundle their software, libraries, and configuration files to communicate through well-defined channels. Because all of the containers share a single operating system kernel&rsquo;s services, they use fewer resources than virtual machines.</p>
+<p>The instructions to install Docker in our Ubuntu server are explained step by step in the <a href="https://docs.docker.com/engine/install/ubuntu/">official documentation</a></p>
+<h2 id="installing-docker-compose">Installing Docker Compose</h2>
+<p>Docker allows us to create containers, but in our case, we want to make several containers (each with one program). For that, we have docker-compose.</p>
+<p>The instructions to install Docker Compose are well explained in the <a href="https://docs.docker.com/compose/install/">official documentation</a></p>
+<h2 id="description-of-the-programs-to-use">Description of the programs to use</h2>
+<h3 id="plex">Plex</h3>
+<p>From their <a href="https://www.plex.tv/">website</a>:</p>
+<p>Plex is like mission control for your media collections. With our easy-to-install Plex Media Server software and your Plex apps, available on all your favourite phones, tablets, streaming devices, gaming consoles, and smart TVs, you can stream your video, music, and photo collections anytime anywhere, to any device.</p>
+<p>What this means is that you can install Plex Media Server on your main content storage device (most likely a server or PC of some kind running on your network) and can stream it to any Plex viewer app available (on iOS, Android, Raspberry, Chromecast, etc.)</p>
+<p>This program is the answer to the question:</p>
+<ul>
+<li>How can I easily stream content from my storage device to my TV?</li>
+</ul>
+<h3 id="sonarr">Sonarr</h3>
+<p>From their <a href="https://github.com/Sonarr/Sonarr">GitHub</a> page:</p>
+<p>Sonarr is a PVR for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new episodes of your favourite shows and grab, sort and rename them. It can also be configured to automatically upgrade the quality of files already downloaded when a better quality format becomes available.</p>
+<p>This program is a partial answer to the question:</p>
+<ul>
+<li>How can I automate the gathering of content to put onto my storage device?</li>
+</ul>
+<p>I have an answer to how to download TV Shows, but not Movies, and it open a new question:</p>
+<ul>
+<li>How can I scan several torrents sites for the media content?</li>
+<li>How can I download a torrent?</li>
+</ul>
+<h3 id="radarr">Radarr</h3>
+<p>From their <a href="https://github.com/Radarr/Radarr">GitHub</a> page:</p>
+<p>Radarr is an independent fork of Sonarr reworked for automatically downloading movies via Usenet and BitTorrent. The project was inspired by other Usenet/BitTorrent movie downloaders such as CouchPotato.</p>
+<p>This program closes the automated gathering of content, as it will handle Movies, but with the same limitations of scanning torrent sites and download the torrent.</p>
+<h3 id="jackett">Jackett</h3>
+<p>From their <a href="https://github.com/Jackett/Jackett">GitHub</a> page:</p>
+<p>Jackett works as a proxy server: it translates queries from apps (Sonarr, Radarr, SickRage, CouchPotato, Mylar, etc) into tracker-site-specific HTTP queries, parses the HTML response, then sends results back to the requesting software. This allows for getting recent uploads (like RSS) and performing searches. Jackett is a single repository of maintained indexer scraping &amp; translation logic - removing the burden from other apps.</p>
+<p>This program allows us to scan several torrent sites, proving a standard API that Radarr and Sonarr can understand.</p>
+<h3 id="deluge">Deluge</h3>
+<p>From <a href="https://en.wikipedia.org/wiki/Deluge_%28software%29">Wikipedia</a>:</p>
+<p>Deluge is a free and open-source, cross-platform BitTorrent client written in Python. Deluge uses a front and back end architecture where libtorrent, a software library written in C++ which provides the application&rsquo;s networking logic, is connected to one of various front ends, including a text console, the web interface and a graphical desktop interface using GTK+ through the project&rsquo;s Python bindings.</p>
+<p>This program closes the loop, answering the question of how I download a torrent?</p>
+<h3 id="jwildernginx-proxy">jwilder/nginx-proxy</h3>
+<p>From <a href="https://hub.docker.com/r/jwilder/nginx-proxy">Docker Hub</a>:</p>
+<p>nginx-proxy sets up a container running nginx and docker-gen. Docker-gen generates reverse proxy configs for nginx and reloads nginx when containers are started and stopped.</p>
+<p>Only a question has remained: How can I securely control the system?</p>
+<p>With this docker image, I partially solve the question, as it allows to expose the programs presented above via the web.</p>
+<h3 id="jrcsletsencrypt-nginx-proxy-companion">jrcs/letsencrypt-nginx-proxy-companion</h3>
+<p>From <a href="https://hub.docker.com/r/jrcs/letsencrypt-nginx-proxy-companion">Docker Hub</a>:</p>
+<p>lets-encrypt-Nginx-proxy-companion is a lightweight companion container for Nginx-proxy. It handles the automated creation, renewal and use of Let&rsquo;s Encrypt certificates for proxied Docker containers.</p>
+<p>This program closes the last question, as it will secure via HTTPS the web access of the programs presented above.</p>
+<h2 id="preparing-the-storage">Preparing the storage</h2>
+<p>In my case, I decided to use several external USB hard-drives and concatenate the space into a single virtual drive. For that, I made use of LVM (Logical Volume Management).</p>
+<p>The detailed instructions are outside the scope of this post, but the reader can find more information in <a href="https://www.makeuseof.com/tag/combine-hard-drives-seamless-storage-container-lvm-linux/">Combine All Your Hard Drives Into One Seamless Storage Container With LVM</a>.</p>
+<p>After the virtual device was created, I format it with <code>mkfs.ext4</code> and mounted the device in <code>/mnt/storage/</code>.</p>
+<h2 id="creating-the-configuration-for-docker-compose">Creating the configuration for Docker Compose</h2>
+<p>Create a folder in your home folder, for example, <code>media_centre and create a file with the name </code>docker-compose.yml` inside the folder with the following code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-YAML" data-lang="YAML"><span style="display:flex;"><span><span style="color:#f92672">version</span>: <span style="color:#e6db74">&#39;2&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">radarr-config</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">external</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">sonarr-config</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">external</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">deluge-config</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">external</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">jackett-config</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">external</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">nginx-vhostd</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">external</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">nginx-confd</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">external</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">nginx-html</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">external</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">nginx-certs</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">external</span>: <span style="color:#66d9ef">true</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">services</span>:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">plex</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">linuxserver/plex</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/etc/localtime:/etc/localtime:ro</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/mnt/storage/apps/plex/config:/config</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/mnt/storage/media:/media/</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/mnt/storage/apps/plex/transcode:/transcode</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">VERSION=latest</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">PUID=1000</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">PGID=1000</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">TZ=Europe/Amsterdam</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">network_mode</span>: <span style="color:#e6db74">&#34;host&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">unless-stopped</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">radarr</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">linuxserver/radarr</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/etc/localtime:/etc/localtime:ro</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">radarr-config:/config</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/mnt/storage/downloads:/downloads</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/mnt/storage/media/Movies/:/movies</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">PUID=1000</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">PGID=1000</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">TZ=Europe/Amsterdam</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">VIRTUAL_HOST=radarr.your.hostname.com</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">LETSENCRYPT_HOST=radarr.your.hostname.com</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">VIRTUAL_PORT=7878</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">HTTPS_METHOD=redirect</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">unless-stopped</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">sonarr</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">linuxserver/sonarr</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/etc/localtime:/etc/localtime:ro</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">sonarr-config:/config</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/mnt/storage/downloads:/downloads</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/mnt/storage/media/TV Shows/:/tv</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">PUID=1000</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">PGID=1000</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">TZ=Europe/Amsterdam</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">VIRTUAL_HOST=sonarr.your.hostname.com</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">LETSENCRYPT_HOST=sonarr.your.hostname.com</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">VIRTUAL_PORT=8989</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">HTTPS_METHOD=redirect</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">unless-stopped</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">nginx-proxy</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">jwilder/nginx-proxy</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">ports</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;80:80&#34;</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;443:443&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">nginx-vhostd:/etc/nginx/vhost.d</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">nginx-confd:/etc/nginx/conf.d</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">nginx-html:/usr/share/nginx/html</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">nginx-certs:/etc/nginx/certs:ro</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/var/run/docker.sock:/tmp/docker.sock:ro</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">labels</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#e6db74">&#34;com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">unless-stopped</span>
+</span></span><span style="display:flex;"><span>      
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">letsencrypt-nginx-proxy-companion</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">depends_on</span>: 
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">nginx-proxy</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">jrcs/letsencrypt-nginx-proxy-companion</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">nginx-vhostd:/etc/nginx/vhost.d</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">nginx-confd:/etc/nginx/conf.d</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">nginx-html:/usr/share/nginx/html</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">nginx-certs:/etc/nginx/certs:rw</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/var/run/docker.sock:/var/run/docker.sock:ro</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">unless-stopped</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">deluge</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">ghcr.io/linuxserver/deluge</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">PUID=1000 </span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">PGID=1000 </span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">TZ=Europe/Amsterdam </span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">deluge-config:/config </span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/mnt/storage/downloads:/downloads </span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">network_mode</span>: <span style="color:#e6db74">&#34;host&#34;</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">unless-stopped</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">jackett</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">ghcr.io/linuxserver/jackett</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">volumes</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/etc/localtime:/etc/localtime:ro</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">jackett-config:/config</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">/mnt/storage/downloads:/downloads</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">environment</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">PUID=1000</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">PGID=1000</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">TZ=Europe/Amsterdam</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">VIRTUAL_HOST=jackett.your.hostname.com</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">LETSENCRYPT_HOST=jackett.your.hostname.com</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">VIRTUAL_PORT=9117</span>
+</span></span><span style="display:flex;"><span>      - <span style="color:#ae81ff">HTTPS_METHOD=redirect</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">restart</span>: <span style="color:#ae81ff">unless-stopped</span>
+</span></span></code></pre></div><p>Remember to replace <code>your.hostname.com</code> for your user-friendly and easy to remember hostname. If you don&rsquo;t have a domain, do not despair, you can find several Internet services providing DDNS. I am currently using <a href="https://www.dynu.com/DynamicDNS">Dynu</a>.</p>
+<p>Also, remember to replace <code>192.168.178.30</code> for the IP address of your server.</p>
+<h2 id="starting-up-the-system">Starting up the system</h2>
+<p>Before starting the system, we must create the volumes specified at the beginning of the configuration. For that, we must type:</p>
+<p><code>$ docker volume create --name radarr-config</code></p>
+<p>And we repeat with all the external volumes defined in our <code>docker-compose.yml</code> file.</p>
+<p>In the folder we created before, we start up our system by typing:</p>
+<p><code>$ docker-compose up -d</code></p>
+<p>It will take a while to download all images and create the HTTPS certificates with Let&rsquo;s Encrypt, but do not worry. Everything is automatic, and no questions or pushing next is required. So, relax, and go to drink a coffee.</p>
+<h2 id="configuring-the-system">Configuring the system</h2>
+<p>After everything have been installed, our last step is to configure the system. For that, we must go to every program and follow the instructions in the welcome tutorial of each program.</p>
+<p>We can enter into every program, pointing our web browser to:</p>
+<ul>
+<li><code>192.168.178.30:32400</code> or your IP address for Plex</li>
+<li><code>192.168.178.30:8112</code> or your IP address for Deluge</li>
+<li><code>radarr.your.hostname.com</code> for Radar</li>
+<li><code>sonarr.your.hostname.com</code> for Sonarr</li>
+<li><code>jackett.your.hostname.com</code> for Jackett</li>
+</ul>
+<p>Congratulations, you just created your own Netflix.</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/docker/">docker</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/entertainment/">entertainment</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        1606 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2017-05-01
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2017%2f05%2fhow-to-make-your-own-netflix-with-docker%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2017%2f05%2fhow-to-make-your-own-netflix-with-docker%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=How%20to%20make%20your%20own%20Netflix%20with%20Docker&amp;caption=How%20to%20make%20your%20own%20Netflix%20with%20Docker&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2017%2f05%2fhow-to-make-your-own-netflix-with-docker%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=How%20to%20make%20your%20own%20Netflix%20with%20Docker&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2017%2f05%2fhow-to-make-your-own-netflix-with-docker%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2017%2f05%2fhow-to-make-your-own-netflix-with-docker%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2017%2f05%2fhow-to-make-your-own-netflix-with-docker%2f;description=How%20to%20make%20your%20own%20Netflix%20with%20Docker" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2017%2f05%2fhow-to-make-your-own-netflix-with-docker%2f&amp;title=How%20to%20make%20your%20own%20Netflix%20with%20Docker&amp;summary=How%20to%20make%20your%20own%20Netflix%20with%20Docker&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2017%2f05%2fhow-to-make-your-own-netflix-with-docker%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2017%2f05%2fhow-to-make-your-own-netflix-with-docker%2f&amp;resubmit=true&amp;title=How%20to%20make%20your%20own%20Netflix%20with%20Docker" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2017%2f05%2fhow-to-make-your-own-netflix-with-docker%2f;title=How%20to%20make%20your%20own%20Netflix%20with%20Docker" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=How%20to%20make%20your%20own%20Netflix%20with%20Docker%20https%3a%2f%2fblog.miguens.one%2fposts%2f2017%2f05%2fhow-to-make-your-own-netflix-with-docker%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2017%2f05%2fhow-to-make-your-own-netflix-with-docker%2f&amp;t=How%20to%20make%20your%20own%20Netflix%20with%20Docker" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=How%20to%20make%20your%20own%20Netflix%20with%20Docker&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2017%2f05%2fhow-to-make-your-own-netflix-with-docker%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2018/01/flight-simulators-as-product-innovation/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">Flight Simulators as Product Innovation</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2017/02/why-i-am-writing-a-blog/">
+                    <span class="button__text">Why I am writing a blog</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

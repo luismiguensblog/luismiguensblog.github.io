@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Modern C&#43;&#43; has placed increasing emphasis on type safety and expressiveness. C&#43;&#43;17 introduced three powerful utilities – std::optional, std::variant, and std::any – that enhance the language&rsquo;s flexibility while making code safer and more self-documenting. These facilities allow programmers to represent &ldquo;optional&rdquo; values, to use type-safe unions for variant types, and to perform type erasure for arbitrary types, respectively, all with the rigour of compile-time type checking or controlled runtime checks. In this article, we delve into each of these C&#43;&#43;17 features in detail, examining how they improve upon pre-C&#43;&#43;17 techniques, demonstrate their usage with practical code examples, discuss real-world applications, and consider edge cases, performance implications, and pitfalls. We also touch on how C&#43;&#43;20/C&#43;&#43;23 have further refined these utilities, all while keeping a focus on C&#43;&#43;17.
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2025/07/embracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany/" />
+
+
+    <title>
+        
+            Embracing Type Safety in C&#43;&#43;17: std::optional, std::variant, and std::any :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="Embracing Type Safety in C&#43;&#43;17: std::optional, std::variant, and std::any">
+  <meta itemprop="description" content="Modern C&#43;&#43; has placed increasing emphasis on type safety and expressiveness. C&#43;&#43;17 introduced three powerful utilities – std::optional, std::variant, and std::any – that enhance the language’s flexibility while making code safer and more self-documenting. These facilities allow programmers to represent “optional” values, to use type-safe unions for variant types, and to perform type erasure for arbitrary types, respectively, all with the rigour of compile-time type checking or controlled runtime checks. In this article, we delve into each of these C&#43;&#43;17 features in detail, examining how they improve upon pre-C&#43;&#43;17 techniques, demonstrate their usage with practical code examples, discuss real-world applications, and consider edge cases, performance implications, and pitfalls. We also touch on how C&#43;&#43;20/C&#43;&#43;23 have further refined these utilities, all while keeping a focus on C&#43;&#43;17.">
+  <meta itemprop="datePublished" content="2025-07-04T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2025-07-04T00:00:00+00:00">
+  <meta itemprop="wordCount" content="8904">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="C_cpp,Programming">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="Embracing Type Safety in C&#43;&#43;17: std::optional, std::variant, and std::any">
+  <meta name="twitter:description" content="Modern C&#43;&#43; has placed increasing emphasis on type safety and expressiveness. C&#43;&#43;17 introduced three powerful utilities – std::optional, std::variant, and std::any – that enhance the language’s flexibility while making code safer and more self-documenting. These facilities allow programmers to represent “optional” values, to use type-safe unions for variant types, and to perform type erasure for arbitrary types, respectively, all with the rigour of compile-time type checking or controlled runtime checks. In this article, we delve into each of these C&#43;&#43;17 features in detail, examining how they improve upon pre-C&#43;&#43;17 techniques, demonstrate their usage with practical code examples, discuss real-world applications, and consider edge cases, performance implications, and pitfalls. We also touch on how C&#43;&#43;20/C&#43;&#43;23 have further refined these utilities, all while keeping a focus on C&#43;&#43;17.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2025/07/embracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="Embracing Type Safety in C&#43;&#43;17: std::optional, std::variant, and std::any">
+  <meta property="og:description" content="Modern C&#43;&#43; has placed increasing emphasis on type safety and expressiveness. C&#43;&#43;17 introduced three powerful utilities – std::optional, std::variant, and std::any – that enhance the language’s flexibility while making code safer and more self-documenting. These facilities allow programmers to represent “optional” values, to use type-safe unions for variant types, and to perform type erasure for arbitrary types, respectively, all with the rigour of compile-time type checking or controlled runtime checks. In this article, we delve into each of these C&#43;&#43;17 features in detail, examining how they improve upon pre-C&#43;&#43;17 techniques, demonstrate their usage with practical code examples, discuss real-world applications, and consider edge cases, performance implications, and pitfalls. We also touch on how C&#43;&#43;20/C&#43;&#43;23 have further refined these utilities, all while keeping a focus on C&#43;&#43;17.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-07-04T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-07-04T00:00:00+00:00">
+    <meta property="article:tag" content="C_cpp">
+    <meta property="article:tag" content="Programming">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2025-07-04 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        42 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2025/07/embracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany/">Embracing Type Safety in C++17: std::optional, std::variant, and std::any</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <p>Modern C++ has placed increasing emphasis on <strong>type safety</strong> and expressiveness. C++17 introduced three powerful utilities – <strong><code>std::optional</code></strong>, <strong><code>std::variant</code></strong>, and <strong><code>std::any</code></strong> – that enhance the language&rsquo;s flexibility while making code safer and more self-documenting. These facilities allow programmers to represent &ldquo;optional&rdquo; values, to use type-safe unions for variant types, and to perform type erasure for arbitrary types, respectively, all with the rigour of compile-time type checking or controlled runtime checks. In this article, we delve into each of these C++17 features in detail, examining how they improve upon pre-C++17 techniques, demonstrate their usage with practical code examples, discuss real-world applications, and consider edge cases, performance implications, and pitfalls. We also touch on how C++20/C++23 have further refined these utilities, all while keeping a focus on C++17.</p>
+<h2 id="type-safety-and-flexibility-in-modern-c">Type Safety and Flexibility in Modern C++</h2>
+<p>One of the guiding principles of modern C++ design is to <strong>make incorrect code harder to write</strong>. Features like <code>std::optional</code>, <code>std::variant</code>, and <code>std::any</code> embody this principle by encoding intent in the type system. Instead of relying on raw pointers, primitive unions, or void pointers (which can lead to undefined behaviour or runtime errors), these abstractions provide <strong>explicit, expressive, and safe</strong> mechanisms for common programming scenarios:</p>
+<ul>
+<li><strong><code>std::optional</code></strong> expresses the <em>optional presence or absence</em> of a value of a given type. It forces the programmer to handle the &ldquo;no value&rdquo; case, rather than using ad-hoc signals like <code>nullptr</code> or sentinel values.</li>
+<li><strong><code>std::variant</code></strong> enables a variable to hold one of several <em>alternative types</em> in a type-safe way. It’s essentially a discriminated union that knows which type is active, preventing mistakes like accessing the wrong member of a union.</li>
+<li><strong><code>std::any</code></strong> provides a container for a value of <em>any type</em>, with runtime type checking. This is a type-safe alternative to <code>void*</code> for scenarios where the type might only be known at runtime (using <em>type erasure</em>).</li>
+</ul>
+<p>By leveraging these, C++17 code becomes <strong>more robust</strong> (less prone to type errors), <strong>more readable</strong> (the code clearly states intent, such as &ldquo;this function may not return a value&rdquo;), and often <strong>more efficient</strong> at runtime than naive approaches (due to avoiding unnecessary allocations or branches, as we&rsquo;ll discuss). Let’s explore each type in turn.</p>
+<h2 id="stdoptional--expressing-optional-values-safely"><code>std::optional</code> – Expressing Optional Values Safely</h2>
+<p><code>std::optional&lt;T&gt;</code> is a class template (defined in the <code>&lt;optional&gt;</code> header) that manages an optional contained value of type <code>T</code>. In simple terms, an <code>optional&lt;T&gt;</code> either contains a value of type <code>T</code> or it is <em>empty</em> (containing no value). This allows us to represent the concept of &ldquo;maybe a T&rdquo; explicitly in the type system. As the C++ reference states, <em>“The class template <code>std::optional</code> manages an optional contained value, i.e. a value that may or may not be present.”</em> In practice, this is often used for the return value of functions that may fail or otherwise not produce a value. Instead of resorting to output parameters, special return codes, or exceptions, a function can return <code>std::optional&lt;T&gt;</code> to indicate <em>“I either have a result of type T, or I have nothing.”</em></p>
+<p><strong>Type Safety and Clarity:</strong> By using <code>std::optional</code>, we make the presence/absence of a value explicit. Callers must <strong>check</strong> whether the optional has a value before using it, typically via <code>optional::operator bool()</code> or <code>optional::has_value()</code>. This prevents errors like accidentally dereferencing a null pointer. It also improves readability: the intent is clear without needing to resort to comments or sentinel conventions. Indeed, <code>std::optional</code> is more expressive and safer than alternatives like a <code>std::pair&lt;T, bool&gt;</code> or a special out-of-band value, and it handles expensive-to-construct objects more gracefully. If an optional is disengaged (empty) and one tries to access the value, the library throws a <code>std::bad_optional_access</code> exception, rather than yielding undefined behaviour. This makes errors easier to catch and diagnose.</p>
+<p><strong>Basic Usage Example:</strong> Consider a configuration lookup function that tries to find a configuration value by key and returns an integer if found. Prior to C++17, one might return a special value (e.g. <code>-1</code>) or use a pointer to indicate &ldquo;not found&rdquo;. With <code>std::optional&lt;int&gt;</code>, the function can directly express the possibility of no result:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;optional&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;unordered_map&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// A simple configuration map for illustration
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>std<span style="color:#f92672">::</span>unordered_map<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string, <span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> config <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;max_retries&#34;</span>, <span style="color:#ae81ff">5</span>},
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;timeout_seconds&#34;</span>, <span style="color:#ae81ff">60</span>}
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>optional<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> getConfigInt(<span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string<span style="color:#f92672">&amp;</span> key) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> it <span style="color:#f92672">=</span> config.find(key);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (it <span style="color:#f92672">!=</span> config.end())
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> it<span style="color:#f92672">-&gt;</span>second;           <span style="color:#75715e">// return a value
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>nullopt;             <span style="color:#75715e">// return an &#34;empty&#34; optional
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> retries <span style="color:#f92672">=</span> getConfigInt(<span style="color:#e6db74">&#34;max_retries&#34;</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (retries) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Safe to dereference or access the value
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Max retries: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#f92672">*</span>retries <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Max retries not set.</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Using value_or to provide a default if not present
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int</span> timeout <span style="color:#f92672">=</span> getConfigInt(<span style="color:#e6db74">&#34;timeout_seconds&#34;</span>).value_or(<span style="color:#ae81ff">30</span>);
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Timeout: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> timeout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; seconds</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In this example, <code>getConfigInt</code> returns an <code>std::optional&lt;int&gt;</code>. The caller checks <code>if (retries)</code> to see if a value is present. The <code>*retries</code> syntax uses <code>optional::operator*()</code> to retrieve the contained value when it exists. This operator is provided for convenience and behaves like dereferencing a pointer (and indeed will throw <code>bad_optional_access</code> if no value is present, similar to how dereferencing a null pointer would be undefined). Alternatively, <code>value_or(30)</code> was used to get either the stored value or a default (<code>30</code> in this case) if the optional is empty. This style is clear and prevents common errors. The code reads almost like natural language: &ldquo;get config&hellip; if (it has value) use it, otherwise use default.&rdquo; The <strong>explicitness</strong> eliminates the need for magic numbers or separate flags.</p>
+<p><strong>Memory and Performance:</strong> <code>std::optional&lt;T&gt;</code> typically holds a <code>T</code> object <strong>in-place</strong> (without additional allocation) and a small flag to indicate whether a value is present. The size of an <code>optional&lt;T&gt;</code> is roughly <code>sizeof(T) + 1</code> (with some padding for alignment). For instance, an <code>optional&lt;double&gt;</code> will hold the <code>double</code> directly and a boolean state. This makes it efficient – there’s no heap allocation and no indirection needed to access the value (unlike using a pointer). Additionally, an empty <code>optional</code> does <strong>not</strong> construct a <code>T</code> until a value is assigned, so it can represent &ldquo;nothing&rdquo; without incurring the cost of a default-constructed <code>T</code>. This is particularly useful for types that are expensive to initialise. In fact, the standard ensures that if an optional is disengaged, the storage for <code>T</code> is uninitialised, and only when a value is emplaced or assigned is the <code>T</code> constructed (and correspondingly destroyed on reset or destruction of the optional). Thus, optional <em>“handles expensive-to-construct objects well”</em> by only creating them when needed.</p>
+<p><strong>Edge Cases and Pitfalls:</strong> While <code>std::optional</code> is straightforward, there are a few things to be mindful of:</p>
+<ul>
+<li>An optional must be checked for a value before using. If you call <code>.value()</code> or dereference an empty optional, a <code>std::bad_optional_access</code> will be thrown. This is safer than a null pointer dereference (which would be undefined behaviour), but it’s still a runtime error that should be avoided by proper checking (or using <code>value_or</code>, etc.). Make it a habit to handle the empty case, either with <code>if (opt)</code> or with the provided utility functions.</li>
+<li><code>std::optional&lt;T&gt;</code> is <strong>not</strong> a drop-in replacement for <code>T*</code> in all cases. Notably, optional <em>does not allow</em> references or array types as the template parameter. You cannot have <code>optional&lt;SomeClass&amp;&gt;</code> directly (since references are not assignable or destructible in a way optional can manage). If you truly need an optional reference, you can use something like <code>std::optional&lt;std::reference_wrapper&lt;T&gt;&gt;</code> or simply a pointer. Usually, though, if you find yourself wanting an optional reference, it may indicate a design that can be refactored.</li>
+<li>Copying or moving an optional will copy/move the contained <code>T</code> if there is one. This is usually fine, but keep in mind if <code>T</code> is a heavy object, copying an <code>optional&lt;T&gt;</code> involves copying that object. In such cases, consider passing references to optionals or using <code>std::optional&lt;some_ptr&gt;</code> to large structures to avoid deep copies. On the other hand, if <code>T</code> is cheap to move, <code>optional</code> is an excellent way to avoid heap allocations that a pointer might cause.</li>
+<li><code>std::optional</code> provides relational operators (==, &lt;, etc.), which perform comparisons in a way that an empty optional is considered less than one with a value, etc. These are handy but be aware of the semantics (e.g., two disengaged optionals are equal). C++20 even added three-way comparison (<code>&lt;=&gt;</code>) support for optionals.</li>
+<li>Monadic operations (in C++23): While C++17’s optional is somewhat minimal, C++23 introduced <em>monadic operations</em> like <code>optional::and_then</code>, <code>transform</code>, and <code>or_else</code>. These allow chaining operations on optional values in a functional style. For example, <code>opt.and_then(f)</code> executes a function <code>f</code> if the optional has a value, passing the contained value, and propagates an empty optional otherwise. These enhancements (available if you’re using C++23) can make handling optional values more concise, but even in C++17 one can achieve similar effects with manual checks or by utilising <code>value_or</code> and ternary operators.</li>
+</ul>
+<p><strong>Real-World Uses:</strong> <code>std::optional</code> is broadly useful wherever a value may be contextually optional. Common scenarios include configuration settings (a setting might not be provided, so use an optional), parsing (if a parse might fail, return an optional instead of a special value), and interactions with hardware or OS (where an API might return a value or indicate the absence of it). For instance, the filesystem library in C++17 uses <code>std::optional&lt;uintmax_t&gt;</code> for <code>file_size()</code> – it returns a size if available, but for directories (where size is not applicable) it returns an empty optional, rather than overloading the function or using an out parameter. Overall, <code>std::optional</code> increases clarity: the programmer and the compiler <em>know</em> when a value might not be there, and the code must handle that possibility.</p>
+<h2 id="stdvariant--type-safe-unions-for-heterogeneous-data"><code>std::variant</code> – Type-Safe Unions for Heterogeneous Data</h2>
+<p>While <code>std::optional</code> deals with <em>presence or absence</em> of one type, <strong><code>std::variant</code></strong> (defined in <code>&lt;variant&gt;</code>) deals with <em>one of many types</em>. It is often described as a &ldquo;type-safe union&rdquo; – indeed, the C++ standard reference defines <code>std::variant</code> as <em>“represents a type-safe union”</em>. A <code>std::variant&lt;...&gt;</code> can hold a value that <strong>alternates among a fixed set of types</strong> (known at compile time). For example, <code>std::variant&lt;int, std::string&gt;</code> can hold either an <code>int</code> or a <code>std::string</code> at any given time (one or the other, but not both). Unlike a traditional C <code>union</code>, the variant knows which type is currently active, and it will only allow you to access that active type, enforcing correctness at compile time or by throwing an exception if you attempt the wrong type access.</p>
+<p><strong>Type Safety and Alternatives:</strong> <code>std::variant</code> addresses a common need: sometimes a variable or return type can naturally be one of a few alternatives. Prior to C++17, one might use a raw <code>union</code> plus a manual tag variable to track the current type, or use a base class with derived types (polymorphism) and <code>dynamic_cast</code> to figure out the actual type, or even abuse <code>void*</code>. All those approaches are error-prone or heavyweight:</p>
+<ul>
+<li>A raw union in C++ does not keep track of which member is active, and reading the wrong member is undefined behaviour. Moreover, unions cannot have non-trivial types without manual constructor/destructor management – they <em>“won’t call destructors of the underlying types”</em>, requiring the programmer to explicitly destroy and construct members when switching the active type. This is complex and bug-prone (leaking memory or calling the wrong destructor are common pitfalls). For example, if a union holds a <code>std::string</code> and a <code>std::vector&lt;int&gt;</code>, the programmer must manually <code>std::destroy</code> the active member and placement-new the new one when changing the type. Failing to do so correctly leads to memory leaks or double-destruction.</li>
+<li>Using class inheritance (polymorphism) to allow a variable to take multiple forms requires heap allocation (for polymorphic objects) and incurs virtual dispatch. It also moves the type determination to runtime (via <code>dynamic_cast</code> or virtual methods) and typically cannot easily return stack-allocated alternatives. It’s often overkill when the set of types is known and limited.</li>
+<li><code>void*</code> (or even <code>std::any</code>) could be used to store &ldquo;something of unknown type&rdquo;, but then it&rsquo;s on the programmer to remember what actual type was stored and to cast it back. With <code>void*</code> there’s no checking at all – a wrong cast is undefined behaviour, likely crashing the program.</li>
+</ul>
+<p>Enter <code>std::variant</code>: it solves these issues by providing an <strong>enumerated set of types</strong> with <strong>strictly enforced access</strong>. When you define <code>std::variant&lt;T1, T2, ..., Tn&gt;</code>, that variant can hold exactly one value, which is either a <code>T1</code> or a <code>T2</code> or &hellip; <code>Tn</code>. The active type is tracked internally (typically by storing an index of which alternative is active). The variant will call the constructor of the stored value when you assign, and call the destructor when the variant changes to hold a different type or is destroyed. This means all the manual work required with unions is handled for you – <em>the proper constructor/destructor is invoked as needed, and you always know which type is active</em>. In fact, if you try to access the wrong type, <code>std::get</code> will throw <code>std::bad_variant_access</code> if you guessed incorrectly, and <code>std::get_if</code> will return null – you have mechanisms to check safely.</p>
+<p><strong>Basic Usage Example:</strong> Let’s illustrate <code>std::variant</code> with a practical scenario: suppose we have a configuration system where a configuration value could be one of a few types (say <code>int</code>, <code>bool</code>, or <code>std::string</code>). We can use a variant to represent such a value in a type-safe way:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;variant&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;unordered_map&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">using</span> ConfigValue <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>variant<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span>, <span style="color:#66d9ef">bool</span>, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// A map of configuration keys to variant values
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>std<span style="color:#f92672">::</span>unordered_map<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string, ConfigValue<span style="color:#f92672">&gt;</span> config <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;max_connections&#34;</span>, <span style="color:#ae81ff">12</span>}, 
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;enable_logging&#34;</span>, true}, 
+</span></span><span style="display:flex;"><span>    {<span style="color:#e6db74">&#34;log_file&#34;</span>, std<span style="color:#f92672">::</span>string(<span style="color:#e6db74">&#34;logs/output.txt&#34;</span>)}
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">printConfigValue</span>(<span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string<span style="color:#f92672">&amp;</span> key) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> it <span style="color:#f92672">=</span> config.find(key);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (it <span style="color:#f92672">==</span> config.end()) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> key <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; is not set.</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> ConfigValue<span style="color:#f92672">&amp;</span> val <span style="color:#f92672">=</span> it<span style="color:#f92672">-&gt;</span>second;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Visit the variant to handle each possible type
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    std<span style="color:#f92672">::</span>visit([](<span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;&amp;</span> arg){
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">using</span> T <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>decay_t<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">decltype</span>(arg)<span style="color:#f92672">&gt;</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">constexpr</span> (std<span style="color:#f92672">::</span>is_same_v<span style="color:#f92672">&lt;</span>T, <span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>)
+</span></span><span style="display:flex;"><span>            std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;int: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> arg <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">constexpr</span> (std<span style="color:#f92672">::</span>is_same_v<span style="color:#f92672">&lt;</span>T, <span style="color:#66d9ef">bool</span><span style="color:#f92672">&gt;</span>)
+</span></span><span style="display:flex;"><span>            std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;bool: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>boolalpha <span style="color:#f92672">&lt;&lt;</span> arg <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">constexpr</span> (std<span style="color:#f92672">::</span>is_same_v<span style="color:#f92672">&lt;</span>T, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span>)
+</span></span><span style="display:flex;"><span>            std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;string: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> arg <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    }, val);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    printConfigValue(<span style="color:#e6db74">&#34;max_connections&#34;</span>);
+</span></span><span style="display:flex;"><span>    printConfigValue(<span style="color:#e6db74">&#34;enable_logging&#34;</span>);
+</span></span><span style="display:flex;"><span>    printConfigValue(<span style="color:#e6db74">&#34;log_file&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In this example, <code>ConfigValue</code> is defined as <code>std::variant&lt;int, bool, std::string&gt;</code>. The <code>config</code> map holds values that can be any one of those three types. The function <code>printConfigValue</code> demonstrates accessing the variant: it uses <code>std::visit</code> with a lambda that has an <code>auto</code> parameter. This C++17 feature (<code>std::visit</code>) will call the lambda with the currently held value. Here we use a C++17 fold of <code>if constexpr</code> to detect the type of <code>arg</code> and act accordingly. The output will vary based on the type, e.g.:</p>
+<pre tabindex="0"><code>max_connections -&gt; int: 12
+enable_logging -&gt; bool: true
+log_file -&gt; string: logs/output.txt
+</code></pre><p>This approach is <em>fully type-safe</em>: if we add another type to the variant, the code inside <code>visit</code> will fail to compile if we don&rsquo;t handle it (in the above generic lambda approach, it actually <em>will</em> handle any type due to the <code>auto</code> and conditional, but one can also use overloaded function objects or explicit lambdas for each type). We can also access the variant in other ways:</p>
+<ul>
+<li><code>std::get&lt;T&gt;(variant)</code> returns a reference to the value if the variant currently holds type <code>T</code>, or throws <code>std::bad_variant_access</code> if not.</li>
+<li><code>std::get&lt;I&gt;(variant)</code> returns the value by index (0-based index of the type in the template parameters), which can be useful in some generic contexts.</li>
+<li><code>std::get_if&lt;T&gt;(&amp;variant)</code> returns a pointer to the value of type <code>T</code> if it’s active, or <code>nullptr</code> otherwise (this is a non-throwing way to query the active type).</li>
+<li><code>variant.index()</code> tells you which alternative is active (by index), and <code>std::holds_alternative&lt;T&gt;(variant)</code> returns true if the variant currently holds type <code>T</code>.</li>
+</ul>
+<p><strong>Active State and Default Construction:</strong> A <code>std::variant</code> must always hold a value of one of its alternatives (except for a special <em>valueless</em> state discussed shortly). Unlike <code>std::optional</code>, a variant cannot be &ldquo;empty&rdquo; (no value) by design – there is no <code>variant::has_value()</code> because one of the types is <em>always</em> active. When you default-construct a variant, it <em>default-initialises the first alternative type</em> (index 0). If that type is not default-constructible, the variant itself won’t be default-constructible. To allow a variant to have an &ldquo;empty&rdquo; state, a common trick is to include an alternative like <code>std::monostate</code> (a trivial empty struct type provided by <code>&lt;variant&gt;</code>) as the first alternative. <code>std::monostate</code> is useful as a kind of &ldquo;null&rdquo; alternative – it’s a distinct type that carries no data. For example, <code>std::variant&lt;std::monostate, int, std::string&gt;</code> default-constructs to <code>monostate</code> (index 0, representing &ldquo;no value&rdquo;), and you can assign an <code>int</code> or <code>std::string</code> later. In many cases, though, you might not need <code>monostate</code> because you might always have a meaningful default. If not, <code>monostate</code> is a handy tool to explicitly represent a <em>valueless initial state</em>.</p>
+<p><strong>Valueless-by-Exception State:</strong> Although a variant generally always holds one of its types, there is an exceptional situation where it can become <em>valueless</em>. If an exception is thrown during a type assignment (for instance, during a converting assignment where the new type&rsquo;s constructor throws after the old value has been destroyed), the variant is left without any active member. This is called the <em>valueless_by_exception</em> state. It’s rare and hard to achieve in practice, but it is detectable via <code>variant.valueless_by_exception()</code> returning true. If a variant is valueless, any attempt to get the value will throw <code>bad_variant_access</code>. One should generally design types and assignments such that this state is avoided (e.g., provide nothrow move constructors for types, or handle exceptions appropriately), but it&rsquo;s good to know the possibility exists. In well-behaved code, you might never encounter a valueless variant.</p>
+<p><strong>Memory and Performance:</strong> A <code>std::variant</code> does not allocate on the heap. Internally, it can be thought of as a union of all the alternative types, plus a small discriminator (typically an index of type <code>size_t</code> or <code>uint8_t</code> depending on number of alternatives). The size of a variant is therefore at least the size of the largest alternative type, plus space for the index. There may also be alignment padding. For instance, if you have <code>variant&lt;int, double&gt;</code>, the size will likely be <code>sizeof(double) + some bytes</code> for the index (since <code>double</code> is larger than <code>int</code>). One of the advantages of variant over approaches like <code>any</code> is that this memory is statically determined – <strong>no dynamic memory allocation is needed for contained values</strong>. Accessing the value involves a type check, but because the set of types is known at compile time, tools like <code>std::visit</code> are able to use <em>compile-time dispatch</em> (often implemented with a table of function pointers or if-else chain under the hood). This means accessing a variant is generally a constant-time operation that is very efficient (comparable to a switch on an enum). The overhead is the switch on the discriminator and the cost of calling the visitor. In most cases, this overhead is negligible, and certainly far less than the cost of misused unions or the dynamic allocation overhead of polymorphic pointers. Also, since the variant alternatives are known, the compiler can often optimise away some checks or inline the visitation.</p>
+<p><strong>Pitfalls and Gotchas:</strong> When using <code>std::variant</code>, keep the following in mind:</p>
+<ul>
+<li><strong>Exhaustive Visiting:</strong> If you use <code>std::visit</code> with a visitor that has an overload for each variant type, the compiler will ensure you handled all types. However, if your visitor is not exhaustive (say you used a lambda that takes <code>auto</code> to catch multiple types generically or you missed a type), you must be careful to handle all cases. Using <code>std::visit</code> with a structured binding of lambdas (an &ldquo;overloaded&rdquo; functor of lambdas for each type) is a common pattern to ensure completeness – if you miss an alternative, the code simply won’t compile. This is a strength of variant: it forces you (at compile time) to consider all possible types, preventing latent bugs. If you choose to use index-based access or <code>get_if</code>, be mindful to check the index or pointer result.</li>
+<li><strong>Type Conversions:</strong> Variants have rules for converting constructors and assignments. For example, if you assign a value of a type that is not exactly one of the alternatives but convertible to one, it might invoke a converting constructor for an unexpected alternative. A classic surprise was <code>std::variant&lt;std::string, bool&gt; v = &quot;hello&quot;;</code> – in C++17, this could actually select the <code>bool</code> alternative, because string literals can convert to <code>bool</code> (the pointer-to-char literal converted to <code>bool</code> yields true). C++20/23 resolved this with a more sane converting constructor resolution, so now <code>&quot;hello&quot;</code> will construct the <code>std::string</code> alternative as expected. It’s worth knowing that if an input is convertible to multiple variant alternatives, there might be ambiguity or unexpected resolution, so sometimes an explicit <code>std::variant</code> constructor call with the desired type is clearer.</li>
+<li><strong>No References or Arrays:</strong> Like optional, variant cannot directly hold reference types or C-style arrays. All alternatives must satisfy the requirements of <code>Destructible</code> (and must be object types). If you need to variant-hold a reference, you can wrap it in <code>std::reference_wrapper</code> or use pointers. Typically, value types are stored in variant.</li>
+<li><strong>Duplicate Types:</strong> Interestingly, <code>std::variant</code> <em>can</em> hold the same type more than once (e.g., <code>std::variant&lt;int, int&gt;</code> is allowed). This is not often useful, but if it happens, note that the two alternatives are treated as distinct by index (so <code>get&lt;0&gt;</code> vs <code>get&lt;1&gt;</code> would refer to the first or second <code>int</code>). Avoid such design unless it’s really necessary for some meta-programming reason.</li>
+<li><strong>Alternative Order Matters:</strong> The index order of types is determined by how you list them. This can affect which type is the &ldquo;first&rdquo; (for default construction) and also affects converting constructor resolution priority. It&rsquo;s usually intuitive (list types from most to least specific, perhaps), but be mindful that <code>variant&lt;int, double&gt;</code> is not the same type as <code>variant&lt;double, int&gt;</code> and their behaviour on default-init (and converting assignment from, say, <code>0</code>) will differ.</li>
+<li><strong>Performance considerations:</strong> If your variant holds alternatives where one is significantly larger than the others, the variant’s size will be that of the largest. This could mean wasted space when holding a smaller alternative. In extreme cases (many large alternatives), this could impact memory usage. But in typical use (a handful of types of reasonable size), this is not an issue. Also, each access has to check a discriminator – in tight loops where millions of variant accesses occur, this overhead could be measurable. If you have such a scenario, you might reconsider the design (maybe separate vectors for each type, etc.), but for most purposes variants are plenty efficient.</li>
+</ul>
+<p><strong>Real-World Uses:</strong> <code>std::variant</code> shines in scenarios such as <strong>message handling systems</strong> or <strong>state machines</strong>. For example, if you are writing an event processing loop, you might have a <code>std::variant</code> that can hold any of several event structures. By using <code>std::visit</code>, you can dispatch the correct handler for each event type without needing a big chain of <code>dynamic_cast</code>s or manual tag comparisons. Another example is a compiler&rsquo;s abstract syntax tree node: it could be a variant of different node type structs (literal, binary_op, variable, etc.), allowing pattern-matching on node types with visitors. The C++ community has embraced variant for implementing algebraic data types – essentially, <code>std::variant</code> is a closed set sum type, akin to <code>std::optional</code> being a special case of a sum type (with two cases: value or none). A concrete illustration is implementing a <strong>finite state machine</strong>: one can define a variant of state types (as structs for each state) and then use visitors to transition between states based on events. This leads to very readable code that clearly enumerates possible states and transitions. In fact, one could model a simple traffic light or door lock state machine with a variant of states and visitors representing events (open, close, lock, unlock) that each produce a new state. This is typesafe – impossible to transition from a state that doesn’t support a given event because the visitor won&rsquo;t have a matching overload, catching errors at compile time.</p>
+<p>In summary, <code>std::variant</code> provides <strong>flexible polymorphism without polymorphic classes</strong>. It gives the benefits of a union (no heap allocations, contiguous storage) while eliminating the unsafe parts (active member tracking and destruction are handled). The code is often more <strong>explicit</strong> than inheritance hierarchies, and certainly much safer and clearer than manual unions.</p>
+<h2 id="stdany--type-erased-containers-for-arbitrary-values"><code>std::any</code> – Type-Erased Containers for Arbitrary Values</h2>
+<p>There are situations where you genuinely need to store &ldquo;any type&rdquo; of data, without knowing the type at compile time. This is where <strong><code>std::any</code></strong> (from the <code>&lt;any&gt;</code> header) comes into play. <code>std::any</code> is a type-safe container for single values of arbitrary type. You can <strong>store</strong> a value of any copyable type in an <code>std::any</code> object, and later <strong>retrieve</strong> it (if you know the correct type to cast to). It employs <em>type erasure</em>: internally, it will allocate memory (if needed) to hold the object and remember the type information so that it can enforce correct casting. In essence, it’s like a safer alternative to <code>void*</code> that eliminates the risk of mismatched types – if you attempt to retrieve the wrong type, it will throw an exception rather than corrupt memory.</p>
+<p><strong>Type Safety at Runtime:</strong> Unlike <code>optional</code> and <code>variant</code>, the types that <code>std::any</code> might hold are not fixed at compile time – it truly can be <em>anything</em>. This gives ultimate flexibility, but shifts type checking to runtime. When you store a value in an <code>any</code>, the object is type-erased (the <code>any</code> doesn’t expose what it is holding except via the <code>type()</code> method or by trying a cast). To get the value out, you use <code>std::any_cast&lt;T&gt;(any)</code> which will either return the value (or reference) if the stored object is of type <code>T</code>, or throw <code>std::bad_any_cast</code> if the types don’t match. This is type-safe in the sense that you won’t accidentally interpret data as the wrong type – you’ll get a runtime error instead.</p>
+<p><strong>Basic Usage Example:</strong> Consider a scenario where we want a container that can hold heterogenous types – perhaps a vector that can hold ints, strings, doubles, etc., determined at runtime (maybe parsed from a scripting language or configuration where types vary). <code>std::any</code> makes this easy:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;any&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;vector&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;typeinfo&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>any<span style="color:#f92672">&gt;</span> values;
+</span></span><span style="display:flex;"><span>    values.push_back(<span style="color:#ae81ff">42</span>);                   <span style="color:#75715e">// int
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    values.push_back(std<span style="color:#f92672">::</span>string(<span style="color:#e6db74">&#34;hello&#34;</span>)); <span style="color:#75715e">// string
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    values.push_back(<span style="color:#ae81ff">3.14</span>);                 <span style="color:#75715e">// double (actually a double literal)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>any<span style="color:#f92672">&amp;</span> v : values) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (v.type() <span style="color:#f92672">==</span> <span style="color:#66d9ef">typeid</span>(<span style="color:#66d9ef">int</span>)) {
+</span></span><span style="display:flex;"><span>            std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;int: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>any_cast<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>(v) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (v.type() <span style="color:#f92672">==</span> <span style="color:#66d9ef">typeid</span>(std<span style="color:#f92672">::</span>string)) {
+</span></span><span style="display:flex;"><span>            std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;string: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>any_cast<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span>(v) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (v.type() <span style="color:#f92672">==</span> <span style="color:#66d9ef">typeid</span>(<span style="color:#66d9ef">double</span>)) {
+</span></span><span style="display:flex;"><span>            std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;double: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>any_cast<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">double</span><span style="color:#f92672">&gt;</span>(v) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Example of incorrect any_cast
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// v[1] holds a string, so casting to int should throw
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">int</span> n <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>any_cast<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>(values[<span style="color:#ae81ff">1</span>]);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">catch</span> (<span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>bad_any_cast<span style="color:#f92672">&amp;</span> e) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cerr <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Bad cast: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> e.what() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In this snippet, we create a <code>std::vector&lt;std::any&gt;</code> and push different typed values into it. We then iterate and use <code>any.type()</code> (which returns a <code>std::type_info</code>) to identify the type of each element in order to cast appropriately. This is admittedly not as neat as using <code>std::variant</code> with a fixed set of types (where <code>std::visit</code> would do it in one go), but in a scenario where you truly don&rsquo;t know the set of possible types (for example, a plugin system where plugins can insert arbitrary types), <code>std::any</code> is a suitable choice. The example also shows a failed <code>std::any_cast</code> – attempting to get an <code>int</code> out of an <code>any</code> that holds a <code>std::string</code> throws a <code>std::bad_any_cast</code>. Unlike a raw pointer cast, which would yield nonsense or crash, <code>std::any</code> detects the mismatch and safely alerts you.</p>
+<p><strong>Storage and Performance:</strong> Under the hood, an <code>std::any</code> typically holds a pointer to a heap-allocated copy of the object you put into it (for larger objects), or it might use a small internal buffer for small objects (small object optimisation). The type information is stored as a <code>std::type_info</code> (from RTTI) or similar identifier. Because of this, there are some performance considerations:</p>
+<ul>
+<li>Copying an <code>std::any</code> requires copying the contained object (via its copy constructor). Therefore, the type you store in an <code>any</code> must be <strong>copy constructible</strong> (this is a requirement: only copyable types can be stored, since <code>std::any</code> itself is copyable). If you attempt to store a non-copyable type (like <code>std::unique_ptr&lt;T&gt;</code>), it won’t compile. The design is such that <code>std::any</code> has value semantics – if you copy the <code>any</code>, you get an independent copy of the held object.</li>
+<li>Move-only types: Because of the above, move-only types can’t be directly stored by copying. However, you can still move them in (with <code>any.emplace</code> or constructing the any with <code>std::move(obj)</code>), but once in the <code>any</code>, you cannot copy the <code>any</code> (as it would attempt to copy the non-copyable content and fail at compile or runtime). In C++17, <code>std::any</code>&rsquo;s constructor template and <code>emplace</code> require the type to be CopyConstructible (there was discussion on possibly loosening this, but as of C++17 it’s a limitation).</li>
+<li>Each <code>any</code> carries a type id and possibly a pointer, so it&rsquo;s larger than a raw pointer. Typically an <code>any</code> might be the size of three pointers (one for type info, one for small buffer or pointer to object, etc.). This is not huge, but if you use a lot of them, be mindful of memory overhead.</li>
+<li>Accessing an <code>any</code> via <code>any_cast</code> involves checking the stored type id against the requested type. This is a runtime comparison (basically comparing <code>typeid(T)</code> of the template against the stored <code>typeid</code> of content). This is quite fast (essentially pointer comparison or string comparison of type info names, depending on implementation), but it’s not zero-cost. So, using <code>any</code> in performance-critical code (e.g., inner loops where millions of any_casts occur) would be ill-advised. It&rsquo;s meant more for flexibility at boundaries (like scripting interfaces, configuration storage, etc.), not for heavy computation on each element repeatedly.</li>
+</ul>
+<p><strong>Pitfalls and Best Practices:</strong></p>
+<ul>
+<li>Use <code>std::any</code> sparingly. Because it defers type checking to runtime, heavy use of <code>any</code> can make code less transparent. If you <em>do</em> know a fixed set of types, prefer <code>std::variant</code> for that situation. Reserve <code>std::any</code> for cases where the type list truly cannot be known or is open-ended (for example, a GUI property bag that can hold values of any type, or an instrumentation system carrying payloads of various plugin-defined types).</li>
+<li>Always retrieve with the correct type. This sounds obvious, but it means the onus is on the programmer to keep track of what an <code>any</code> is supposed to hold. Misuses might not be caught until runtime (throwing an exception). Organise your code such that the logic &ldquo;knows&rdquo; the type before calling <code>any_cast</code>. Sometimes this involves storing type tags in parallel or encoding the information in the context (like using a key that implies the type).</li>
+<li>If an <code>any</code> is empty (default constructed or after a reset), <code>any_cast</code> will throw as well. You can check <code>any.has_value()</code> before casting, similar to optional&rsquo;s <code>has_value</code> (and there’s <code>any.reset()</code> to clear it).</li>
+<li><strong>No direct comparison:</strong> Unlike optional and variant, <code>std::any</code> does not provide comparison operators or a way to directly compare stored values (since the type is erased, you&rsquo;d have to know the type to compare meaningfully). You also cannot directly serialize an <code>any</code> without knowing what&rsquo;s inside. Essentially, <code>any</code> is a type-erased box – you need additional knowledge to use what&rsquo;s inside. Keep that in mind when designing APIs: an <code>any</code> is best used at the <em>boundaries</em> of a system (e.g., passing data through interfaces where compile-time coupling is not possible), and then quickly converted to a known type for use.</li>
+<li>If you find yourself putting the same few types into an <code>any</code> repeatedly, reconsider using a variant. <code>std::any</code> is more for when you truly have <em>completely varied</em> types or want to allow future extension without changing code (at the cost of needing runtime checks).</li>
+<li><strong>Exception safety:</strong> In theory, constructing or copying the contained object could throw, leaving the <code>any</code> in an empty state or propagating the exception. Typically this is not a problem unique to <code>any</code> – it just forwards exceptions from the type&rsquo;s constructors. <code>std::any</code> provides the basic exception guarantee: if a throw happens during an <code>any</code> assignment, the <code>any</code> is left unchanged.</li>
+</ul>
+<p><strong>Real-World Uses:</strong> A classic use-case for <code>std::any</code> is in implementing <strong>generic data storage or messaging where the set of types is open-ended</strong>. For example, consider an event system where events can carry a payload of arbitrary type, and listeners are expecting specific types. The event could store its payload in an <code>std::any</code>. Listeners would retrieve it with <code>any_cast</code> to the type they expect. Another example is a <strong>configuration system</strong> where config values might be of various types not known in advance – you could use <code>std::any</code> to hold the value, alongside maybe a description string of what type is expected. (If the types <em>are</em> known in advance, <code>std::variant</code> would be preferred, as discussed in the config example earlier, but if a plugin can introduce a new type of config value unknown to the core program, <code>std::any</code> could accommodate it.) The C++17 introduction of <code>std::any</code> was largely motivated by the existence of <code>boost::any</code> and the need for a safer alternative to void pointers in generic code. GUI frameworks, serialization libraries, and scripting language embeddings are all areas where <code>std::any</code> might appear.</p>
+<p>To sum up, <code>std::any</code> offers <strong>maximum flexibility</strong> at the cost of compile-time type knowledge. It should be used when that flexibility is needed, and with discipline to manage types. It complements <code>std::optional</code> and <code>std::variant</code> – if optional is a maybe-value and variant is a one-of-several, then any is an <em>anything</em>. Each has its place in the C++ toolbox for achieving type-safe programming without sacrificing too much performance or clarity.</p>
+<h2 id="practical-examples-and-applications">Practical Examples and Applications</h2>
+<p>To see these utilities in action together, let’s sketch a couple of <strong>real-world inspired scenarios</strong>:</p>
+<ul>
+<li>
+<p><strong>Configuration Parsing:</strong> Imagine a configuration file where each setting has a name and a value, and values can be of different types. Using <code>std::variant</code> or <code>std::any</code> can greatly simplify the design. As shown earlier, we could use <code>std::variant&lt;int, bool, std::string&gt;</code> for a config system with a fixed set of value types. If a certain configuration entry is optional, we can make the config map return an <code>optional&lt;ConfigValue&gt;</code> – for example, a function <code>std::optional&lt;ConfigValue&gt; getConfig(const std::string&amp; name)</code> that returns a value variant if the key exists, or <code>nullopt</code> if not. This explicitly forces the caller to handle the &ldquo;setting not found&rdquo; case, instead of, say, returning a default or sentinel. If the config values are very heterogeneous and not known ahead (perhaps user-defined types allowed), one could choose <code>std::map&lt;std::string, std::any&gt;</code> to store them. Then, each consumer of a particular config key would <code>any_cast</code> to the expected type. The combination of optional and variant here gives both safety and flexibility: optional for presence, variant for multiple known types, any for truly dynamic cases. In fact, using <code>std::variant</code> or <code>std::any</code> is a marked improvement over older techniques where people might have stored config values as <code>void*</code> along with a type tag, or used a union of possible types without safety. It was observed that <em>even <code>void*</code> was used to hold such unknown-type values</em>, but now one can “improve the design by using <code>std::variant</code> if we know all the possible types, or leverage <code>std::any</code>”.</p>
+</li>
+<li>
+<p><strong>Message Handling System:</strong> Consider a distributed message bus or event system where messages of different types (with different payload structures) are passed through a single channel. Prior to C++17, one might define a base <code>Message</code> class and subclass it for each message type, using <code>dynamic_cast</code> or an enum to distinguish them. With C++17, you can define <code>using Message = std::variant&lt;MsgA, MsgB, MsgC&gt;</code> for all your message types. A consumer can use <code>std::visit</code> to handle each message type in a separate branch, and the compiler will ensure you covered all message variants. For optional parts of a message (say a field that may or may not be present), <code>std::optional</code> can be used within the message struct. For example, <code>struct MsgA { std::optional&lt;std::string&gt; comment; /*...*/ };</code> clearly indicates that <code>comment</code> might be absent. In more dynamic systems where new message types can be added at runtime (imagine a plugin introducing a new message), <code>std::any</code> might be used to carry the payload, with some external mechanism (like a message type registry) to know what type to cast to. However, in most systems, the set of message types is known at compile time, and <code>std::variant</code> excels there by giving compile-time type checking for the handlers. The result is code that is both efficient (no heap allocation for the polymorphism, unlike virtual inheritance) and safe (no bad casts – visitors ensure proper type handling).</p>
+</li>
+<li>
+<p><strong>Data Processing Pipeline:</strong> In some data processing or ETL pipelines, data might be represented in a union-like structure as it flows between stages, especially if the pipeline can handle different data shapes (for example, a field that might be int or string depending on context). <code>std::variant</code> can represent this intermediate data. Each stage of the pipeline can pattern-match on the variant and process accordingly. If a stage optionally produces a result (maybe a filtering stage can drop data), it could return <code>std::optional&lt;DataVariant&gt;</code>. If a pipeline stage can yield a result in an unpredictable type (maybe scriptable stage), <code>std::any</code> might be used to hold that result until the next stage casts it to something expected. Designing such pipelines with these abstractions makes the flow of types explicit and eliminates classes of errors (e.g., one stage forgetting to check that the previous stage provided a value, or interpreting bytes as the wrong type).</p>
+</li>
+</ul>
+<p>In all these scenarios, the overarching theme is that <strong>expressing the intent in the type system</strong> leads to clearer and safer code. By using <code>optional</code>, <code>variant</code>, and <code>any</code>, we document the <em>shape</em> of our data: whether it can be missing, whether it can take multiple forms, or whether it’s completely dynamic. This moves potential errors from runtime to compile time (in the case of optional and variant) or at least to controlled runtime (in the case of any, where a wrong cast throws an exception instead of corrupting memory).</p>
+<h2 id="edge-cases-performance-and-pitfalls">Edge Cases, Performance, and Pitfalls</h2>
+<p>To summarise the caveats and special considerations of each of these C++17 features, below is a breakdown of <strong>edge cases, performance implications, and potential pitfalls</strong> for each:</p>
+<ul>
+<li>
+<p><strong><code>std::optional</code>:</strong> An optional is pretty lightweight (usually just one extra boolean flag). Performance is generally a non-issue, but be wary of copying large objects in optionals. Always check for presence before accessing; a mistaken access when empty throws a <code>bad_optional_access</code> – which is better than undefined behaviour, but still something to avoid in normal logic. Remember that optional cannot hold reference types or array types. If you need an optional reference, consider redesign or use pointer/reference_wrapper. Another subtle pitfall is that <code>optional&lt;bool&gt;</code> is not a substitute for the &ldquo;tri-state boolean&rdquo; (some languages have a nullable boolean); while it works for that, note that <code>optional&lt;bool&gt;</code> will be larger than a plain bool and you must still check it (so, no, you can’t directly do if(optional_bool) to mean true/false/missing without a check – <code>if(opt_bool)</code> only tells you if it&rsquo;s present, not its value). Also, be mindful that <code>optional</code>&rsquo;s implicit conversion to bool (for checking) can sometimes lead to slight ambiguities in overload resolution if you also have a bool overload; but those cases are rare. In terms of exception safety, optional is strong – if a constructor throws while emplacing a value in an optional, the optional remains empty. Optional&rsquo;s comparison operators make it easy to sort containers of optionals, but ensure you understand that an empty optional is treated as &lt; any value.</p>
+</li>
+<li>
+<p><strong><code>std::variant</code>:</strong> The main edge case is the <em>valueless by exception</em> state as discussed – rare, but if one of your variant&rsquo;s types can throw during move or copy, be aware of exception safety. You can check <code>valueless_by_exception()</code> if needed. In practice, many variants hold simple types or types with nothrow moves, so this isn’t encountered. Another consideration is <em>visitor runtime cost</em>: using <code>std::visit</code> introduces an indirection (essentially a switch or jump) which is extremely fast, but if you have deeply nested variants or a chain of visitors it could add up. Still, it&rsquo;s usually negligible compared to any real work done inside the visitor. A pitfall to watch out for is using variant for types that don&rsquo;t naturally belong together – if you find yourself with a variant of 10+ types that are unrelated, you might be abusing it and making the code harder to maintain. Each addition of a type forces all visitations to handle it, which can increase code complexity. Try to keep variants to a reasonable number of alternatives that make sense in context. Also, as noted, if your variant alternatives have a large size disparity, you pay the cost in space for each variant instance. For example, <code>std::variant&lt;std::array&lt;int,1000&gt;, int&gt;</code> will be roughly the size of that 1000-int array (plus overhead) even when holding an <code>int</code>. If memory is a concern and usage of the large alternative is rare, an alternative design might be to use a pointer or a separate structure. But often this is not a major issue unless you have thousands of variant objects. Finally, be careful with variant&rsquo;s <em>converting constructors</em>: C++17 has a certain set of rules that might surprise, though C++20 made them more intuitive. When in doubt, explicitly construct the variant with the type you want (<code>variant&lt;Ts...&gt; var(std::in_place_type&lt;T&gt;, value)</code>) to avoid ambiguity.</p>
+</li>
+<li>
+<p><strong><code>std::any</code>:</strong> The biggest pitfall is loss of compile-time checking. Overuse of <code>any</code> can lead to code where you only find out at runtime that you mixed up types. As a rule of thumb, confine <code>std::any</code> to the boundaries of your system. For instance, if you have a plugin API where plugins can return data of arbitrary type, accept <code>std::any</code> there, but internally, downcast to known types as soon as possible and work with those. Performance-wise, each <code>any</code> might incur a dynamic allocation (except for small trivially moveable objects where small-object optimization kicks in). This means storing large objects in an any could be costly. Also, any requires types to be copyable, which means you cannot directly store move-only types. If you must store something like a unique_ptr or a move-only lambda, you might wrap it in a <code>std::shared_ptr</code> or similar to satisfy copyability (or store a wrapper that holds it). This is a limitation to be aware of: <code>std::any</code> was intentionally designed this way to avoid complex behaviour on copying. Another issue is that <code>any</code>&rsquo;s type erasure uses RTTI (<code>typeid</code>), which is typically available in C++ builds, but if you disabled RTTI, <code>std::any</code> might not function (or you lose <code>any_cast</code> ability). This is rare, but worth noting in some embedded or strict environments. In terms of exceptions, incorrect <code>any_cast</code> throws <code>bad_any_cast</code> – always handle or avoid that by logic. And as with variant, storing extremely large disparate types in a single any and then copying it frequently can hurt performance due to allocations and copies. If you find yourself doing heavy operations on <code>any</code> in tight loops, consider refactoring the design (perhaps using templates or overloading to regain compile-time types).</p>
+</li>
+</ul>
+<p>In summary, each of these features is designed to make common patterns safer. The trade-offs are usually minor – a small constant overhead for the safety they provide. By understanding their behaviour and limitations, one can use them effectively without performance surprises or bugs.</p>
+<h2 id="comparison-to-pre-c17-approaches">Comparison to Pre-C++17 Approaches</h2>
+<p>It’s instructive to briefly contrast how one would achieve similar goals <em>before C++17</em> (or in lower-level C-style code) versus using <code>optional</code>, <code>variant</code>, and <code>any</code>:</p>
+<ul>
+<li>
+<p><strong>Without <code>std::optional</code>:</strong> One might use a raw pointer or a special flag/value to indicate &ldquo;no value&rdquo;. For example, returning a pointer that is <code>nullptr</code> if not found, or returning an <code>int</code> where <code>-1</code> means &ldquo;not found&rdquo;. Pointers introduce ambiguity (is a <code>nullptr</code> an error or just a null object?) and potential for misuse (forgetting to check for null). Sentinel values (like <code>-1</code>) can be even worse if that value might also be a valid data (leading to bugs where <code>-1</code> could be mistaken for actual data). Alternatively, a common pattern was to return a <code>std::pair&lt;T, bool&gt;</code> or an <code>std::tuple&lt;ErrorCode, T&gt;</code> to signal success or failure. These work but are less clear; for instance, <code>auto [val, ok] = func(); if (!ok) { ... }</code> is more cumbersome than <code>auto opt = func(); if (!opt) { ... }</code>. <strong>Boost.Optional</strong> was available and widely used in pre-C++17 code as a stop-gap; it offered nearly the same interface and semantics as <code>std::optional</code>. Now with the standard <code>optional</code>, there is no need for custom solutions – we have a clear, language-supported way to represent an optional value.</p>
+</li>
+<li>
+<p><strong>Without <code>std::variant</code>:</strong> C++11 and earlier didn’t have a standard discriminated union. You either used a C-style <code>union</code> (with all the attendant problems discussed – manual tracking of active member, inability to hold complex types without manual construction, etc.) or you used polymorphic classes (an abstract base with derived types for each alternative). Polymorphism can be overkill if value semantics are desired, and it complicates object lifetimes (objects typically allocated on heap). Another approach was an ad-hoc struct that had all possible fields and an enum indicating which is valid, which is essentially a poor man&rsquo;s variant. Maintaining such code is error-prone (someone might set the enum to one thing but put data in another field, etc.). <strong>Boost.Variant</strong> existed to fill this gap pre-C++17 and had similar functionality (though without <code>std::visit</code> – Boost.Variant used either visitors via <code>boost::apply_visitor</code> or <code>boost::get</code>). Boost.Variant also lacked some of the constexpr capabilities that <code>std::variant</code> now has. In modern C++, there&rsquo;s almost no reason to use raw unions for variant-like purposes – <code>std::variant</code> covers the need in nearly all cases, except maybe very low-level bit reinterpretation tricks (and even those have safer alternatives).</p>
+</li>
+<li>
+<p><strong>Without <code>std::any</code>:</strong> The old approach for &ldquo;hold anything&rdquo; was typically <code>void*</code> or something like a union of common types (which still fails for custom types) or using a base class <code>Any</code> with virtual cloning (a manual type erasure). <code>void*</code> is extremely unsafe because you lose all type information – the burden is entirely on the programmer to cast to the correct type, and if they get it wrong, it’s undefined behaviour (likely a crash or memory corruption). Debugging such issues is hard. Some frameworks introduced their own any-like containers; for instance, Qt has a <code>QVariant</code> (which despite the name, is more like a type-safe union of a fixed set of Qt types) and Boost introduced <code>boost::any</code>. <strong>Boost.Any</strong> was essentially the reference implementation that inspired <code>std::any</code>. It provided type erasure and <code>boost::any_cast</code>. The standard <code>std::any</code> is very similar but benefits from being in <code>&lt;any&gt;</code> and carefully specified. Using <code>std::any</code> over raw <code>void*</code> is hugely beneficial in terms of safety – you get a runtime check on type mismatch and you avoid the immediate need for heap allocations or custom new/delete for arbitrary data (since <code>any</code> takes care of that internally with correct copying semantics). In performance-sensitive scenarios, templates (to keep types known) or variants (if types are limited) are still preferable, but when those aren’t feasible, <code>std::any</code> is the go-to.</p>
+</li>
+</ul>
+<p>In essence, C++17 saved us from a lot of boilerplate and hazards. Where we used to have to choose between safety and convenience, we now have tools that offer both. Code that uses <code>optional</code>/<code>variant</code>/<code>any</code> is often <strong>shorter, clearer, and safer</strong> than the pre-C++17 equivalents. These features also integrate well with other modern C++ techniques – for instance, you can combine <code>std::optional</code> with ranges or algorithms (C++20 ranges even have <code>.transform()</code> for optionals to apply a function if present), and <code>std::variant</code> can be used in constexpr context from C++20 onwards, which makes it usable in compile-time computation or <code>constexpr</code> if/visit. The language and standard library are moving toward giving us higher-level abstractions that cost nothing at runtime but prevent entire classes of errors.</p>
+<h2 id="enhancements-in-c20-and-c23">Enhancements in C++20 and C++23</h2>
+<p>While our focus is on C++17, it&rsquo;s worth noting that subsequent standards have extended these facilities:</p>
+<ul>
+<li>
+<p><strong><code>std::optional</code> in C++20/C++23:</strong> C++20 added comparisons (<code>operator&lt;=&gt;</code>) for optional, making them easily sortable. C++23 introduced the aforementioned monadic operations <code>and_then</code>, <code>transform</code>, and <code>or_else</code>, which were inspired by functional programming (they simplify chaining operations on optionals without deeply nested <code>if</code> statements). These improve ergonomics but do not change the fundamental performance or semantics of optional. Optional remains a straightforward struct with a value-or-not.</p>
+</li>
+<li>
+<p><strong><code>std::variant</code> in C++20/C++23:</strong> C++20 made variants <em>constexpr-friendly</em>, meaning you can create and manipulate variants in constant expressions. This is useful for compile-time computations and metaprogramming. Additionally, as mentioned, C++20 fixed the converting constructor behaviour to be more intuitive. C++23 introduced some helper features, like visitation of variant types that are themselves variants (to ease handling nested variants), and a proposal to propagate triviality (so that a variant is trivially copyable if all alternatives are trivially copyable), which helps optimisers. Another C++23 improvement was allowing <code>std::visit</code> to accept lambdas that take base classes of variant types (if one alternative is derived from another&rsquo;s type). These are relatively minor refinements – the core functionality of variant as introduced in C++17 remains the same. It’s simply becoming more powerful and easier to use in more contexts.</p>
+</li>
+<li>
+<p><strong><code>std::any</code> in C++20/C++23:</strong> There have been fewer changes here. <code>std::any</code> is largely unchanged since C++17. One notable addition in the standard library, however, is <code>std::any_cast</code> gaining support for arrays (C++23) in a limited form, and <code>std::make_any</code> factory function (added in C++17 after initial, and improved later). But fundamentally, <code>any</code> remains as it was. If anything, the community has realised that <code>std::any</code> should be used with care, and alternatives like using concepts or variants are preferred when possible.</p>
+</li>
+</ul>
+<p>It’s also worth acknowledging that C++23 introduced <code>std::expected</code>, which is a type for error handling that combines the idea of an optional value <em>or</em> an error code (much like a simplified variant of value or error). This is another step in the direction of type-safe programming – giving a structured way to handle errors instead of relying on exceptions or output parameters. While <code>std::expected</code> is beyond our main topic, it fits the narrative: modern C++ continues the trend of providing strong, type-safe abstractions for scenarios that used to rely on convention or non-typesafe idioms.</p>
+<p>The evolution of these features from Boost libraries to C++17 and minor tweaks in later standards shows a commitment in the C++ committee to <strong>type safety, clarity, and expressiveness</strong> without compromising performance. With each revision, they integrate more smoothly with the language&rsquo;s other features (e.g., constexpr, concepts, ranges).</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>C++17’s <code>std::optional</code>, <code>std::variant</code>, and <code>std::any</code> represent significant strides toward more expressive and type-safe C++ programming. They enable us to model optional values, variant types, and dynamic types in a way that is <strong>clear</strong> in intent and <strong>safe</strong> in usage. By leveraging these constructs, developers can avoid a whole class of bugs – no more unchecked null pointers or unsafe unions or mysterious void pointer casts. The code becomes self-documenting: an <code>optional&lt;T&gt;</code> <em>shouts</em> “this <code>T</code> might not be here,” a <code>variant&lt;A,B&gt;</code> declares “it’s either A or B,” and an <code>any</code> signals “this could be anything, handle with care.”</p>
+<p>We have seen through examples how these types can be applied to real-world tasks like configuration handling, message dispatch, and state management, leading to solutions that are both elegant and robust. We also discussed how they improve upon pre-C++17 techniques: where older code might rely on conventions and extensive comments to explain that &ldquo;we use -1 to mean not valid&rdquo; or maintain parallel enums alongside unions, modern C++ code can encode that directly in the type system, making the compiler our ally in catching mistakes.</p>
+<p>In terms of performance, these features are crafted to impose minimal overhead. <code>std::optional</code> typically has the same performance as using a flag and separate value, but with nicer syntax. <code>std::variant</code> avoids allocations and uses only a small constant time dispatch, giving you the speed of a union with far better safety. <code>std::any</code> does have some overhead due to type erasure, but it’s a conscious trade-off for flexibility; and even then, it provides safety checks that raw approaches lack. For most applications, these are small costs for the huge gains in correctness and maintainability.</p>
+<p>As C++ moves forward (with C++20, C++23, and beyond), the trend is clearly toward <strong>stronger static typing with more expressive power</strong>. Features like concepts, constexpr if, structured bindings, and these type-safe containers all reinforce the idea that we can write code that is both high-level and efficient. We can expect future proposals to continue in this vein – perhaps pattern matching in the language will make variants even easier to use, and more monadic utilities might appear for optional-like types. The direction is set: C++ is embracing techniques long proven in functional and high-level languages, but adapting them to the C++ ethos of zero-overhead abstractions.</p>
+<p>In conclusion, mastering <code>std::optional</code>, <code>std::variant</code>, and <code>std::any</code> is essential for intermediate and advanced C++ programmers looking to write modern, robust software. These constructs allow us to express our intent directly in code, reduce bugs, and produce maintainable designs. By using them appropriately, we align with C++’s philosophy of making the <strong>type system</strong> work for us – resulting in programs that are not only safer and more correct, but also easier to understand. The inclusion of these facilities in C++17 was a big leap forward in <strong>type-safe programming</strong>, and using them will undoubtedly become second nature as we continue to modernise our C++ codebases.</p>
+<p><strong>Sources:</strong></p>
+<ul>
+<li>C++ reference for <a href="https://en.cppreference.com/w/cpp/utility/optional"><code>std::optional</code></a> – definition and properties</li>
+<li>C++ reference for <a href="https://en.cppreference.com/w/cpp/utility/variant"><code>std::variant</code></a> – definition and detailed behavior</li>
+<li>C++ reference for <a href="https://en.cppreference.com/w/cpp/utility/any"><code>std::any</code></a> – definition and usage notes</li>
+<li>Bjarne Stroustrup, <em>The C++ Programming Language (4th Edition)</em> – discussions on variant and optional in modern C++ design (for conceptual background).</li>
+<li><strong>CppCoreGuidelines</strong> C.183 – <em>“Don’t use a union for type punning”</em> (and related discussion on union safety).</li>
+<li>Andrzej Krzemienski, <em>“Everything You Need to Know About std::variant from C++17”</em> – <em>C++ Stories</em> blog (Jan 2023 update), which provides insightful examples (state machines, config parsing) and covers variant’s design and usage in depth.</li>
+<li>Richard Smith, et al. – ISO C++ proposal papers P2231 (constexpr for variant) and others (for improvements in C++20/23).</li>
+<li><strong>Boost</strong> documentation for <code>boost::optional</code>, <code>boost::variant</code>, <code>boost::any</code> – as historical reference points for these utilities prior to standardisation.</li>
+</ul>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        8904 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2025-07-04
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fembracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fembracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Embracing%20Type%20Safety%20in%20C%2b%2b17%3a%20std%3a%3aoptional%2c%20std%3a%3avariant%2c%20and%20std%3a%3aany&amp;caption=Embracing%20Type%20Safety%20in%20C%2b%2b17%3a%20std%3a%3aoptional%2c%20std%3a%3avariant%2c%20and%20std%3a%3aany&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fembracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Embracing%20Type%20Safety%20in%20C%2b%2b17%3a%20std%3a%3aoptional%2c%20std%3a%3avariant%2c%20and%20std%3a%3aany&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fembracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fembracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fembracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany%2f;description=Embracing%20Type%20Safety%20in%20C%2b%2b17%3a%20std%3a%3aoptional%2c%20std%3a%3avariant%2c%20and%20std%3a%3aany" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fembracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany%2f&amp;title=Embracing%20Type%20Safety%20in%20C%2b%2b17%3a%20std%3a%3aoptional%2c%20std%3a%3avariant%2c%20and%20std%3a%3aany&amp;summary=Embracing%20Type%20Safety%20in%20C%2b%2b17%3a%20std%3a%3aoptional%2c%20std%3a%3avariant%2c%20and%20std%3a%3aany&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fembracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fembracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany%2f&amp;resubmit=true&amp;title=Embracing%20Type%20Safety%20in%20C%2b%2b17%3a%20std%3a%3aoptional%2c%20std%3a%3avariant%2c%20and%20std%3a%3aany" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fembracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany%2f;title=Embracing%20Type%20Safety%20in%20C%2b%2b17%3a%20std%3a%3aoptional%2c%20std%3a%3avariant%2c%20and%20std%3a%3aany" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Embracing%20Type%20Safety%20in%20C%2b%2b17%3a%20std%3a%3aoptional%2c%20std%3a%3avariant%2c%20and%20std%3a%3aany%20https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fembracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fembracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany%2f&amp;t=Embracing%20Type%20Safety%20in%20C%2b%2b17%3a%20std%3a%3aoptional%2c%20std%3a%3avariant%2c%20and%20std%3a%3aany" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Embracing%20Type%20Safety%20in%20C%2b%2b17%3a%20std%3a%3aoptional%2c%20std%3a%3avariant%2c%20and%20std%3a%3aany&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fembracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2025/07/parallel-algorithms-in-c-17-execution-policies-advantages-and-limitations/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">Parallel Algorithms in C&#43;&#43;17 – Execution Policies, Advantages, and Limitations</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2025/06/the-filesystem-library-in-c-17-a-comprehensive-introduction/">
+                    <span class="button__text">The Filesystem Library in C&#43;&#43;17: A Comprehensive Introduction</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

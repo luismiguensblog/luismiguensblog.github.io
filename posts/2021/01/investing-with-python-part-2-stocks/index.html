@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="This is a continuation of the previous post. Here I will apply the Black Litterman model to a portfolio of stocks.
+import pandas as pd import yfinance as yf import openpyxl from currency_converter import CurrencyConverter import numpy as np from pypfopt import BlackLittermanModel from pypfopt import black_litterman, risk_models # Declare constants PORTFOLIO=&#39;/mnt/wd-bigfoot/share/luis/OneDrive/Documents/Portfolio/00 portfolio.xlsx&#39; STOCKS_SHEET=&#39;Stocks&#39; START_DATE=&#39;2010-01-01&#39; END_DATE=&#39;2021-01-08&#39; ALL_WORLD=&#39;IWDA.AS&#39; TOTAL_FUNDS=40e3 # 40.000 EUR # Open the portfolio and get the stocks stocks_pd = pd.read_excel(PORTFOLIO, engine=&#39;openpyxl&#39;, sheet_name=STOCKS_SHEET) stocks_pd.index = stocks_pd[&#39;Symbol&#39;] stocks_pd = stocks_pd[[&#39;Company Name&#39;, &#39;Prediction&#39;, &#39;Pesimistic&#39;, &#39;Optimistic&#39;]] stocks_pd Company Name Prediction Pesimistic Optimistic Symbol AMD Advanced Micro Devices, Inc. 0.20 0.03 0.40 AIR.PA Airbus SE 0.10 0.03 0.20 GOOGL Alphabet Inc. 0.10 0.03 0.30 AMZN Amazon.com, Inc. 0.20 0.05 0.50 AAPL Apple Inc. 0.15 0.00 0.40 BA.L BAE Systems plc 0.00 -0.05 0.05 CSCO Cisco Systems, Inc. 0.00 -0.05 0.05 BN.PA Danone S.A. 0.00 -0.05 0.05 FB Facebook, Inc. 0.05 -0.05 0.05 GE General Electric Company 0.05 0.00 0.05 HYU.F Hyundai Corporation 0.10 0.00 0.30 IDR.MC Indra Sistemas, S.A. 0.00 -0.05 0.02 INTC Intel Corporation 0.00 -0.02 0.05 IBM International Business Machines Corporation 0.05 -0.02 0.10 IAG.MC International Consolidated Airlines Group, S.A. 0.50 -0.10 1.00 PHIA.AS Koninklijke Philips N.V. 0.00 -0.05 0.05 MEL.MC Meliá Hotels International, S.A. 0.20 0.00 0.50 MRK Merck &amp; Co., Inc. 0.05 0.00 0.05 MSFT Microsoft Corporation 0.10 0.00 0.15 NESN.SW Nestlé S.A. 0.00 -0.05 0.03 NFLX Netflix, Inc. 0.05 -0.01 0.15 NHH.MC NH Hotel Group, S.A. 0.20 -0.05 0.50 NOKIA.HE Nokia Corporation 0.05 -0.05 0.20 NVDA NVIDIA Corporation 0.10 -0.05 0.30 ORCL Oracle Corporation 0.05 0.00 0.05 PEP PepsiCo, Inc. 0.00 -0.05 0.05 QCOM QUALCOMM Incorporated 0.05 -0.02 0.15 SSUN.F Samsung Electronics Co., Ltd. 0.10 -0.02 0.20 SIE.DE Siemens Aktiengesellschaft 0.05 -0.02 0.10 ENR.DE Siemens Energy AG 0.05 -0.02 0.10 SPOT Spotify Technology S.A. 0.02 -0.05 0.10 TSLA Tesla, Inc. 0.00 -0.20 0.05 TXN Texas Instruments Incorporated 0.05 0.00 0.10 BA The Boeing Company 0.05 -0.05 0.10 KHC The Kraft Heinz Company 0.00 -0.05 0.05 PG The Procter &amp; Gamble Company 0.05 -0.05 0.05 DIS The Walt Disney Company 0.05 -0.05 0.20 TMO Thermo Fisher Scientific Inc. 0.05 -0.05 0.15 TM Toyota Motor Corporation 0.05 -0.02 0.10 UBER Uber Technologies, Inc. 0.10 -0.10 0.20 UL Unilever PLC 0.00 -0.05 0.05 # Get the historical data of the stocks and exchange to EUR stocks = pd.DataFrame() cc = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=&#39;True&#39;) for symbol in stocks_pd.index: history = yf.download(symbol, start=START_DATE, end=END_DATE)[&#39;Adj Close&#39;] dataframe = pd.DataFrame(history) currency = yf.Ticker(symbol).info[&#39;currency&#39;].upper() dataframe.columns = [ symbol &#43; &#39;:&#39; &#43; currency ] # Add Market Cap to the stocks_pd stocks_pd.at[symbol, &#39;Market Cap&#39;] = cc.convert(yf.Ticker(symbol).info[&#39;marketCap&#39;], currency, &#39;EUR&#39;, dataframe.index[-1].to_pydatetime()) # Add column with security in EUR if needed if currency.lower() != &#39;eur&#39;: for index in dataframe.index: original_value = dataframe.at[index, symbol &#43; &#39;:&#39; &#43; currency] value = cc.convert(original_value, currency, &#39;EUR&#39;, date=index.to_pydatetime()) dataframe.at[index, symbol &#43; &#39;:EUR&#39;] = value # Merge everything stocks = pd.concat([ stocks, dataframe], axis=&#39;columns&#39;) # Fill any NA values with the best forward or backarwd value stocks.fillna(method=&#39;ffill&#39;, inplace=True) del cc, symbol, history, dataframe, currency, original_value, value, index [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed stocks_pd Company Name Prediction Pesimistic Optimistic Market Cap Symbol AMD Advanced Micro Devices, Inc. 0.20 0.03 0.40 8.148238e&#43;10 AIR.PA Airbus SE 0.10 0.03 0.20 7.461750e&#43;10 GOOGL Alphabet Inc. 0.10 0.03 0.30 1.183262e&#43;12 AMZN Amazon.com, Inc. 0.20 0.05 0.50 1.355935e&#43;12 AAPL Apple Inc. 0.15 0.00 0.40 1.765546e&#43;12 BA.L BAE Systems plc 0.00 -0.05 0.05 1.787769e&#43;10 CSCO Cisco Systems, Inc. 0.00 -0.05 0.05 1.811978e&#43;11 BN.PA Danone S.A. 0.00 -0.05 0.05 3.849391e&#43;10 FB Facebook, Inc. 0.05 -0.05 0.05 7.102801e&#43;11 GE General Electric Company 0.05 0.00 0.05 9.526443e&#43;10 HYU.F Hyundai Corporation 0.10 0.00 0.30 3.768063e&#43;10 IDR.MC Indra Sistemas, S.A. 0.00 -0.05 0.02 1.320735e&#43;09 INTC Intel Corporation 0.00 -0.02 0.05 2.213519e&#43;11 IBM International Business Machines Corporation 0.05 -0.02 0.10 1.000500e&#43;11 IAG.MC International Consolidated Airlines Group, S.A. 0.50 -0.10 1.00 1.080973e&#43;10 PHIA.AS Koninklijke Philips N.V. 0.00 -0.05 0.05 4.355928e&#43;10 MEL.MC Meliá Hotels International, S.A. 0.20 0.00 0.50 1.345669e&#43;09 MRK Merck &amp; Co., Inc. 0.05 0.00 0.05 1.683183e&#43;11 MSFT Microsoft Corporation 0.10 0.00 0.15 1.537831e&#43;12 NESN.SW Nestlé S.A. 0.00 -0.05 0.03 2.751414e&#43;11 NFLX Netflix, Inc. 0.05 -0.01 0.15 2.033889e&#43;11 NHH.MC NH Hotel Group, S.A. 0.20 -0.05 0.50 1.475451e&#43;09 NOKIA.HE Nokia Corporation 0.05 -0.05 0.20 1.926819e&#43;10 NVDA NVIDIA Corporation 0.10 -0.05 0.30 2.806550e&#43;11 ORCL Oracle Corporation 0.05 0.00 0.05 1.641228e&#43;11 PEP PepsiCo, Inc. 0.00 -0.05 0.05 1.651222e&#43;11 QCOM QUALCOMM Incorporated 0.05 -0.02 0.15 1.291990e&#43;11 SSUN.F Samsung Electronics Co., Ltd. 0.10 -0.02 0.20 4.059750e&#43;11 SIE.DE Siemens Aktiengesellschaft 0.05 -0.02 0.10 1.086902e&#43;11 ENR.DE Siemens Energy AG 0.05 -0.02 0.10 2.160643e&#43;10 SPOT Spotify Technology S.A. 0.02 -0.05 0.10 4.376889e&#43;10 TSLA Tesla, Inc. 0.00 -0.20 0.05 5.454659e&#43;11 TXN Texas Instruments Incorporated 0.05 0.00 0.10 1.416198e&#43;11 BA The Boeing Company 0.05 -0.05 0.10 1.208403e&#43;11 KHC The Kraft Heinz Company 0.00 -0.05 0.05 4.085665e&#43;10 PG The Procter &amp; Gamble Company 0.05 -0.05 0.05 2.802307e&#43;11 DIS The Walt Disney Company 0.05 -0.05 0.20 2.940217e&#43;11 TMO Thermo Fisher Scientific Inc. 0.05 -0.05 0.15 1.527621e&#43;11 TM Toyota Motor Corporation 0.05 -0.02 0.10 1.805378e&#43;11 UBER Uber Technologies, Inc. 0.10 -0.10 0.20 8.531728e&#43;10 UL Unilever PLC 0.00 -0.05 0.05 1.977436e&#43;11 # Get market reference (MSCI All World Accumulative ETF in USD) market = pd.DataFrame(yf.download(ALL_WORLD, start=START_DATE, end=END_DATE)[&#39;Adj Close&#39;]) market.columns = [&#39;Market Ref:USD&#39;] cc = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=&#39;True&#39;) for index in market.index: original_value = market.at[index, &#39;Market Ref:USD&#39;] value = cc.convert(original_value, &#39;USD&#39;, &#39;EUR&#39;, date=index.to_pydatetime()) market.at[index, &#39;Market Ref:EUR&#39;] = value # Fill any NA values with the best forward or backarwd value market.fillna(method=&#39;ffill&#39;, inplace=True) del cc, original_value, value, index [*********************100%***********************] 1 of 1 completed # Clean up dataframes and keep only EUR with the symbol name # Same for Market for column in stocks.columns: if &#39;:EUR&#39; not in column: stocks.drop(column, axis=&#39;columns&#39;, inplace=True) symbol, currency = column.split(&#39;:&#39;) stocks.rename(mapper={column: symbol}, axis=&#39;columns&#39;, inplace=True) for column in market.columns: if &#39;:EUR&#39; not in column: market.drop(column, axis=&#39;columns&#39;, inplace=True) symbol, currency = column.split(&#39;:&#39;) market.rename(mapper={column: symbol}, axis=&#39;columns&#39;, inplace=True) del column, symbol, currency # Create a checkpoint stocks.to_csv(&#39;cache_stocks.csv&#39;) market.to_csv(&#39;cache_market.csv&#39;) # Restore Checkpoint stocks = pd.read_csv(&#39;cache_stocks.csv&#39;) stocks.set_index(pd.DatetimeIndex(stocks[&#39;Date&#39;]), inplace=True) stocks.drop([&#39;Date&#39;], axis=&#39;columns&#39;, inplace=True) market = pd.read_csv(&#39;cache_market.csv&#39;) market.set_index(pd.DatetimeIndex(market[&#39;Date&#39;]), inplace=True) market.drop([&#39;Date&#39;], axis=&#39;columns&#39;, inplace=True) # Construct the dictionary with your views views = stocks_pd[&#39;Prediction&#39;].to_dict() # Construct a uncertanties dictionary optimistic = stocks_pd[&#39;Optimistic&#39;].to_dict() pesimistic = stocks_pd[&#39;Pesimistic&#39;].to_dict() variances = [] for symbol in views.keys(): sigma = (optimistic[symbol] - pesimistic[symbol])/2 variances.append(sigma ** 2) omega = np.diag(variances) del optimistic, pesimistic, variances, symbol, sigma # Construct the Black Litterman S = risk_models.CovarianceShrinkage(stocks).ledoit_wolf() delta = black_litterman.market_implied_risk_aversion(market[&#39;Market Ref&#39;]) # Using a pi equal weighted as the market caps for stocks are too complex to calculate bl = BlackLittermanModel(S, pi=&#34;market&#34;, market_caps=stocks_pd[&#39;Market Cap&#39;], risk_aversion=delta, absolute_views=views, omega=omega) ret_bl = bl.bl_returns() S_bl = bl.bl_cov() from pypfopt import EfficientFrontier, objective_functions ef = EfficientFrontier(ret_bl, S_bl) ef.add_objective(objective_functions.L2_reg) ef.max_sharpe() weights = ef.clean_weights() pd.Series(weights).plot.pie(figsize=(10,10)); /home/luis/.local/lib/python3.8/site-packages/pypfopt/efficient_frontier.py:195: UserWarning: max_sharpe transforms the optimisation problem so additional objectives may not work as expected. warnings.warn( /home/luis/.local/lib/python3.8/site-packages/pandas/plotting/_matplotlib/core.py:1547: MatplotlibDeprecationWarning: normalize=None does not normalize if the sum is less than 1 but this behavior is deprecated since 3.3 until two minor releases later. After the deprecation period the default value will be normalize=True. To prevent normalization pass normalize=False results = ax.pie(y, labels=blabels, **kwds) " />
+<meta name="keywords" content=", trading, investing, python, finance" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2021/01/investing-with-python-part-2-stocks/" />
+
+
+    <title>
+        
+            Investing with Python: Part 2 - Stocks :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="Investing with Python: Part 2 - Stocks">
+  <meta itemprop="description" content="This is a continuation of the previous post. Here I will apply the Black Litterman model to a portfolio of stocks.
+import pandas as pd import yfinance as yf import openpyxl from currency_converter import CurrencyConverter import numpy as np from pypfopt import BlackLittermanModel from pypfopt import black_litterman, risk_models # Declare constants PORTFOLIO=&#39;/mnt/wd-bigfoot/share/luis/OneDrive/Documents/Portfolio/00 portfolio.xlsx&#39; STOCKS_SHEET=&#39;Stocks&#39; START_DATE=&#39;2010-01-01&#39; END_DATE=&#39;2021-01-08&#39; ALL_WORLD=&#39;IWDA.AS&#39; TOTAL_FUNDS=40e3 # 40.000 EUR # Open the portfolio and get the stocks stocks_pd = pd.read_excel(PORTFOLIO, engine=&#39;openpyxl&#39;, sheet_name=STOCKS_SHEET) stocks_pd.index = stocks_pd[&#39;Symbol&#39;] stocks_pd = stocks_pd[[&#39;Company Name&#39;, &#39;Prediction&#39;, &#39;Pesimistic&#39;, &#39;Optimistic&#39;]] stocks_pd Company Name Prediction Pesimistic Optimistic Symbol AMD Advanced Micro Devices, Inc. 0.20 0.03 0.40 AIR.PA Airbus SE 0.10 0.03 0.20 GOOGL Alphabet Inc. 0.10 0.03 0.30 AMZN Amazon.com, Inc. 0.20 0.05 0.50 AAPL Apple Inc. 0.15 0.00 0.40 BA.L BAE Systems plc 0.00 -0.05 0.05 CSCO Cisco Systems, Inc. 0.00 -0.05 0.05 BN.PA Danone S.A. 0.00 -0.05 0.05 FB Facebook, Inc. 0.05 -0.05 0.05 GE General Electric Company 0.05 0.00 0.05 HYU.F Hyundai Corporation 0.10 0.00 0.30 IDR.MC Indra Sistemas, S.A. 0.00 -0.05 0.02 INTC Intel Corporation 0.00 -0.02 0.05 IBM International Business Machines Corporation 0.05 -0.02 0.10 IAG.MC International Consolidated Airlines Group, S.A. 0.50 -0.10 1.00 PHIA.AS Koninklijke Philips N.V. 0.00 -0.05 0.05 MEL.MC Meliá Hotels International, S.A. 0.20 0.00 0.50 MRK Merck &amp; Co., Inc. 0.05 0.00 0.05 MSFT Microsoft Corporation 0.10 0.00 0.15 NESN.SW Nestlé S.A. 0.00 -0.05 0.03 NFLX Netflix, Inc. 0.05 -0.01 0.15 NHH.MC NH Hotel Group, S.A. 0.20 -0.05 0.50 NOKIA.HE Nokia Corporation 0.05 -0.05 0.20 NVDA NVIDIA Corporation 0.10 -0.05 0.30 ORCL Oracle Corporation 0.05 0.00 0.05 PEP PepsiCo, Inc. 0.00 -0.05 0.05 QCOM QUALCOMM Incorporated 0.05 -0.02 0.15 SSUN.F Samsung Electronics Co., Ltd. 0.10 -0.02 0.20 SIE.DE Siemens Aktiengesellschaft 0.05 -0.02 0.10 ENR.DE Siemens Energy AG 0.05 -0.02 0.10 SPOT Spotify Technology S.A. 0.02 -0.05 0.10 TSLA Tesla, Inc. 0.00 -0.20 0.05 TXN Texas Instruments Incorporated 0.05 0.00 0.10 BA The Boeing Company 0.05 -0.05 0.10 KHC The Kraft Heinz Company 0.00 -0.05 0.05 PG The Procter &amp; Gamble Company 0.05 -0.05 0.05 DIS The Walt Disney Company 0.05 -0.05 0.20 TMO Thermo Fisher Scientific Inc. 0.05 -0.05 0.15 TM Toyota Motor Corporation 0.05 -0.02 0.10 UBER Uber Technologies, Inc. 0.10 -0.10 0.20 UL Unilever PLC 0.00 -0.05 0.05 # Get the historical data of the stocks and exchange to EUR stocks = pd.DataFrame() cc = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=&#39;True&#39;) for symbol in stocks_pd.index: history = yf.download(symbol, start=START_DATE, end=END_DATE)[&#39;Adj Close&#39;] dataframe = pd.DataFrame(history) currency = yf.Ticker(symbol).info[&#39;currency&#39;].upper() dataframe.columns = [ symbol &#43; &#39;:&#39; &#43; currency ] # Add Market Cap to the stocks_pd stocks_pd.at[symbol, &#39;Market Cap&#39;] = cc.convert(yf.Ticker(symbol).info[&#39;marketCap&#39;], currency, &#39;EUR&#39;, dataframe.index[-1].to_pydatetime()) # Add column with security in EUR if needed if currency.lower() != &#39;eur&#39;: for index in dataframe.index: original_value = dataframe.at[index, symbol &#43; &#39;:&#39; &#43; currency] value = cc.convert(original_value, currency, &#39;EUR&#39;, date=index.to_pydatetime()) dataframe.at[index, symbol &#43; &#39;:EUR&#39;] = value # Merge everything stocks = pd.concat([ stocks, dataframe], axis=&#39;columns&#39;) # Fill any NA values with the best forward or backarwd value stocks.fillna(method=&#39;ffill&#39;, inplace=True) del cc, symbol, history, dataframe, currency, original_value, value, index [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed stocks_pd Company Name Prediction Pesimistic Optimistic Market Cap Symbol AMD Advanced Micro Devices, Inc. 0.20 0.03 0.40 8.148238e&#43;10 AIR.PA Airbus SE 0.10 0.03 0.20 7.461750e&#43;10 GOOGL Alphabet Inc. 0.10 0.03 0.30 1.183262e&#43;12 AMZN Amazon.com, Inc. 0.20 0.05 0.50 1.355935e&#43;12 AAPL Apple Inc. 0.15 0.00 0.40 1.765546e&#43;12 BA.L BAE Systems plc 0.00 -0.05 0.05 1.787769e&#43;10 CSCO Cisco Systems, Inc. 0.00 -0.05 0.05 1.811978e&#43;11 BN.PA Danone S.A. 0.00 -0.05 0.05 3.849391e&#43;10 FB Facebook, Inc. 0.05 -0.05 0.05 7.102801e&#43;11 GE General Electric Company 0.05 0.00 0.05 9.526443e&#43;10 HYU.F Hyundai Corporation 0.10 0.00 0.30 3.768063e&#43;10 IDR.MC Indra Sistemas, S.A. 0.00 -0.05 0.02 1.320735e&#43;09 INTC Intel Corporation 0.00 -0.02 0.05 2.213519e&#43;11 IBM International Business Machines Corporation 0.05 -0.02 0.10 1.000500e&#43;11 IAG.MC International Consolidated Airlines Group, S.A. 0.50 -0.10 1.00 1.080973e&#43;10 PHIA.AS Koninklijke Philips N.V. 0.00 -0.05 0.05 4.355928e&#43;10 MEL.MC Meliá Hotels International, S.A. 0.20 0.00 0.50 1.345669e&#43;09 MRK Merck &amp; Co., Inc. 0.05 0.00 0.05 1.683183e&#43;11 MSFT Microsoft Corporation 0.10 0.00 0.15 1.537831e&#43;12 NESN.SW Nestlé S.A. 0.00 -0.05 0.03 2.751414e&#43;11 NFLX Netflix, Inc. 0.05 -0.01 0.15 2.033889e&#43;11 NHH.MC NH Hotel Group, S.A. 0.20 -0.05 0.50 1.475451e&#43;09 NOKIA.HE Nokia Corporation 0.05 -0.05 0.20 1.926819e&#43;10 NVDA NVIDIA Corporation 0.10 -0.05 0.30 2.806550e&#43;11 ORCL Oracle Corporation 0.05 0.00 0.05 1.641228e&#43;11 PEP PepsiCo, Inc. 0.00 -0.05 0.05 1.651222e&#43;11 QCOM QUALCOMM Incorporated 0.05 -0.02 0.15 1.291990e&#43;11 SSUN.F Samsung Electronics Co., Ltd. 0.10 -0.02 0.20 4.059750e&#43;11 SIE.DE Siemens Aktiengesellschaft 0.05 -0.02 0.10 1.086902e&#43;11 ENR.DE Siemens Energy AG 0.05 -0.02 0.10 2.160643e&#43;10 SPOT Spotify Technology S.A. 0.02 -0.05 0.10 4.376889e&#43;10 TSLA Tesla, Inc. 0.00 -0.20 0.05 5.454659e&#43;11 TXN Texas Instruments Incorporated 0.05 0.00 0.10 1.416198e&#43;11 BA The Boeing Company 0.05 -0.05 0.10 1.208403e&#43;11 KHC The Kraft Heinz Company 0.00 -0.05 0.05 4.085665e&#43;10 PG The Procter &amp; Gamble Company 0.05 -0.05 0.05 2.802307e&#43;11 DIS The Walt Disney Company 0.05 -0.05 0.20 2.940217e&#43;11 TMO Thermo Fisher Scientific Inc. 0.05 -0.05 0.15 1.527621e&#43;11 TM Toyota Motor Corporation 0.05 -0.02 0.10 1.805378e&#43;11 UBER Uber Technologies, Inc. 0.10 -0.10 0.20 8.531728e&#43;10 UL Unilever PLC 0.00 -0.05 0.05 1.977436e&#43;11 # Get market reference (MSCI All World Accumulative ETF in USD) market = pd.DataFrame(yf.download(ALL_WORLD, start=START_DATE, end=END_DATE)[&#39;Adj Close&#39;]) market.columns = [&#39;Market Ref:USD&#39;] cc = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=&#39;True&#39;) for index in market.index: original_value = market.at[index, &#39;Market Ref:USD&#39;] value = cc.convert(original_value, &#39;USD&#39;, &#39;EUR&#39;, date=index.to_pydatetime()) market.at[index, &#39;Market Ref:EUR&#39;] = value # Fill any NA values with the best forward or backarwd value market.fillna(method=&#39;ffill&#39;, inplace=True) del cc, original_value, value, index [*********************100%***********************] 1 of 1 completed # Clean up dataframes and keep only EUR with the symbol name # Same for Market for column in stocks.columns: if &#39;:EUR&#39; not in column: stocks.drop(column, axis=&#39;columns&#39;, inplace=True) symbol, currency = column.split(&#39;:&#39;) stocks.rename(mapper={column: symbol}, axis=&#39;columns&#39;, inplace=True) for column in market.columns: if &#39;:EUR&#39; not in column: market.drop(column, axis=&#39;columns&#39;, inplace=True) symbol, currency = column.split(&#39;:&#39;) market.rename(mapper={column: symbol}, axis=&#39;columns&#39;, inplace=True) del column, symbol, currency # Create a checkpoint stocks.to_csv(&#39;cache_stocks.csv&#39;) market.to_csv(&#39;cache_market.csv&#39;) # Restore Checkpoint stocks = pd.read_csv(&#39;cache_stocks.csv&#39;) stocks.set_index(pd.DatetimeIndex(stocks[&#39;Date&#39;]), inplace=True) stocks.drop([&#39;Date&#39;], axis=&#39;columns&#39;, inplace=True) market = pd.read_csv(&#39;cache_market.csv&#39;) market.set_index(pd.DatetimeIndex(market[&#39;Date&#39;]), inplace=True) market.drop([&#39;Date&#39;], axis=&#39;columns&#39;, inplace=True) # Construct the dictionary with your views views = stocks_pd[&#39;Prediction&#39;].to_dict() # Construct a uncertanties dictionary optimistic = stocks_pd[&#39;Optimistic&#39;].to_dict() pesimistic = stocks_pd[&#39;Pesimistic&#39;].to_dict() variances = [] for symbol in views.keys(): sigma = (optimistic[symbol] - pesimistic[symbol])/2 variances.append(sigma ** 2) omega = np.diag(variances) del optimistic, pesimistic, variances, symbol, sigma # Construct the Black Litterman S = risk_models.CovarianceShrinkage(stocks).ledoit_wolf() delta = black_litterman.market_implied_risk_aversion(market[&#39;Market Ref&#39;]) # Using a pi equal weighted as the market caps for stocks are too complex to calculate bl = BlackLittermanModel(S, pi=&#34;market&#34;, market_caps=stocks_pd[&#39;Market Cap&#39;], risk_aversion=delta, absolute_views=views, omega=omega) ret_bl = bl.bl_returns() S_bl = bl.bl_cov() from pypfopt import EfficientFrontier, objective_functions ef = EfficientFrontier(ret_bl, S_bl) ef.add_objective(objective_functions.L2_reg) ef.max_sharpe() weights = ef.clean_weights() pd.Series(weights).plot.pie(figsize=(10,10)); /home/luis/.local/lib/python3.8/site-packages/pypfopt/efficient_frontier.py:195: UserWarning: max_sharpe transforms the optimisation problem so additional objectives may not work as expected. warnings.warn( /home/luis/.local/lib/python3.8/site-packages/pandas/plotting/_matplotlib/core.py:1547: MatplotlibDeprecationWarning: normalize=None does not normalize if the sum is less than 1 but this behavior is deprecated since 3.3 until two minor releases later. After the deprecation period the default value will be normalize=True. To prevent normalization pass normalize=False results = ax.pie(y, labels=blabels, **kwds)">
+  <meta itemprop="datePublished" content="2021-01-17T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2021-01-17T00:00:00+00:00">
+  <meta itemprop="wordCount" content="1708">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="Trading,Investing,Python,Finance">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="Investing with Python: Part 2 - Stocks">
+  <meta name="twitter:description" content="This is a continuation of the previous post. Here I will apply the Black Litterman model to a portfolio of stocks.
+import pandas as pd import yfinance as yf import openpyxl from currency_converter import CurrencyConverter import numpy as np from pypfopt import BlackLittermanModel from pypfopt import black_litterman, risk_models # Declare constants PORTFOLIO=&#39;/mnt/wd-bigfoot/share/luis/OneDrive/Documents/Portfolio/00 portfolio.xlsx&#39; STOCKS_SHEET=&#39;Stocks&#39; START_DATE=&#39;2010-01-01&#39; END_DATE=&#39;2021-01-08&#39; ALL_WORLD=&#39;IWDA.AS&#39; TOTAL_FUNDS=40e3 # 40.000 EUR # Open the portfolio and get the stocks stocks_pd = pd.read_excel(PORTFOLIO, engine=&#39;openpyxl&#39;, sheet_name=STOCKS_SHEET) stocks_pd.index = stocks_pd[&#39;Symbol&#39;] stocks_pd = stocks_pd[[&#39;Company Name&#39;, &#39;Prediction&#39;, &#39;Pesimistic&#39;, &#39;Optimistic&#39;]] stocks_pd Company Name Prediction Pesimistic Optimistic Symbol AMD Advanced Micro Devices, Inc. 0.20 0.03 0.40 AIR.PA Airbus SE 0.10 0.03 0.20 GOOGL Alphabet Inc. 0.10 0.03 0.30 AMZN Amazon.com, Inc. 0.20 0.05 0.50 AAPL Apple Inc. 0.15 0.00 0.40 BA.L BAE Systems plc 0.00 -0.05 0.05 CSCO Cisco Systems, Inc. 0.00 -0.05 0.05 BN.PA Danone S.A. 0.00 -0.05 0.05 FB Facebook, Inc. 0.05 -0.05 0.05 GE General Electric Company 0.05 0.00 0.05 HYU.F Hyundai Corporation 0.10 0.00 0.30 IDR.MC Indra Sistemas, S.A. 0.00 -0.05 0.02 INTC Intel Corporation 0.00 -0.02 0.05 IBM International Business Machines Corporation 0.05 -0.02 0.10 IAG.MC International Consolidated Airlines Group, S.A. 0.50 -0.10 1.00 PHIA.AS Koninklijke Philips N.V. 0.00 -0.05 0.05 MEL.MC Meliá Hotels International, S.A. 0.20 0.00 0.50 MRK Merck &amp; Co., Inc. 0.05 0.00 0.05 MSFT Microsoft Corporation 0.10 0.00 0.15 NESN.SW Nestlé S.A. 0.00 -0.05 0.03 NFLX Netflix, Inc. 0.05 -0.01 0.15 NHH.MC NH Hotel Group, S.A. 0.20 -0.05 0.50 NOKIA.HE Nokia Corporation 0.05 -0.05 0.20 NVDA NVIDIA Corporation 0.10 -0.05 0.30 ORCL Oracle Corporation 0.05 0.00 0.05 PEP PepsiCo, Inc. 0.00 -0.05 0.05 QCOM QUALCOMM Incorporated 0.05 -0.02 0.15 SSUN.F Samsung Electronics Co., Ltd. 0.10 -0.02 0.20 SIE.DE Siemens Aktiengesellschaft 0.05 -0.02 0.10 ENR.DE Siemens Energy AG 0.05 -0.02 0.10 SPOT Spotify Technology S.A. 0.02 -0.05 0.10 TSLA Tesla, Inc. 0.00 -0.20 0.05 TXN Texas Instruments Incorporated 0.05 0.00 0.10 BA The Boeing Company 0.05 -0.05 0.10 KHC The Kraft Heinz Company 0.00 -0.05 0.05 PG The Procter &amp; Gamble Company 0.05 -0.05 0.05 DIS The Walt Disney Company 0.05 -0.05 0.20 TMO Thermo Fisher Scientific Inc. 0.05 -0.05 0.15 TM Toyota Motor Corporation 0.05 -0.02 0.10 UBER Uber Technologies, Inc. 0.10 -0.10 0.20 UL Unilever PLC 0.00 -0.05 0.05 # Get the historical data of the stocks and exchange to EUR stocks = pd.DataFrame() cc = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=&#39;True&#39;) for symbol in stocks_pd.index: history = yf.download(symbol, start=START_DATE, end=END_DATE)[&#39;Adj Close&#39;] dataframe = pd.DataFrame(history) currency = yf.Ticker(symbol).info[&#39;currency&#39;].upper() dataframe.columns = [ symbol &#43; &#39;:&#39; &#43; currency ] # Add Market Cap to the stocks_pd stocks_pd.at[symbol, &#39;Market Cap&#39;] = cc.convert(yf.Ticker(symbol).info[&#39;marketCap&#39;], currency, &#39;EUR&#39;, dataframe.index[-1].to_pydatetime()) # Add column with security in EUR if needed if currency.lower() != &#39;eur&#39;: for index in dataframe.index: original_value = dataframe.at[index, symbol &#43; &#39;:&#39; &#43; currency] value = cc.convert(original_value, currency, &#39;EUR&#39;, date=index.to_pydatetime()) dataframe.at[index, symbol &#43; &#39;:EUR&#39;] = value # Merge everything stocks = pd.concat([ stocks, dataframe], axis=&#39;columns&#39;) # Fill any NA values with the best forward or backarwd value stocks.fillna(method=&#39;ffill&#39;, inplace=True) del cc, symbol, history, dataframe, currency, original_value, value, index [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed stocks_pd Company Name Prediction Pesimistic Optimistic Market Cap Symbol AMD Advanced Micro Devices, Inc. 0.20 0.03 0.40 8.148238e&#43;10 AIR.PA Airbus SE 0.10 0.03 0.20 7.461750e&#43;10 GOOGL Alphabet Inc. 0.10 0.03 0.30 1.183262e&#43;12 AMZN Amazon.com, Inc. 0.20 0.05 0.50 1.355935e&#43;12 AAPL Apple Inc. 0.15 0.00 0.40 1.765546e&#43;12 BA.L BAE Systems plc 0.00 -0.05 0.05 1.787769e&#43;10 CSCO Cisco Systems, Inc. 0.00 -0.05 0.05 1.811978e&#43;11 BN.PA Danone S.A. 0.00 -0.05 0.05 3.849391e&#43;10 FB Facebook, Inc. 0.05 -0.05 0.05 7.102801e&#43;11 GE General Electric Company 0.05 0.00 0.05 9.526443e&#43;10 HYU.F Hyundai Corporation 0.10 0.00 0.30 3.768063e&#43;10 IDR.MC Indra Sistemas, S.A. 0.00 -0.05 0.02 1.320735e&#43;09 INTC Intel Corporation 0.00 -0.02 0.05 2.213519e&#43;11 IBM International Business Machines Corporation 0.05 -0.02 0.10 1.000500e&#43;11 IAG.MC International Consolidated Airlines Group, S.A. 0.50 -0.10 1.00 1.080973e&#43;10 PHIA.AS Koninklijke Philips N.V. 0.00 -0.05 0.05 4.355928e&#43;10 MEL.MC Meliá Hotels International, S.A. 0.20 0.00 0.50 1.345669e&#43;09 MRK Merck &amp; Co., Inc. 0.05 0.00 0.05 1.683183e&#43;11 MSFT Microsoft Corporation 0.10 0.00 0.15 1.537831e&#43;12 NESN.SW Nestlé S.A. 0.00 -0.05 0.03 2.751414e&#43;11 NFLX Netflix, Inc. 0.05 -0.01 0.15 2.033889e&#43;11 NHH.MC NH Hotel Group, S.A. 0.20 -0.05 0.50 1.475451e&#43;09 NOKIA.HE Nokia Corporation 0.05 -0.05 0.20 1.926819e&#43;10 NVDA NVIDIA Corporation 0.10 -0.05 0.30 2.806550e&#43;11 ORCL Oracle Corporation 0.05 0.00 0.05 1.641228e&#43;11 PEP PepsiCo, Inc. 0.00 -0.05 0.05 1.651222e&#43;11 QCOM QUALCOMM Incorporated 0.05 -0.02 0.15 1.291990e&#43;11 SSUN.F Samsung Electronics Co., Ltd. 0.10 -0.02 0.20 4.059750e&#43;11 SIE.DE Siemens Aktiengesellschaft 0.05 -0.02 0.10 1.086902e&#43;11 ENR.DE Siemens Energy AG 0.05 -0.02 0.10 2.160643e&#43;10 SPOT Spotify Technology S.A. 0.02 -0.05 0.10 4.376889e&#43;10 TSLA Tesla, Inc. 0.00 -0.20 0.05 5.454659e&#43;11 TXN Texas Instruments Incorporated 0.05 0.00 0.10 1.416198e&#43;11 BA The Boeing Company 0.05 -0.05 0.10 1.208403e&#43;11 KHC The Kraft Heinz Company 0.00 -0.05 0.05 4.085665e&#43;10 PG The Procter &amp; Gamble Company 0.05 -0.05 0.05 2.802307e&#43;11 DIS The Walt Disney Company 0.05 -0.05 0.20 2.940217e&#43;11 TMO Thermo Fisher Scientific Inc. 0.05 -0.05 0.15 1.527621e&#43;11 TM Toyota Motor Corporation 0.05 -0.02 0.10 1.805378e&#43;11 UBER Uber Technologies, Inc. 0.10 -0.10 0.20 8.531728e&#43;10 UL Unilever PLC 0.00 -0.05 0.05 1.977436e&#43;11 # Get market reference (MSCI All World Accumulative ETF in USD) market = pd.DataFrame(yf.download(ALL_WORLD, start=START_DATE, end=END_DATE)[&#39;Adj Close&#39;]) market.columns = [&#39;Market Ref:USD&#39;] cc = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=&#39;True&#39;) for index in market.index: original_value = market.at[index, &#39;Market Ref:USD&#39;] value = cc.convert(original_value, &#39;USD&#39;, &#39;EUR&#39;, date=index.to_pydatetime()) market.at[index, &#39;Market Ref:EUR&#39;] = value # Fill any NA values with the best forward or backarwd value market.fillna(method=&#39;ffill&#39;, inplace=True) del cc, original_value, value, index [*********************100%***********************] 1 of 1 completed # Clean up dataframes and keep only EUR with the symbol name # Same for Market for column in stocks.columns: if &#39;:EUR&#39; not in column: stocks.drop(column, axis=&#39;columns&#39;, inplace=True) symbol, currency = column.split(&#39;:&#39;) stocks.rename(mapper={column: symbol}, axis=&#39;columns&#39;, inplace=True) for column in market.columns: if &#39;:EUR&#39; not in column: market.drop(column, axis=&#39;columns&#39;, inplace=True) symbol, currency = column.split(&#39;:&#39;) market.rename(mapper={column: symbol}, axis=&#39;columns&#39;, inplace=True) del column, symbol, currency # Create a checkpoint stocks.to_csv(&#39;cache_stocks.csv&#39;) market.to_csv(&#39;cache_market.csv&#39;) # Restore Checkpoint stocks = pd.read_csv(&#39;cache_stocks.csv&#39;) stocks.set_index(pd.DatetimeIndex(stocks[&#39;Date&#39;]), inplace=True) stocks.drop([&#39;Date&#39;], axis=&#39;columns&#39;, inplace=True) market = pd.read_csv(&#39;cache_market.csv&#39;) market.set_index(pd.DatetimeIndex(market[&#39;Date&#39;]), inplace=True) market.drop([&#39;Date&#39;], axis=&#39;columns&#39;, inplace=True) # Construct the dictionary with your views views = stocks_pd[&#39;Prediction&#39;].to_dict() # Construct a uncertanties dictionary optimistic = stocks_pd[&#39;Optimistic&#39;].to_dict() pesimistic = stocks_pd[&#39;Pesimistic&#39;].to_dict() variances = [] for symbol in views.keys(): sigma = (optimistic[symbol] - pesimistic[symbol])/2 variances.append(sigma ** 2) omega = np.diag(variances) del optimistic, pesimistic, variances, symbol, sigma # Construct the Black Litterman S = risk_models.CovarianceShrinkage(stocks).ledoit_wolf() delta = black_litterman.market_implied_risk_aversion(market[&#39;Market Ref&#39;]) # Using a pi equal weighted as the market caps for stocks are too complex to calculate bl = BlackLittermanModel(S, pi=&#34;market&#34;, market_caps=stocks_pd[&#39;Market Cap&#39;], risk_aversion=delta, absolute_views=views, omega=omega) ret_bl = bl.bl_returns() S_bl = bl.bl_cov() from pypfopt import EfficientFrontier, objective_functions ef = EfficientFrontier(ret_bl, S_bl) ef.add_objective(objective_functions.L2_reg) ef.max_sharpe() weights = ef.clean_weights() pd.Series(weights).plot.pie(figsize=(10,10)); /home/luis/.local/lib/python3.8/site-packages/pypfopt/efficient_frontier.py:195: UserWarning: max_sharpe transforms the optimisation problem so additional objectives may not work as expected. warnings.warn( /home/luis/.local/lib/python3.8/site-packages/pandas/plotting/_matplotlib/core.py:1547: MatplotlibDeprecationWarning: normalize=None does not normalize if the sum is less than 1 but this behavior is deprecated since 3.3 until two minor releases later. After the deprecation period the default value will be normalize=True. To prevent normalization pass normalize=False results = ax.pie(y, labels=blabels, **kwds)">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2021/01/investing-with-python-part-2-stocks/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="Investing with Python: Part 2 - Stocks">
+  <meta property="og:description" content="This is a continuation of the previous post. Here I will apply the Black Litterman model to a portfolio of stocks.
+import pandas as pd import yfinance as yf import openpyxl from currency_converter import CurrencyConverter import numpy as np from pypfopt import BlackLittermanModel from pypfopt import black_litterman, risk_models # Declare constants PORTFOLIO=&#39;/mnt/wd-bigfoot/share/luis/OneDrive/Documents/Portfolio/00 portfolio.xlsx&#39; STOCKS_SHEET=&#39;Stocks&#39; START_DATE=&#39;2010-01-01&#39; END_DATE=&#39;2021-01-08&#39; ALL_WORLD=&#39;IWDA.AS&#39; TOTAL_FUNDS=40e3 # 40.000 EUR # Open the portfolio and get the stocks stocks_pd = pd.read_excel(PORTFOLIO, engine=&#39;openpyxl&#39;, sheet_name=STOCKS_SHEET) stocks_pd.index = stocks_pd[&#39;Symbol&#39;] stocks_pd = stocks_pd[[&#39;Company Name&#39;, &#39;Prediction&#39;, &#39;Pesimistic&#39;, &#39;Optimistic&#39;]] stocks_pd Company Name Prediction Pesimistic Optimistic Symbol AMD Advanced Micro Devices, Inc. 0.20 0.03 0.40 AIR.PA Airbus SE 0.10 0.03 0.20 GOOGL Alphabet Inc. 0.10 0.03 0.30 AMZN Amazon.com, Inc. 0.20 0.05 0.50 AAPL Apple Inc. 0.15 0.00 0.40 BA.L BAE Systems plc 0.00 -0.05 0.05 CSCO Cisco Systems, Inc. 0.00 -0.05 0.05 BN.PA Danone S.A. 0.00 -0.05 0.05 FB Facebook, Inc. 0.05 -0.05 0.05 GE General Electric Company 0.05 0.00 0.05 HYU.F Hyundai Corporation 0.10 0.00 0.30 IDR.MC Indra Sistemas, S.A. 0.00 -0.05 0.02 INTC Intel Corporation 0.00 -0.02 0.05 IBM International Business Machines Corporation 0.05 -0.02 0.10 IAG.MC International Consolidated Airlines Group, S.A. 0.50 -0.10 1.00 PHIA.AS Koninklijke Philips N.V. 0.00 -0.05 0.05 MEL.MC Meliá Hotels International, S.A. 0.20 0.00 0.50 MRK Merck &amp; Co., Inc. 0.05 0.00 0.05 MSFT Microsoft Corporation 0.10 0.00 0.15 NESN.SW Nestlé S.A. 0.00 -0.05 0.03 NFLX Netflix, Inc. 0.05 -0.01 0.15 NHH.MC NH Hotel Group, S.A. 0.20 -0.05 0.50 NOKIA.HE Nokia Corporation 0.05 -0.05 0.20 NVDA NVIDIA Corporation 0.10 -0.05 0.30 ORCL Oracle Corporation 0.05 0.00 0.05 PEP PepsiCo, Inc. 0.00 -0.05 0.05 QCOM QUALCOMM Incorporated 0.05 -0.02 0.15 SSUN.F Samsung Electronics Co., Ltd. 0.10 -0.02 0.20 SIE.DE Siemens Aktiengesellschaft 0.05 -0.02 0.10 ENR.DE Siemens Energy AG 0.05 -0.02 0.10 SPOT Spotify Technology S.A. 0.02 -0.05 0.10 TSLA Tesla, Inc. 0.00 -0.20 0.05 TXN Texas Instruments Incorporated 0.05 0.00 0.10 BA The Boeing Company 0.05 -0.05 0.10 KHC The Kraft Heinz Company 0.00 -0.05 0.05 PG The Procter &amp; Gamble Company 0.05 -0.05 0.05 DIS The Walt Disney Company 0.05 -0.05 0.20 TMO Thermo Fisher Scientific Inc. 0.05 -0.05 0.15 TM Toyota Motor Corporation 0.05 -0.02 0.10 UBER Uber Technologies, Inc. 0.10 -0.10 0.20 UL Unilever PLC 0.00 -0.05 0.05 # Get the historical data of the stocks and exchange to EUR stocks = pd.DataFrame() cc = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=&#39;True&#39;) for symbol in stocks_pd.index: history = yf.download(symbol, start=START_DATE, end=END_DATE)[&#39;Adj Close&#39;] dataframe = pd.DataFrame(history) currency = yf.Ticker(symbol).info[&#39;currency&#39;].upper() dataframe.columns = [ symbol &#43; &#39;:&#39; &#43; currency ] # Add Market Cap to the stocks_pd stocks_pd.at[symbol, &#39;Market Cap&#39;] = cc.convert(yf.Ticker(symbol).info[&#39;marketCap&#39;], currency, &#39;EUR&#39;, dataframe.index[-1].to_pydatetime()) # Add column with security in EUR if needed if currency.lower() != &#39;eur&#39;: for index in dataframe.index: original_value = dataframe.at[index, symbol &#43; &#39;:&#39; &#43; currency] value = cc.convert(original_value, currency, &#39;EUR&#39;, date=index.to_pydatetime()) dataframe.at[index, symbol &#43; &#39;:EUR&#39;] = value # Merge everything stocks = pd.concat([ stocks, dataframe], axis=&#39;columns&#39;) # Fill any NA values with the best forward or backarwd value stocks.fillna(method=&#39;ffill&#39;, inplace=True) del cc, symbol, history, dataframe, currency, original_value, value, index [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed [*********************100%***********************] 1 of 1 completed stocks_pd Company Name Prediction Pesimistic Optimistic Market Cap Symbol AMD Advanced Micro Devices, Inc. 0.20 0.03 0.40 8.148238e&#43;10 AIR.PA Airbus SE 0.10 0.03 0.20 7.461750e&#43;10 GOOGL Alphabet Inc. 0.10 0.03 0.30 1.183262e&#43;12 AMZN Amazon.com, Inc. 0.20 0.05 0.50 1.355935e&#43;12 AAPL Apple Inc. 0.15 0.00 0.40 1.765546e&#43;12 BA.L BAE Systems plc 0.00 -0.05 0.05 1.787769e&#43;10 CSCO Cisco Systems, Inc. 0.00 -0.05 0.05 1.811978e&#43;11 BN.PA Danone S.A. 0.00 -0.05 0.05 3.849391e&#43;10 FB Facebook, Inc. 0.05 -0.05 0.05 7.102801e&#43;11 GE General Electric Company 0.05 0.00 0.05 9.526443e&#43;10 HYU.F Hyundai Corporation 0.10 0.00 0.30 3.768063e&#43;10 IDR.MC Indra Sistemas, S.A. 0.00 -0.05 0.02 1.320735e&#43;09 INTC Intel Corporation 0.00 -0.02 0.05 2.213519e&#43;11 IBM International Business Machines Corporation 0.05 -0.02 0.10 1.000500e&#43;11 IAG.MC International Consolidated Airlines Group, S.A. 0.50 -0.10 1.00 1.080973e&#43;10 PHIA.AS Koninklijke Philips N.V. 0.00 -0.05 0.05 4.355928e&#43;10 MEL.MC Meliá Hotels International, S.A. 0.20 0.00 0.50 1.345669e&#43;09 MRK Merck &amp; Co., Inc. 0.05 0.00 0.05 1.683183e&#43;11 MSFT Microsoft Corporation 0.10 0.00 0.15 1.537831e&#43;12 NESN.SW Nestlé S.A. 0.00 -0.05 0.03 2.751414e&#43;11 NFLX Netflix, Inc. 0.05 -0.01 0.15 2.033889e&#43;11 NHH.MC NH Hotel Group, S.A. 0.20 -0.05 0.50 1.475451e&#43;09 NOKIA.HE Nokia Corporation 0.05 -0.05 0.20 1.926819e&#43;10 NVDA NVIDIA Corporation 0.10 -0.05 0.30 2.806550e&#43;11 ORCL Oracle Corporation 0.05 0.00 0.05 1.641228e&#43;11 PEP PepsiCo, Inc. 0.00 -0.05 0.05 1.651222e&#43;11 QCOM QUALCOMM Incorporated 0.05 -0.02 0.15 1.291990e&#43;11 SSUN.F Samsung Electronics Co., Ltd. 0.10 -0.02 0.20 4.059750e&#43;11 SIE.DE Siemens Aktiengesellschaft 0.05 -0.02 0.10 1.086902e&#43;11 ENR.DE Siemens Energy AG 0.05 -0.02 0.10 2.160643e&#43;10 SPOT Spotify Technology S.A. 0.02 -0.05 0.10 4.376889e&#43;10 TSLA Tesla, Inc. 0.00 -0.20 0.05 5.454659e&#43;11 TXN Texas Instruments Incorporated 0.05 0.00 0.10 1.416198e&#43;11 BA The Boeing Company 0.05 -0.05 0.10 1.208403e&#43;11 KHC The Kraft Heinz Company 0.00 -0.05 0.05 4.085665e&#43;10 PG The Procter &amp; Gamble Company 0.05 -0.05 0.05 2.802307e&#43;11 DIS The Walt Disney Company 0.05 -0.05 0.20 2.940217e&#43;11 TMO Thermo Fisher Scientific Inc. 0.05 -0.05 0.15 1.527621e&#43;11 TM Toyota Motor Corporation 0.05 -0.02 0.10 1.805378e&#43;11 UBER Uber Technologies, Inc. 0.10 -0.10 0.20 8.531728e&#43;10 UL Unilever PLC 0.00 -0.05 0.05 1.977436e&#43;11 # Get market reference (MSCI All World Accumulative ETF in USD) market = pd.DataFrame(yf.download(ALL_WORLD, start=START_DATE, end=END_DATE)[&#39;Adj Close&#39;]) market.columns = [&#39;Market Ref:USD&#39;] cc = CurrencyConverter(fallback_on_missing_rate=True, fallback_on_wrong_date=&#39;True&#39;) for index in market.index: original_value = market.at[index, &#39;Market Ref:USD&#39;] value = cc.convert(original_value, &#39;USD&#39;, &#39;EUR&#39;, date=index.to_pydatetime()) market.at[index, &#39;Market Ref:EUR&#39;] = value # Fill any NA values with the best forward or backarwd value market.fillna(method=&#39;ffill&#39;, inplace=True) del cc, original_value, value, index [*********************100%***********************] 1 of 1 completed # Clean up dataframes and keep only EUR with the symbol name # Same for Market for column in stocks.columns: if &#39;:EUR&#39; not in column: stocks.drop(column, axis=&#39;columns&#39;, inplace=True) symbol, currency = column.split(&#39;:&#39;) stocks.rename(mapper={column: symbol}, axis=&#39;columns&#39;, inplace=True) for column in market.columns: if &#39;:EUR&#39; not in column: market.drop(column, axis=&#39;columns&#39;, inplace=True) symbol, currency = column.split(&#39;:&#39;) market.rename(mapper={column: symbol}, axis=&#39;columns&#39;, inplace=True) del column, symbol, currency # Create a checkpoint stocks.to_csv(&#39;cache_stocks.csv&#39;) market.to_csv(&#39;cache_market.csv&#39;) # Restore Checkpoint stocks = pd.read_csv(&#39;cache_stocks.csv&#39;) stocks.set_index(pd.DatetimeIndex(stocks[&#39;Date&#39;]), inplace=True) stocks.drop([&#39;Date&#39;], axis=&#39;columns&#39;, inplace=True) market = pd.read_csv(&#39;cache_market.csv&#39;) market.set_index(pd.DatetimeIndex(market[&#39;Date&#39;]), inplace=True) market.drop([&#39;Date&#39;], axis=&#39;columns&#39;, inplace=True) # Construct the dictionary with your views views = stocks_pd[&#39;Prediction&#39;].to_dict() # Construct a uncertanties dictionary optimistic = stocks_pd[&#39;Optimistic&#39;].to_dict() pesimistic = stocks_pd[&#39;Pesimistic&#39;].to_dict() variances = [] for symbol in views.keys(): sigma = (optimistic[symbol] - pesimistic[symbol])/2 variances.append(sigma ** 2) omega = np.diag(variances) del optimistic, pesimistic, variances, symbol, sigma # Construct the Black Litterman S = risk_models.CovarianceShrinkage(stocks).ledoit_wolf() delta = black_litterman.market_implied_risk_aversion(market[&#39;Market Ref&#39;]) # Using a pi equal weighted as the market caps for stocks are too complex to calculate bl = BlackLittermanModel(S, pi=&#34;market&#34;, market_caps=stocks_pd[&#39;Market Cap&#39;], risk_aversion=delta, absolute_views=views, omega=omega) ret_bl = bl.bl_returns() S_bl = bl.bl_cov() from pypfopt import EfficientFrontier, objective_functions ef = EfficientFrontier(ret_bl, S_bl) ef.add_objective(objective_functions.L2_reg) ef.max_sharpe() weights = ef.clean_weights() pd.Series(weights).plot.pie(figsize=(10,10)); /home/luis/.local/lib/python3.8/site-packages/pypfopt/efficient_frontier.py:195: UserWarning: max_sharpe transforms the optimisation problem so additional objectives may not work as expected. warnings.warn( /home/luis/.local/lib/python3.8/site-packages/pandas/plotting/_matplotlib/core.py:1547: MatplotlibDeprecationWarning: normalize=None does not normalize if the sum is less than 1 but this behavior is deprecated since 3.3 until two minor releases later. After the deprecation period the default value will be normalize=True. To prevent normalization pass normalize=False results = ax.pie(y, labels=blabels, **kwds)">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2021-01-17T00:00:00+00:00">
+    <meta property="article:modified_time" content="2021-01-17T00:00:00+00:00">
+    <meta property="article:tag" content="Trading">
+    <meta property="article:tag" content="Investing">
+    <meta property="article:tag" content="Python">
+    <meta property="article:tag" content="Finance">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="business" />
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2021-01-17 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        9 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2021/01/investing-with-python-part-2-stocks/">Investing with Python: Part 2 - Stocks</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <p>This is a continuation of the previous post. Here I will apply the Black Litterman model to a portfolio of stocks.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> yfinance <span style="color:#66d9ef">as</span> yf
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> openpyxl
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> currency_converter <span style="color:#f92672">import</span> CurrencyConverter
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> numpy <span style="color:#66d9ef">as</span> np
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pypfopt <span style="color:#f92672">import</span> BlackLittermanModel
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> pypfopt <span style="color:#f92672">import</span> black_litterman, risk_models
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Declare constants</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>PORTFOLIO<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;/mnt/wd-bigfoot/share/luis/OneDrive/Documents/Portfolio/00 portfolio.xlsx&#39;</span>
+</span></span><span style="display:flex;"><span>STOCKS_SHEET<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;Stocks&#39;</span>
+</span></span><span style="display:flex;"><span>START_DATE<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;2010-01-01&#39;</span>
+</span></span><span style="display:flex;"><span>END_DATE<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;2021-01-08&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ALL_WORLD<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;IWDA.AS&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TOTAL_FUNDS<span style="color:#f92672">=</span><span style="color:#ae81ff">40e3</span> <span style="color:#75715e"># 40.000 EUR</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Open the portfolio and get the stocks</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>stocks_pd <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_excel(PORTFOLIO, engine<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;openpyxl&#39;</span>, sheet_name<span style="color:#f92672">=</span>STOCKS_SHEET)
+</span></span><span style="display:flex;"><span>stocks_pd<span style="color:#f92672">.</span>index <span style="color:#f92672">=</span> stocks_pd[<span style="color:#e6db74">&#39;Symbol&#39;</span>]
+</span></span><span style="display:flex;"><span>stocks_pd <span style="color:#f92672">=</span> stocks_pd[[<span style="color:#e6db74">&#39;Company Name&#39;</span>, <span style="color:#e6db74">&#39;Prediction&#39;</span>, <span style="color:#e6db74">&#39;Pesimistic&#39;</span>, <span style="color:#e6db74">&#39;Optimistic&#39;</span>]]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>stocks_pd
+</span></span></code></pre></div>
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Company Name</th>
+      <th>Prediction</th>
+      <th>Pesimistic</th>
+      <th>Optimistic</th>
+    </tr>
+    <tr>
+      <th>Symbol</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>AMD</th>
+      <td>Advanced Micro Devices, Inc.</td>
+      <td>0.20</td>
+      <td>0.03</td>
+      <td>0.40</td>
+    </tr>
+    <tr>
+      <th>AIR.PA</th>
+      <td>Airbus SE</td>
+      <td>0.10</td>
+      <td>0.03</td>
+      <td>0.20</td>
+    </tr>
+    <tr>
+      <th>GOOGL</th>
+      <td>Alphabet Inc.</td>
+      <td>0.10</td>
+      <td>0.03</td>
+      <td>0.30</td>
+    </tr>
+    <tr>
+      <th>AMZN</th>
+      <td>Amazon.com, Inc.</td>
+      <td>0.20</td>
+      <td>0.05</td>
+      <td>0.50</td>
+    </tr>
+    <tr>
+      <th>AAPL</th>
+      <td>Apple Inc.</td>
+      <td>0.15</td>
+      <td>0.00</td>
+      <td>0.40</td>
+    </tr>
+    <tr>
+      <th>BA.L</th>
+      <td>BAE Systems plc</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+    </tr>
+    <tr>
+      <th>CSCO</th>
+      <td>Cisco Systems, Inc.</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+    </tr>
+    <tr>
+      <th>BN.PA</th>
+      <td>Danone S.A.</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+    </tr>
+    <tr>
+      <th>FB</th>
+      <td>Facebook, Inc.</td>
+      <td>0.05</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+    </tr>
+    <tr>
+      <th>GE</th>
+      <td>General Electric Company</td>
+      <td>0.05</td>
+      <td>0.00</td>
+      <td>0.05</td>
+    </tr>
+    <tr>
+      <th>HYU.F</th>
+      <td>Hyundai Corporation</td>
+      <td>0.10</td>
+      <td>0.00</td>
+      <td>0.30</td>
+    </tr>
+    <tr>
+      <th>IDR.MC</th>
+      <td>Indra Sistemas, S.A.</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.02</td>
+    </tr>
+    <tr>
+      <th>INTC</th>
+      <td>Intel Corporation</td>
+      <td>0.00</td>
+      <td>-0.02</td>
+      <td>0.05</td>
+    </tr>
+    <tr>
+      <th>IBM</th>
+      <td>International Business Machines Corporation</td>
+      <td>0.05</td>
+      <td>-0.02</td>
+      <td>0.10</td>
+    </tr>
+    <tr>
+      <th>IAG.MC</th>
+      <td>International Consolidated Airlines Group, S.A.</td>
+      <td>0.50</td>
+      <td>-0.10</td>
+      <td>1.00</td>
+    </tr>
+    <tr>
+      <th>PHIA.AS</th>
+      <td>Koninklijke Philips N.V.</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+    </tr>
+    <tr>
+      <th>MEL.MC</th>
+      <td>Meliá Hotels International, S.A.</td>
+      <td>0.20</td>
+      <td>0.00</td>
+      <td>0.50</td>
+    </tr>
+    <tr>
+      <th>MRK</th>
+      <td>Merck &amp; Co., Inc.</td>
+      <td>0.05</td>
+      <td>0.00</td>
+      <td>0.05</td>
+    </tr>
+    <tr>
+      <th>MSFT</th>
+      <td>Microsoft Corporation</td>
+      <td>0.10</td>
+      <td>0.00</td>
+      <td>0.15</td>
+    </tr>
+    <tr>
+      <th>NESN.SW</th>
+      <td>Nestlé S.A.</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.03</td>
+    </tr>
+    <tr>
+      <th>NFLX</th>
+      <td>Netflix, Inc.</td>
+      <td>0.05</td>
+      <td>-0.01</td>
+      <td>0.15</td>
+    </tr>
+    <tr>
+      <th>NHH.MC</th>
+      <td>NH Hotel Group, S.A.</td>
+      <td>0.20</td>
+      <td>-0.05</td>
+      <td>0.50</td>
+    </tr>
+    <tr>
+      <th>NOKIA.HE</th>
+      <td>Nokia Corporation</td>
+      <td>0.05</td>
+      <td>-0.05</td>
+      <td>0.20</td>
+    </tr>
+    <tr>
+      <th>NVDA</th>
+      <td>NVIDIA Corporation</td>
+      <td>0.10</td>
+      <td>-0.05</td>
+      <td>0.30</td>
+    </tr>
+    <tr>
+      <th>ORCL</th>
+      <td>Oracle Corporation</td>
+      <td>0.05</td>
+      <td>0.00</td>
+      <td>0.05</td>
+    </tr>
+    <tr>
+      <th>PEP</th>
+      <td>PepsiCo, Inc.</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+    </tr>
+    <tr>
+      <th>QCOM</th>
+      <td>QUALCOMM Incorporated</td>
+      <td>0.05</td>
+      <td>-0.02</td>
+      <td>0.15</td>
+    </tr>
+    <tr>
+      <th>SSUN.F</th>
+      <td>Samsung Electronics Co., Ltd.</td>
+      <td>0.10</td>
+      <td>-0.02</td>
+      <td>0.20</td>
+    </tr>
+    <tr>
+      <th>SIE.DE</th>
+      <td>Siemens Aktiengesellschaft</td>
+      <td>0.05</td>
+      <td>-0.02</td>
+      <td>0.10</td>
+    </tr>
+    <tr>
+      <th>ENR.DE</th>
+      <td>Siemens Energy AG</td>
+      <td>0.05</td>
+      <td>-0.02</td>
+      <td>0.10</td>
+    </tr>
+    <tr>
+      <th>SPOT</th>
+      <td>Spotify Technology S.A.</td>
+      <td>0.02</td>
+      <td>-0.05</td>
+      <td>0.10</td>
+    </tr>
+    <tr>
+      <th>TSLA</th>
+      <td>Tesla, Inc.</td>
+      <td>0.00</td>
+      <td>-0.20</td>
+      <td>0.05</td>
+    </tr>
+    <tr>
+      <th>TXN</th>
+      <td>Texas Instruments Incorporated</td>
+      <td>0.05</td>
+      <td>0.00</td>
+      <td>0.10</td>
+    </tr>
+    <tr>
+      <th>BA</th>
+      <td>The Boeing Company</td>
+      <td>0.05</td>
+      <td>-0.05</td>
+      <td>0.10</td>
+    </tr>
+    <tr>
+      <th>KHC</th>
+      <td>The Kraft Heinz Company</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+    </tr>
+    <tr>
+      <th>PG</th>
+      <td>The Procter &amp; Gamble Company</td>
+      <td>0.05</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+    </tr>
+    <tr>
+      <th>DIS</th>
+      <td>The Walt Disney Company</td>
+      <td>0.05</td>
+      <td>-0.05</td>
+      <td>0.20</td>
+    </tr>
+    <tr>
+      <th>TMO</th>
+      <td>Thermo Fisher Scientific Inc.</td>
+      <td>0.05</td>
+      <td>-0.05</td>
+      <td>0.15</td>
+    </tr>
+    <tr>
+      <th>TM</th>
+      <td>Toyota Motor Corporation</td>
+      <td>0.05</td>
+      <td>-0.02</td>
+      <td>0.10</td>
+    </tr>
+    <tr>
+      <th>UBER</th>
+      <td>Uber Technologies, Inc.</td>
+      <td>0.10</td>
+      <td>-0.10</td>
+      <td>0.20</td>
+    </tr>
+    <tr>
+      <th>UL</th>
+      <td>Unilever PLC</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Get the historical data of the stocks and exchange to EUR</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>stocks <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>DataFrame()
+</span></span><span style="display:flex;"><span>cc <span style="color:#f92672">=</span> CurrencyConverter(fallback_on_missing_rate<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, fallback_on_wrong_date<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;True&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> symbol <span style="color:#f92672">in</span> stocks_pd<span style="color:#f92672">.</span>index:
+</span></span><span style="display:flex;"><span>    history <span style="color:#f92672">=</span> yf<span style="color:#f92672">.</span>download(symbol, start<span style="color:#f92672">=</span>START_DATE, end<span style="color:#f92672">=</span>END_DATE)[<span style="color:#e6db74">&#39;Adj Close&#39;</span>]
+</span></span><span style="display:flex;"><span>    dataframe <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>DataFrame(history)
+</span></span><span style="display:flex;"><span>    currency <span style="color:#f92672">=</span> yf<span style="color:#f92672">.</span>Ticker(symbol)<span style="color:#f92672">.</span>info[<span style="color:#e6db74">&#39;currency&#39;</span>]<span style="color:#f92672">.</span>upper()
+</span></span><span style="display:flex;"><span>    dataframe<span style="color:#f92672">.</span>columns <span style="color:#f92672">=</span> [ symbol <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;:&#39;</span> <span style="color:#f92672">+</span> currency ]
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Add Market Cap to the stocks_pd</span>
+</span></span><span style="display:flex;"><span>    stocks_pd<span style="color:#f92672">.</span>at[symbol, <span style="color:#e6db74">&#39;Market Cap&#39;</span>] <span style="color:#f92672">=</span> cc<span style="color:#f92672">.</span>convert(yf<span style="color:#f92672">.</span>Ticker(symbol)<span style="color:#f92672">.</span>info[<span style="color:#e6db74">&#39;marketCap&#39;</span>],
+</span></span><span style="display:flex;"><span>                                                  currency, <span style="color:#e6db74">&#39;EUR&#39;</span>, 
+</span></span><span style="display:flex;"><span>                                                  dataframe<span style="color:#f92672">.</span>index[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>to_pydatetime())
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Add column with security in EUR if needed</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> currency<span style="color:#f92672">.</span>lower() <span style="color:#f92672">!=</span> <span style="color:#e6db74">&#39;eur&#39;</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span> index <span style="color:#f92672">in</span> dataframe<span style="color:#f92672">.</span>index:
+</span></span><span style="display:flex;"><span>            original_value <span style="color:#f92672">=</span> dataframe<span style="color:#f92672">.</span>at[index, symbol <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;:&#39;</span> <span style="color:#f92672">+</span> currency]
+</span></span><span style="display:flex;"><span>            value <span style="color:#f92672">=</span> cc<span style="color:#f92672">.</span>convert(original_value, currency, <span style="color:#e6db74">&#39;EUR&#39;</span>, date<span style="color:#f92672">=</span>index<span style="color:#f92672">.</span>to_pydatetime())
+</span></span><span style="display:flex;"><span>            dataframe<span style="color:#f92672">.</span>at[index, symbol <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;:EUR&#39;</span>] <span style="color:#f92672">=</span> value
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># Merge everything</span>
+</span></span><span style="display:flex;"><span>    stocks <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>concat([ stocks, dataframe], axis<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;columns&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Fill any NA values with the best forward or backarwd value</span>
+</span></span><span style="display:flex;"><span>stocks<span style="color:#f92672">.</span>fillna(method<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;ffill&#39;</span>, inplace<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">del</span> cc, symbol, history, dataframe, currency, original_value, value, index
+</span></span></code></pre></div><pre><code>[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+[*********************100%***********************]  1 of 1 completed
+</code></pre>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>stocks_pd
+</span></span></code></pre></div>
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Company Name</th>
+      <th>Prediction</th>
+      <th>Pesimistic</th>
+      <th>Optimistic</th>
+      <th>Market Cap</th>
+    </tr>
+    <tr>
+      <th>Symbol</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>AMD</th>
+      <td>Advanced Micro Devices, Inc.</td>
+      <td>0.20</td>
+      <td>0.03</td>
+      <td>0.40</td>
+      <td>8.148238e+10</td>
+    </tr>
+    <tr>
+      <th>AIR.PA</th>
+      <td>Airbus SE</td>
+      <td>0.10</td>
+      <td>0.03</td>
+      <td>0.20</td>
+      <td>7.461750e+10</td>
+    </tr>
+    <tr>
+      <th>GOOGL</th>
+      <td>Alphabet Inc.</td>
+      <td>0.10</td>
+      <td>0.03</td>
+      <td>0.30</td>
+      <td>1.183262e+12</td>
+    </tr>
+    <tr>
+      <th>AMZN</th>
+      <td>Amazon.com, Inc.</td>
+      <td>0.20</td>
+      <td>0.05</td>
+      <td>0.50</td>
+      <td>1.355935e+12</td>
+    </tr>
+    <tr>
+      <th>AAPL</th>
+      <td>Apple Inc.</td>
+      <td>0.15</td>
+      <td>0.00</td>
+      <td>0.40</td>
+      <td>1.765546e+12</td>
+    </tr>
+    <tr>
+      <th>BA.L</th>
+      <td>BAE Systems plc</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+      <td>1.787769e+10</td>
+    </tr>
+    <tr>
+      <th>CSCO</th>
+      <td>Cisco Systems, Inc.</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+      <td>1.811978e+11</td>
+    </tr>
+    <tr>
+      <th>BN.PA</th>
+      <td>Danone S.A.</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+      <td>3.849391e+10</td>
+    </tr>
+    <tr>
+      <th>FB</th>
+      <td>Facebook, Inc.</td>
+      <td>0.05</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+      <td>7.102801e+11</td>
+    </tr>
+    <tr>
+      <th>GE</th>
+      <td>General Electric Company</td>
+      <td>0.05</td>
+      <td>0.00</td>
+      <td>0.05</td>
+      <td>9.526443e+10</td>
+    </tr>
+    <tr>
+      <th>HYU.F</th>
+      <td>Hyundai Corporation</td>
+      <td>0.10</td>
+      <td>0.00</td>
+      <td>0.30</td>
+      <td>3.768063e+10</td>
+    </tr>
+    <tr>
+      <th>IDR.MC</th>
+      <td>Indra Sistemas, S.A.</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.02</td>
+      <td>1.320735e+09</td>
+    </tr>
+    <tr>
+      <th>INTC</th>
+      <td>Intel Corporation</td>
+      <td>0.00</td>
+      <td>-0.02</td>
+      <td>0.05</td>
+      <td>2.213519e+11</td>
+    </tr>
+    <tr>
+      <th>IBM</th>
+      <td>International Business Machines Corporation</td>
+      <td>0.05</td>
+      <td>-0.02</td>
+      <td>0.10</td>
+      <td>1.000500e+11</td>
+    </tr>
+    <tr>
+      <th>IAG.MC</th>
+      <td>International Consolidated Airlines Group, S.A.</td>
+      <td>0.50</td>
+      <td>-0.10</td>
+      <td>1.00</td>
+      <td>1.080973e+10</td>
+    </tr>
+    <tr>
+      <th>PHIA.AS</th>
+      <td>Koninklijke Philips N.V.</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+      <td>4.355928e+10</td>
+    </tr>
+    <tr>
+      <th>MEL.MC</th>
+      <td>Meliá Hotels International, S.A.</td>
+      <td>0.20</td>
+      <td>0.00</td>
+      <td>0.50</td>
+      <td>1.345669e+09</td>
+    </tr>
+    <tr>
+      <th>MRK</th>
+      <td>Merck &amp; Co., Inc.</td>
+      <td>0.05</td>
+      <td>0.00</td>
+      <td>0.05</td>
+      <td>1.683183e+11</td>
+    </tr>
+    <tr>
+      <th>MSFT</th>
+      <td>Microsoft Corporation</td>
+      <td>0.10</td>
+      <td>0.00</td>
+      <td>0.15</td>
+      <td>1.537831e+12</td>
+    </tr>
+    <tr>
+      <th>NESN.SW</th>
+      <td>Nestlé S.A.</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.03</td>
+      <td>2.751414e+11</td>
+    </tr>
+    <tr>
+      <th>NFLX</th>
+      <td>Netflix, Inc.</td>
+      <td>0.05</td>
+      <td>-0.01</td>
+      <td>0.15</td>
+      <td>2.033889e+11</td>
+    </tr>
+    <tr>
+      <th>NHH.MC</th>
+      <td>NH Hotel Group, S.A.</td>
+      <td>0.20</td>
+      <td>-0.05</td>
+      <td>0.50</td>
+      <td>1.475451e+09</td>
+    </tr>
+    <tr>
+      <th>NOKIA.HE</th>
+      <td>Nokia Corporation</td>
+      <td>0.05</td>
+      <td>-0.05</td>
+      <td>0.20</td>
+      <td>1.926819e+10</td>
+    </tr>
+    <tr>
+      <th>NVDA</th>
+      <td>NVIDIA Corporation</td>
+      <td>0.10</td>
+      <td>-0.05</td>
+      <td>0.30</td>
+      <td>2.806550e+11</td>
+    </tr>
+    <tr>
+      <th>ORCL</th>
+      <td>Oracle Corporation</td>
+      <td>0.05</td>
+      <td>0.00</td>
+      <td>0.05</td>
+      <td>1.641228e+11</td>
+    </tr>
+    <tr>
+      <th>PEP</th>
+      <td>PepsiCo, Inc.</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+      <td>1.651222e+11</td>
+    </tr>
+    <tr>
+      <th>QCOM</th>
+      <td>QUALCOMM Incorporated</td>
+      <td>0.05</td>
+      <td>-0.02</td>
+      <td>0.15</td>
+      <td>1.291990e+11</td>
+    </tr>
+    <tr>
+      <th>SSUN.F</th>
+      <td>Samsung Electronics Co., Ltd.</td>
+      <td>0.10</td>
+      <td>-0.02</td>
+      <td>0.20</td>
+      <td>4.059750e+11</td>
+    </tr>
+    <tr>
+      <th>SIE.DE</th>
+      <td>Siemens Aktiengesellschaft</td>
+      <td>0.05</td>
+      <td>-0.02</td>
+      <td>0.10</td>
+      <td>1.086902e+11</td>
+    </tr>
+    <tr>
+      <th>ENR.DE</th>
+      <td>Siemens Energy AG</td>
+      <td>0.05</td>
+      <td>-0.02</td>
+      <td>0.10</td>
+      <td>2.160643e+10</td>
+    </tr>
+    <tr>
+      <th>SPOT</th>
+      <td>Spotify Technology S.A.</td>
+      <td>0.02</td>
+      <td>-0.05</td>
+      <td>0.10</td>
+      <td>4.376889e+10</td>
+    </tr>
+    <tr>
+      <th>TSLA</th>
+      <td>Tesla, Inc.</td>
+      <td>0.00</td>
+      <td>-0.20</td>
+      <td>0.05</td>
+      <td>5.454659e+11</td>
+    </tr>
+    <tr>
+      <th>TXN</th>
+      <td>Texas Instruments Incorporated</td>
+      <td>0.05</td>
+      <td>0.00</td>
+      <td>0.10</td>
+      <td>1.416198e+11</td>
+    </tr>
+    <tr>
+      <th>BA</th>
+      <td>The Boeing Company</td>
+      <td>0.05</td>
+      <td>-0.05</td>
+      <td>0.10</td>
+      <td>1.208403e+11</td>
+    </tr>
+    <tr>
+      <th>KHC</th>
+      <td>The Kraft Heinz Company</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+      <td>4.085665e+10</td>
+    </tr>
+    <tr>
+      <th>PG</th>
+      <td>The Procter &amp; Gamble Company</td>
+      <td>0.05</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+      <td>2.802307e+11</td>
+    </tr>
+    <tr>
+      <th>DIS</th>
+      <td>The Walt Disney Company</td>
+      <td>0.05</td>
+      <td>-0.05</td>
+      <td>0.20</td>
+      <td>2.940217e+11</td>
+    </tr>
+    <tr>
+      <th>TMO</th>
+      <td>Thermo Fisher Scientific Inc.</td>
+      <td>0.05</td>
+      <td>-0.05</td>
+      <td>0.15</td>
+      <td>1.527621e+11</td>
+    </tr>
+    <tr>
+      <th>TM</th>
+      <td>Toyota Motor Corporation</td>
+      <td>0.05</td>
+      <td>-0.02</td>
+      <td>0.10</td>
+      <td>1.805378e+11</td>
+    </tr>
+    <tr>
+      <th>UBER</th>
+      <td>Uber Technologies, Inc.</td>
+      <td>0.10</td>
+      <td>-0.10</td>
+      <td>0.20</td>
+      <td>8.531728e+10</td>
+    </tr>
+    <tr>
+      <th>UL</th>
+      <td>Unilever PLC</td>
+      <td>0.00</td>
+      <td>-0.05</td>
+      <td>0.05</td>
+      <td>1.977436e+11</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Get market reference (MSCI All World Accumulative ETF in USD)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>market <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>DataFrame(yf<span style="color:#f92672">.</span>download(ALL_WORLD, start<span style="color:#f92672">=</span>START_DATE, end<span style="color:#f92672">=</span>END_DATE)[<span style="color:#e6db74">&#39;Adj Close&#39;</span>])
+</span></span><span style="display:flex;"><span>market<span style="color:#f92672">.</span>columns <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#39;Market Ref:USD&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>cc <span style="color:#f92672">=</span> CurrencyConverter(fallback_on_missing_rate<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>, fallback_on_wrong_date<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;True&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> index <span style="color:#f92672">in</span> market<span style="color:#f92672">.</span>index:
+</span></span><span style="display:flex;"><span>    original_value <span style="color:#f92672">=</span> market<span style="color:#f92672">.</span>at[index, <span style="color:#e6db74">&#39;Market Ref:USD&#39;</span>]
+</span></span><span style="display:flex;"><span>    value <span style="color:#f92672">=</span> cc<span style="color:#f92672">.</span>convert(original_value, <span style="color:#e6db74">&#39;USD&#39;</span>, <span style="color:#e6db74">&#39;EUR&#39;</span>, date<span style="color:#f92672">=</span>index<span style="color:#f92672">.</span>to_pydatetime())
+</span></span><span style="display:flex;"><span>    market<span style="color:#f92672">.</span>at[index, <span style="color:#e6db74">&#39;Market Ref:EUR&#39;</span>] <span style="color:#f92672">=</span> value
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Fill any NA values with the best forward or backarwd value</span>
+</span></span><span style="display:flex;"><span>market<span style="color:#f92672">.</span>fillna(method<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;ffill&#39;</span>, inplace<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">del</span> cc, original_value, value, index
+</span></span></code></pre></div><pre><code>[*********************100%***********************]  1 of 1 completed
+</code></pre>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Clean up dataframes and keep only EUR with the symbol name</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Same for Market</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> column <span style="color:#f92672">in</span> stocks<span style="color:#f92672">.</span>columns:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#39;:EUR&#39;</span> <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> column:
+</span></span><span style="display:flex;"><span>            stocks<span style="color:#f92672">.</span>drop(column, axis<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;columns&#39;</span>, inplace<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    symbol, currency <span style="color:#f92672">=</span> column<span style="color:#f92672">.</span>split(<span style="color:#e6db74">&#39;:&#39;</span>)
+</span></span><span style="display:flex;"><span>    stocks<span style="color:#f92672">.</span>rename(mapper<span style="color:#f92672">=</span>{column: symbol}, axis<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;columns&#39;</span>, inplace<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> column <span style="color:#f92672">in</span> market<span style="color:#f92672">.</span>columns:
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#e6db74">&#39;:EUR&#39;</span> <span style="color:#f92672">not</span> <span style="color:#f92672">in</span> column:
+</span></span><span style="display:flex;"><span>            market<span style="color:#f92672">.</span>drop(column, axis<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;columns&#39;</span>, inplace<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>    symbol, currency <span style="color:#f92672">=</span> column<span style="color:#f92672">.</span>split(<span style="color:#e6db74">&#39;:&#39;</span>)
+</span></span><span style="display:flex;"><span>    market<span style="color:#f92672">.</span>rename(mapper<span style="color:#f92672">=</span>{column: symbol}, axis<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;columns&#39;</span>, inplace<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">del</span> column, symbol, currency
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Create a checkpoint</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>stocks<span style="color:#f92672">.</span>to_csv(<span style="color:#e6db74">&#39;cache_stocks.csv&#39;</span>)
+</span></span><span style="display:flex;"><span>market<span style="color:#f92672">.</span>to_csv(<span style="color:#e6db74">&#39;cache_market.csv&#39;</span>)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Restore Checkpoint</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>stocks <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_csv(<span style="color:#e6db74">&#39;cache_stocks.csv&#39;</span>)
+</span></span><span style="display:flex;"><span>stocks<span style="color:#f92672">.</span>set_index(pd<span style="color:#f92672">.</span>DatetimeIndex(stocks[<span style="color:#e6db74">&#39;Date&#39;</span>]), inplace<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>stocks<span style="color:#f92672">.</span>drop([<span style="color:#e6db74">&#39;Date&#39;</span>], axis<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;columns&#39;</span>, inplace<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>market <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_csv(<span style="color:#e6db74">&#39;cache_market.csv&#39;</span>)
+</span></span><span style="display:flex;"><span>market<span style="color:#f92672">.</span>set_index(pd<span style="color:#f92672">.</span>DatetimeIndex(market[<span style="color:#e6db74">&#39;Date&#39;</span>]), inplace<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>market<span style="color:#f92672">.</span>drop([<span style="color:#e6db74">&#39;Date&#39;</span>], axis<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;columns&#39;</span>, inplace<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Construct the dictionary with your views</span>
+</span></span><span style="display:flex;"><span>views <span style="color:#f92672">=</span> stocks_pd[<span style="color:#e6db74">&#39;Prediction&#39;</span>]<span style="color:#f92672">.</span>to_dict()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Construct a uncertanties dictionary</span>
+</span></span><span style="display:flex;"><span>optimistic <span style="color:#f92672">=</span> stocks_pd[<span style="color:#e6db74">&#39;Optimistic&#39;</span>]<span style="color:#f92672">.</span>to_dict()
+</span></span><span style="display:flex;"><span>pesimistic <span style="color:#f92672">=</span> stocks_pd[<span style="color:#e6db74">&#39;Pesimistic&#39;</span>]<span style="color:#f92672">.</span>to_dict()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>variances <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> symbol <span style="color:#f92672">in</span> views<span style="color:#f92672">.</span>keys():
+</span></span><span style="display:flex;"><span>    sigma <span style="color:#f92672">=</span> (optimistic[symbol] <span style="color:#f92672">-</span> pesimistic[symbol])<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>
+</span></span><span style="display:flex;"><span>    variances<span style="color:#f92672">.</span>append(sigma <span style="color:#f92672">**</span> <span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>omega <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>diag(variances)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">del</span> optimistic, pesimistic, variances, symbol, sigma
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Construct the Black Litterman </span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>S <span style="color:#f92672">=</span> risk_models<span style="color:#f92672">.</span>CovarianceShrinkage(stocks)<span style="color:#f92672">.</span>ledoit_wolf()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>delta <span style="color:#f92672">=</span> black_litterman<span style="color:#f92672">.</span>market_implied_risk_aversion(market[<span style="color:#e6db74">&#39;Market Ref&#39;</span>])
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e"># Using a pi equal weighted as the market caps for stocks are too complex to calculate</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>bl <span style="color:#f92672">=</span> BlackLittermanModel(S, pi<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;market&#34;</span>, market_caps<span style="color:#f92672">=</span>stocks_pd[<span style="color:#e6db74">&#39;Market Cap&#39;</span>], 
+</span></span><span style="display:flex;"><span>                         risk_aversion<span style="color:#f92672">=</span>delta, absolute_views<span style="color:#f92672">=</span>views, omega<span style="color:#f92672">=</span>omega)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>ret_bl <span style="color:#f92672">=</span> bl<span style="color:#f92672">.</span>bl_returns()
+</span></span><span style="display:flex;"><span>S_bl <span style="color:#f92672">=</span> bl<span style="color:#f92672">.</span>bl_cov()
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> pypfopt <span style="color:#f92672">import</span> EfficientFrontier, objective_functions
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>ef <span style="color:#f92672">=</span> EfficientFrontier(ret_bl, S_bl)
+</span></span><span style="display:flex;"><span>ef<span style="color:#f92672">.</span>add_objective(objective_functions<span style="color:#f92672">.</span>L2_reg)
+</span></span><span style="display:flex;"><span>ef<span style="color:#f92672">.</span>max_sharpe()
+</span></span><span style="display:flex;"><span>weights <span style="color:#f92672">=</span> ef<span style="color:#f92672">.</span>clean_weights()
+</span></span><span style="display:flex;"><span>pd<span style="color:#f92672">.</span>Series(weights)<span style="color:#f92672">.</span>plot<span style="color:#f92672">.</span>pie(figsize<span style="color:#f92672">=</span>(<span style="color:#ae81ff">10</span>,<span style="color:#ae81ff">10</span>));
+</span></span></code></pre></div><pre><code>/home/luis/.local/lib/python3.8/site-packages/pypfopt/efficient_frontier.py:195: UserWarning: max_sharpe transforms the optimisation problem so additional objectives may not work as expected.
+  warnings.warn(
+/home/luis/.local/lib/python3.8/site-packages/pandas/plotting/_matplotlib/core.py:1547: MatplotlibDeprecationWarning: normalize=None does not normalize if the sum is less than 1 but this behavior is deprecated since 3.3 until two minor releases later. After the deprecation period the default value will be normalize=True. To prevent normalization pass normalize=False 
+  results = ax.pie(y, labels=blabels, **kwds)
+</code></pre>
+<p><img src="https://blog.miguens.one/img/invest-stocks.png" alt="png"></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> pypfopt <span style="color:#f92672">import</span> DiscreteAllocation
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>da <span style="color:#f92672">=</span> DiscreteAllocation(weights, stocks<span style="color:#f92672">.</span>iloc[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>], total_portfolio_value<span style="color:#f92672">=</span>TOTAL_FUNDS)
+</span></span><span style="display:flex;"><span>alloc, leftover <span style="color:#f92672">=</span> da<span style="color:#f92672">.</span>greedy_portfolio()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>allocation <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>DataFrame(data<span style="color:#f92672">=</span>stocks_pd[<span style="color:#e6db74">&#39;Company Name&#39;</span>], 
+</span></span><span style="display:flex;"><span>                          index<span style="color:#f92672">=</span>stocks_pd<span style="color:#f92672">.</span>index, columns<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;Company Name&#39;</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> key <span style="color:#f92672">in</span> alloc<span style="color:#f92672">.</span>keys():
+</span></span><span style="display:flex;"><span>    allocation<span style="color:#f92672">.</span>at[key, <span style="color:#e6db74">&#39;Desired Position&#39;</span>] <span style="color:#f92672">=</span> alloc[key]
+</span></span><span style="display:flex;"><span>    allocation<span style="color:#f92672">.</span>at[key, <span style="color:#e6db74">&#39;Last Price EUR&#39;</span>] <span style="color:#f92672">=</span> int(stocks<span style="color:#f92672">.</span>iloc[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>][key] <span style="color:#f92672">*</span> <span style="color:#ae81ff">100</span>)<span style="color:#f92672">/</span><span style="color:#ae81ff">100</span>
+</span></span><span style="display:flex;"><span>    allocation<span style="color:#f92672">.</span>at[key, <span style="color:#e6db74">&#39;Total Funds EUR&#39;</span>] <span style="color:#f92672">=</span> int(stocks<span style="color:#f92672">.</span>iloc[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>][key] <span style="color:#f92672">*</span> alloc[key] <span style="color:#f92672">*</span> <span style="color:#ae81ff">100</span>)<span style="color:#f92672">/</span><span style="color:#ae81ff">100</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>allocation<span style="color:#f92672">.</span>fillna(<span style="color:#ae81ff">0</span>, inplace<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span><span style="display:flex;"><span>allocation[<span style="color:#e6db74">&#39;Desired Position&#39;</span>] <span style="color:#f92672">=</span> allocation[<span style="color:#e6db74">&#39;Desired Position&#39;</span>]<span style="color:#f92672">.</span>astype(int)
+</span></span><span style="display:flex;"><span>allocation
+</span></span></code></pre></div>
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Company Name</th>
+      <th>Desired Position</th>
+      <th>Last Price EUR</th>
+      <th>Total Funds EUR</th>
+    </tr>
+    <tr>
+      <th>Symbol</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>AMD</th>
+      <td>Advanced Micro Devices, Inc.</td>
+      <td>46</td>
+      <td>81.66</td>
+      <td>3756.74</td>
+    </tr>
+    <tr>
+      <th>AIR.PA</th>
+      <td>Airbus SE</td>
+      <td>19</td>
+      <td>89.62</td>
+      <td>1702.78</td>
+    </tr>
+    <tr>
+      <th>GOOGL</th>
+      <td>Alphabet Inc.</td>
+      <td>2</td>
+      <td>1522.77</td>
+      <td>3045.55</td>
+    </tr>
+    <tr>
+      <th>AMZN</th>
+      <td>Amazon.com, Inc.</td>
+      <td>2</td>
+      <td>2713.83</td>
+      <td>5427.66</td>
+    </tr>
+    <tr>
+      <th>AAPL</th>
+      <td>Apple Inc.</td>
+      <td>28</td>
+      <td>112.19</td>
+      <td>3141.34</td>
+    </tr>
+    <tr>
+      <th>BA.L</th>
+      <td>BAE Systems plc</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th>CSCO</th>
+      <td>Cisco Systems, Inc.</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th>BN.PA</th>
+      <td>Danone S.A.</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th>FB</th>
+      <td>Facebook, Inc.</td>
+      <td>7</td>
+      <td>230.63</td>
+      <td>1614.46</td>
+    </tr>
+    <tr>
+      <th>GE</th>
+      <td>General Electric Company</td>
+      <td>80</td>
+      <td>9.66</td>
+      <td>773.20</td>
+    </tr>
+    <tr>
+      <th>HYU.F</th>
+      <td>Hyundai Corporation</td>
+      <td>29</td>
+      <td>34.29</td>
+      <td>994.69</td>
+    </tr>
+    <tr>
+      <th>IDR.MC</th>
+      <td>Indra Sistemas, S.A.</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th>INTC</th>
+      <td>Intel Corporation</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th>IBM</th>
+      <td>International Business Machines Corporation</td>
+      <td>5</td>
+      <td>109.24</td>
+      <td>546.21</td>
+    </tr>
+    <tr>
+      <th>IAG.MC</th>
+      <td>International Consolidated Airlines Group, S.A.</td>
+      <td>374</td>
+      <td>1.73</td>
+      <td>649.82</td>
+    </tr>
+    <tr>
+      <th>PHIA.AS</th>
+      <td>Koninklijke Philips N.V.</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th>MEL.MC</th>
+      <td>Meliá Hotels International, S.A.</td>
+      <td>237</td>
+      <td>5.53</td>
+      <td>1311.79</td>
+    </tr>
+    <tr>
+      <th>MRK</th>
+      <td>Merck &amp; Co., Inc.</td>
+      <td>12</td>
+      <td>71.47</td>
+      <td>857.75</td>
+    </tr>
+    <tr>
+      <th>MSFT</th>
+      <td>Microsoft Corporation</td>
+      <td>13</td>
+      <td>186.91</td>
+      <td>2429.83</td>
+    </tr>
+    <tr>
+      <th>NESN.SW</th>
+      <td>Nestlé S.A.</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th>NFLX</th>
+      <td>Netflix, Inc.</td>
+      <td>3</td>
+      <td>436.74</td>
+      <td>1310.22</td>
+    </tr>
+    <tr>
+      <th>NHH.MC</th>
+      <td>NH Hotel Group, S.A.</td>
+      <td>159</td>
+      <td>3.46</td>
+      <td>550.14</td>
+    </tr>
+    <tr>
+      <th>NOKIA.HE</th>
+      <td>Nokia Corporation</td>
+      <td>48</td>
+      <td>3.23</td>
+      <td>155.20</td>
+    </tr>
+    <tr>
+      <th>NVDA</th>
+      <td>NVIDIA Corporation</td>
+      <td>5</td>
+      <td>457.92</td>
+      <td>2289.63</td>
+    </tr>
+    <tr>
+      <th>ORCL</th>
+      <td>Oracle Corporation</td>
+      <td>15</td>
+      <td>54.12</td>
+      <td>811.92</td>
+    </tr>
+    <tr>
+      <th>PEP</th>
+      <td>PepsiCo, Inc.</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th>QCOM</th>
+      <td>QUALCOMM Incorporated</td>
+      <td>9</td>
+      <td>132.99</td>
+      <td>1196.92</td>
+    </tr>
+    <tr>
+      <th>SSUN.F</th>
+      <td>Samsung Electronics Co., Ltd.</td>
+      <td>1</td>
+      <td>1382.00</td>
+      <td>1382.00</td>
+    </tr>
+    <tr>
+      <th>SIE.DE</th>
+      <td>Siemens Aktiengesellschaft</td>
+      <td>2</td>
+      <td>124.30</td>
+      <td>248.60</td>
+    </tr>
+    <tr>
+      <th>ENR.DE</th>
+      <td>Siemens Energy AG</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th>SPOT</th>
+      <td>Spotify Technology S.A.</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th>TSLA</th>
+      <td>Tesla, Inc.</td>
+      <td>2</td>
+      <td>700.34</td>
+      <td>1400.68</td>
+    </tr>
+    <tr>
+      <th>TXN</th>
+      <td>Texas Instruments Incorporated</td>
+      <td>5</td>
+      <td>143.26</td>
+      <td>716.30</td>
+    </tr>
+    <tr>
+      <th>BA</th>
+      <td>The Boeing Company</td>
+      <td>7</td>
+      <td>182.55</td>
+      <td>1277.86</td>
+    </tr>
+    <tr>
+      <th>KHC</th>
+      <td>The Kraft Heinz Company</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th>PG</th>
+      <td>The Procter &amp; Gamble Company</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th>DIS</th>
+      <td>The Walt Disney Company</td>
+      <td>6</td>
+      <td>153.26</td>
+      <td>919.56</td>
+    </tr>
+    <tr>
+      <th>TMO</th>
+      <td>Thermo Fisher Scientific Inc.</td>
+      <td>2</td>
+      <td>429.14</td>
+      <td>858.29</td>
+    </tr>
+    <tr>
+      <th>TM</th>
+      <td>Toyota Motor Corporation</td>
+      <td>4</td>
+      <td>131.02</td>
+      <td>524.09</td>
+    </tr>
+    <tr>
+      <th>UBER</th>
+      <td>Uber Technologies, Inc.</td>
+      <td>2</td>
+      <td>48.17</td>
+      <td>96.34</td>
+    </tr>
+    <tr>
+      <th>UL</th>
+      <td>Unilever PLC</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>allocation<span style="color:#f92672">.</span>to_excel(<span style="color:#e6db74">&#39;/mnt/wd-bigfoot/share/luis/OneDrive/Documents/Portfolio/99 Last Allocation of Stocks.xlsx&#39;</span>, 
+</span></span><span style="display:flex;"><span>                    index<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span></code></pre></div>
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/trading/">trading</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/investing/">investing</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/python/">python</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/finance/">finance</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/business/">business</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        1708 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2021-01-17
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2021%2f01%2finvesting-with-python-part-2-stocks%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2021%2f01%2finvesting-with-python-part-2-stocks%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Investing%20with%20Python%3a%20Part%202%20-%20Stocks&amp;caption=Investing%20with%20Python%3a%20Part%202%20-%20Stocks&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2021%2f01%2finvesting-with-python-part-2-stocks%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Investing%20with%20Python%3a%20Part%202%20-%20Stocks&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2021%2f01%2finvesting-with-python-part-2-stocks%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2021%2f01%2finvesting-with-python-part-2-stocks%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2021%2f01%2finvesting-with-python-part-2-stocks%2f;description=Investing%20with%20Python%3a%20Part%202%20-%20Stocks" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2021%2f01%2finvesting-with-python-part-2-stocks%2f&amp;title=Investing%20with%20Python%3a%20Part%202%20-%20Stocks&amp;summary=Investing%20with%20Python%3a%20Part%202%20-%20Stocks&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2021%2f01%2finvesting-with-python-part-2-stocks%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2021%2f01%2finvesting-with-python-part-2-stocks%2f&amp;resubmit=true&amp;title=Investing%20with%20Python%3a%20Part%202%20-%20Stocks" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2021%2f01%2finvesting-with-python-part-2-stocks%2f;title=Investing%20with%20Python%3a%20Part%202%20-%20Stocks" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Investing%20with%20Python%3a%20Part%202%20-%20Stocks%20https%3a%2f%2fblog.miguens.one%2fposts%2f2021%2f01%2finvesting-with-python-part-2-stocks%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2021%2f01%2finvesting-with-python-part-2-stocks%2f&amp;t=Investing%20with%20Python%3a%20Part%202%20-%20Stocks" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Investing%20with%20Python%3a%20Part%202%20-%20Stocks&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2021%2f01%2finvesting-with-python-part-2-stocks%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2021/03/parallelism-in-python./">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">Parallelism in Python.</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2021/01/investing-with-python-part-1-etfs/">
+                    <span class="button__text">Investing with Python: Part 1 - ETFs</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

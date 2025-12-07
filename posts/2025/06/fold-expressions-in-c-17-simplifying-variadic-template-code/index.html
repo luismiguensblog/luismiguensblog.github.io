@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Introduction Variadic templates, introduced in C&#43;&#43;11, enabled functions and classes to accept an arbitrary number of arguments, but using them often required cumbersome recursion or expansion tricks. C&#43;&#43;17 addressed this complexity by introducing fold expressions, which provide a concise way to reduce (or &ldquo;fold&rdquo;) a parameter pack over a binary operator (Fold expressions (since C&#43;&#43;17) - cppreference.com). In this article, I explore what fold expressions are, how they simplify variadic template code, and how to use them effectively. I will explain their syntax (unary left/right folds vs. binary folds), demonstrate several examples (summing values, computing logical conjunctions, finding a minimum value), and discuss common use cases, best practices, and pitfalls. The tone is analytical and professional, assuming an intermediate to advanced understanding of C&#43;&#43;. By the end, you should have a thorough grasp of fold expressions and be ready to apply them in your modern C&#43;&#43; code.
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2025/06/fold-expressions-in-c-17-simplifying-variadic-template-code/" />
+
+
+    <title>
+        
+            Fold Expressions in C&#43;&#43;17: Simplifying Variadic Template Code :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="Fold Expressions in C&#43;&#43;17: Simplifying Variadic Template Code">
+  <meta itemprop="description" content="Introduction Variadic templates, introduced in C&#43;&#43;11, enabled functions and classes to accept an arbitrary number of arguments, but using them often required cumbersome recursion or expansion tricks. C&#43;&#43;17 addressed this complexity by introducing fold expressions, which provide a concise way to reduce (or “fold”) a parameter pack over a binary operator (Fold expressions (since C&#43;&#43;17) - cppreference.com). In this article, I explore what fold expressions are, how they simplify variadic template code, and how to use them effectively. I will explain their syntax (unary left/right folds vs. binary folds), demonstrate several examples (summing values, computing logical conjunctions, finding a minimum value), and discuss common use cases, best practices, and pitfalls. The tone is analytical and professional, assuming an intermediate to advanced understanding of C&#43;&#43;. By the end, you should have a thorough grasp of fold expressions and be ready to apply them in your modern C&#43;&#43; code.">
+  <meta itemprop="datePublished" content="2025-06-11T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2025-06-11T00:00:00+00:00">
+  <meta itemprop="wordCount" content="4096">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="C_cpp,Programming">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="Fold Expressions in C&#43;&#43;17: Simplifying Variadic Template Code">
+  <meta name="twitter:description" content="Introduction Variadic templates, introduced in C&#43;&#43;11, enabled functions and classes to accept an arbitrary number of arguments, but using them often required cumbersome recursion or expansion tricks. C&#43;&#43;17 addressed this complexity by introducing fold expressions, which provide a concise way to reduce (or “fold”) a parameter pack over a binary operator (Fold expressions (since C&#43;&#43;17) - cppreference.com). In this article, I explore what fold expressions are, how they simplify variadic template code, and how to use them effectively. I will explain their syntax (unary left/right folds vs. binary folds), demonstrate several examples (summing values, computing logical conjunctions, finding a minimum value), and discuss common use cases, best practices, and pitfalls. The tone is analytical and professional, assuming an intermediate to advanced understanding of C&#43;&#43;. By the end, you should have a thorough grasp of fold expressions and be ready to apply them in your modern C&#43;&#43; code.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2025/06/fold-expressions-in-c-17-simplifying-variadic-template-code/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="Fold Expressions in C&#43;&#43;17: Simplifying Variadic Template Code">
+  <meta property="og:description" content="Introduction Variadic templates, introduced in C&#43;&#43;11, enabled functions and classes to accept an arbitrary number of arguments, but using them often required cumbersome recursion or expansion tricks. C&#43;&#43;17 addressed this complexity by introducing fold expressions, which provide a concise way to reduce (or “fold”) a parameter pack over a binary operator (Fold expressions (since C&#43;&#43;17) - cppreference.com). In this article, I explore what fold expressions are, how they simplify variadic template code, and how to use them effectively. I will explain their syntax (unary left/right folds vs. binary folds), demonstrate several examples (summing values, computing logical conjunctions, finding a minimum value), and discuss common use cases, best practices, and pitfalls. The tone is analytical and professional, assuming an intermediate to advanced understanding of C&#43;&#43;. By the end, you should have a thorough grasp of fold expressions and be ready to apply them in your modern C&#43;&#43; code.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-11T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-06-11T00:00:00+00:00">
+    <meta property="article:tag" content="C_cpp">
+    <meta property="article:tag" content="Programming">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2025-06-11 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        20 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2025/06/fold-expressions-in-c-17-simplifying-variadic-template-code/">Fold Expressions in C++17: Simplifying Variadic Template Code</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="introduction">Introduction</h2>
+<p>Variadic templates, introduced in C++11, enabled functions and classes to accept an arbitrary number of arguments, but using them often required cumbersome recursion or expansion tricks. C++17 addressed this complexity by introducing <strong>fold expressions</strong>, which provide a concise way to <strong>reduce (or &ldquo;fold&rdquo;) a parameter pack over a binary operator</strong> (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=Reduces%20,a%20binary%20operator">Fold expressions (since C++17) - cppreference.com</a>). In this article, I explore what fold expressions are, how they simplify variadic template code, and how to use them effectively. I will explain their syntax (unary left/right folds vs. binary folds), demonstrate several examples (summing values, computing logical conjunctions, finding a minimum value), and discuss common use cases, best practices, and pitfalls. The tone is analytical and professional, assuming an intermediate to advanced understanding of C++. By the end, you should have a thorough grasp of fold expressions and be ready to apply them in your modern C++ code.</p>
+<h2 id="what-are-fold-expressions">What Are Fold Expressions?</h2>
+<p>Fold expressions are a language feature (added in C++17) that automatically expands a parameter pack with a given binary operator, producing a single combined result. In essence, a fold expression applies a binary operator repeatedly to each template argument in a pack, <strong>effectively reducing a pack of values down to one value</strong> (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=Reduces%20,a%20binary%20operator">Fold expressions (since C++17) - cppreference.com</a>). The name &ldquo;fold&rdquo; comes from functional programming, where <em>fold</em> (or <em>reduce</em>) operations combine a sequence of elements using a function or operator to produce a single result. C++17 brings this capability into the core language, allowing the compiler to generate the necessary code to combine all arguments, rather than the programmer writing explicit loops or recursive templates.</p>
+<p>Before fold expressions, programmers had to expand parameter packs manually. For example, to sum an arbitrary list of numbers, one common approach was to write a recursive variadic template or use an <code>std::initializer_list</code> trick. Such solutions were verbose and error-prone. Fold expressions simplify this by letting <strong>the compiler generate the boilerplate</strong>. As a result, code that accumulates or processes pack arguments becomes shorter, clearer, and less likely to harbor bugs. In this article, <em>I will use first-person pronouns to guide you through understanding and using fold expressions, drawing on my experience to explain their mechanics and nuances in a formal yet approachable manner.</em></p>
+<h2 id="syntax-and-variants-of-fold-expressions">Syntax and Variants of Fold Expressions</h2>
+<p>The C++17 standard defines four forms of fold expressions, distinguished by whether they have an <strong>initial value</strong> and whether the fold is <strong>left-associative</strong> or <strong>right-associative</strong>. The general syntax uses an ellipsis (<code>...</code>) on either the left or right of the parameter pack, optionally with an initial seed value. The four variants are (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=,%284">Fold expressions (since C++17) - cppreference.com</a>):</p>
+<ol>
+<li><strong>Unary left fold:</strong> <code>(... op pack)</code> – the operator <code>op</code> is applied <em>left-associatively</em> across the pack.</li>
+<li><strong>Unary right fold:</strong> <code>(pack op ...)</code> – the operator is applied <em>right-associatively</em> across the pack.</li>
+<li><strong>Binary left fold:</strong> <code>(init op ... op pack)</code> – like a left fold but with an initial value <code>init</code> that is placed to the left of the pack.</li>
+<li><strong>Binary right fold:</strong> <code>(pack op ... op init)</code> – like a right fold but with an initial value on the right of the pack.</li>
+</ol>
+<p>In these forms, <em>pack</em> is an expression containing the parameter pack (the expanded variadic arguments), <em>op</em> is the binary operator used for folding, and <em>init</em> is an initial value (an expression that does <strong>not</strong> contain the pack) (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=op%20,cast%20at%20the%20top%20level">Fold expressions (since C++17) - cppreference.com</a>). Importantly, the opening and closing parentheses around the entire fold expression are <strong>required</strong> by the syntax (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=%28formally%2C%20a%20cast">Fold expressions (since C++17) - cppreference.com</a>).</p>
+<p>The fold operator <code>op</code> can be any of the 32 allowed binary operators in C++ (for example, <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code>, <code>^</code>, <code>&amp;</code>, <code>|</code>, <code>&amp;&amp;</code>, <code>||</code>, <code>==</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;&lt;</code>, <code>&gt;&gt;</code>, the comma <code>,</code>, etc.) (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=op%20,unexpanded%20pack%20and%20does%20not">Fold expressions (since C++17) - cppreference.com</a>). In a binary fold (one with an initial value), the same operator must appear on both sides of the ellipsis (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=op%20,unexpanded%20pack%20and%20does%20not">Fold expressions (since C++17) - cppreference.com</a>). This means you cannot mix different operators in a single fold expression. For instance, <code>(args + ... - init)</code> is not a valid fold, because the operator to the left of the pack (<code>+</code>) is different from the one to the right (<code>-</code>). Both must be the same in forms 3 and 4.</p>
+<p><strong>Associativity (Left vs. Right):</strong> The position of the ellipsis determines how the expression is parenthesised by the compiler. A <em>unary left fold</em> <code>(... op pack)</code> expands to <code>((pack1 op pack2) op pack3) op ... op packN</code> (fully left-associative), whereas a <em>unary right fold</em> <code>(pack op ...)</code> expands to <code>pack1 op (pack2 op (pack3 op ... op packN))</code> (fully right-associative) (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=The%20instantiation%20of%20a%20fold,the%20expression%20e%20as%20follows">Fold expressions (since C++17) - cppreference.com</a>). In other words, the left fold combines elements from left to right, and the right fold combines from right to left. For many associative operators (like addition or multiplication), left vs. right fold yields the same result. However, for non-associative or order-dependent operators, the difference is significant.</p>
+<p>For example, consider a simple subtraction of a pack of numbers:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span>... Args<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> leftFoldSubtract(Args... args) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (... <span style="color:#f92672">-</span> args);  <span style="color:#75715e">// unary left fold
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span>... Args<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> rightFoldSubtract(Args... args) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (args <span style="color:#f92672">-</span> ...);  <span style="color:#75715e">// unary right fold
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> leftFoldSubtract(<span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">2</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;   <span style="color:#75715e">// (10 - 3) - 2
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> rightFoldSubtract(<span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">2</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;  <span style="color:#75715e">// 10 - (3 - 2)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span></code></pre></div><p>In the <code>leftFoldSubtract</code> call, the expansion is <code>((10 - 3) - 2)</code>, which yields <code>5</code>. In <code>rightFoldSubtract</code>, the expansion is <code>10 - (3 - 2)</code>, which yields <code>9</code>. The results differ (<code>5</code> vs <code>9</code>) because subtraction is not associative, so the order of folding matters (<a href="https://www.fluentcpp.com/2021/03/12/cpp-fold-expressions/#:~:text=match%20at%20L216%20Then%20when,Quite%20a%20different%20result">C++ Fold Expressions 101 - Fluent C++</a>). This example illustrates that you must choose left or right folds carefully based on the operation&rsquo;s properties. Generally, for <em>left-associative</em> semantics use the <code>(... op pack)</code> form, and for <em>right-associative</em> semantics use <code>(pack op ...)</code>. (If this reminds you of functional programming, C++&rsquo;s left fold corresponds to Haskell&rsquo;s <code>foldl</code>, and the right fold corresponds to <code>foldr</code> (<a href="https://www.modernescpp.com/index.php/from-variadic-templates-to-fold-expressions/#:~:text=Fold%20expression%20allows%20it%20to,and%20foldr1%20directly%20in%20C">From Variadic Templates to Fold Expressions – MC++ BLOG</a>).)</p>
+<p><strong>Initial Values (Binary Folds):</strong> The binary fold variants allow specifying an initial value to be folded in. For instance, <code>(init op ... op pack)</code> will start the fold by combining <code>init</code> with the first element of the pack (for a left fold) or combining the last element of the pack with <code>init</code> (for a right fold). Initial values serve as a <strong>base case</strong> or identity element for the fold. They are especially useful when the parameter pack might be empty, or when you want to ensure a certain result if no arguments are provided. For example, one could define a summation with an initial value 0:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span>... Args<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> sumAll(Args... args) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (<span style="color:#ae81ff">0</span> <span style="color:#f92672">+</span> ... <span style="color:#f92672">+</span> args);  <span style="color:#75715e">// binary left fold with init = 0
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span></code></pre></div><p>Here <code>0</code> is the initial value, so if <code>sumAll</code> is called with no arguments, the result would just be <code>0</code>. In fact, certain operators have well-defined <em>identity</em> values that make sense as defaults. C++17 fold expressions define that for an empty pack: logical AND (<code>&amp;&amp;</code>) yields <code>true</code> (since true is the identity for AND), logical OR (<code>||</code>) yields <code>false</code>, and the comma operator (<code>,</code>) yields <code>void()</code> (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=When%20a%20unary%20fold%20is,the%20following%20operators%20are%20allowed">Fold expressions (since C++17) - cppreference.com</a>). These are the only operators that can fold an empty pack <strong>without</strong> an explicitly provided initial value. For all other operators (e.g. arithmetic ones like <code>+</code> or <code>*</code>), an empty pack without an init is an error, because the compiler wouldn’t know what value to produce. Thus, if there&rsquo;s a possibility of no arguments, you <strong>must provide an initial value</strong> for non-boolean folds (or otherwise ensure at least one argument is present).</p>
+<p><strong>Syntax Requirements:</strong> Because fold expressions introduce new syntax, there are a few rules to be aware of:</p>
+<ul>
+<li>You must enclose the fold expression in parentheses. For example, <code>return ... + args;</code> (without parentheses) is invalid, whereas <code>return (... + args);</code> is correct.</li>
+<li>If either the pack expression or the initial expression contains an operator with lower precedence than the fold operator, you should parenthesise that sub-expression to avoid parsing issues (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=If%20the%20expression%20used%20as,level%2C%20it%20must%20be%20parenthesized">Fold expressions (since C++17) - cppreference.com</a>). For instance, writing <code>(args + ... + 1 * 2)</code> is problematic because the multiplication <code>1 * 2</code> has lower precedence than <code>+</code> and confuses the parser; it should be written as <code>(args + ... + (1 * 2))</code> (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=int%20sum%28Args%26%26...%20args%29%20,%2F%2F%20OK">Fold expressions (since C++17) - cppreference.com</a>). In practice, a good rule is to <strong>put parentheses around sub-expressions</strong> inside a fold expression unless they are simple variables or literals.</li>
+</ul>
+<p>Having covered the syntax and structure of fold expressions, let&rsquo;s move on to some concrete examples demonstrating how folds can simplify code for various common tasks.</p>
+<h2 id="examples-and-use-cases-of-fold-expressions">Examples and Use Cases of Fold Expressions</h2>
+<p>Fold expressions shine in scenarios where a pack of arguments needs to be combined or processed in a uniform way. Below are several illustrative examples using different operators: summing numbers, computing a logical conjunction (testing if all conditions are true), and finding a minimum value. These examples use only the C++ standard library and language features.</p>
+<h3 id="summation-of-a-parameter-pack">Summation of a Parameter Pack</h3>
+<p>Perhaps the simplest use of a fold is summing a list of values. Without fold expressions, you might implement a <code>sum</code> function via recursion or overloaded initializer lists. With C++17, it becomes almost trivial:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span>... Args<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> sum(Args... args) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (... <span style="color:#f92672">+</span> args);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This single line returns the sum of all values in <code>args...</code> by folding the <code>+</code> operator over the parameter pack. It is a <strong>unary left fold</strong> – equivalent to writing <code>(((arg1 + arg2) + arg3) + ... + argN)</code>. The C++ Core Guidelines note this approach as <em>good and much more flexible</em> than using C-style varargs or manual recursion (<a href="https://cpp-core-guidelines-docs.vercel.app/functions#:~:text=template">F: Functions – C++</a>). For example, <code>sum(3, 5, 10)</code> will yield <code>18</code>, and <code>sum(3.14, 2.718, 1.0)</code> will yield approximately <code>6.858</code>. The template will work for any types that support the <code>+</code> operator (and where the + operation is associative enough for summation to make sense).</p>
+<p>It&rsquo;s worth mentioning that if <code>Args...</code> is empty, the above <code>sum</code> function would not compile (since there&rsquo;s nothing to fold and <code>+</code> has no identity defined in C++). If we wanted <code>sum()</code> (with no arguments) to return 0, we could provide an initial value: for instance, <code>return (0 + ... + args);</code> as shown earlier. In most cases, though, one would simply avoid calling <code>sum</code> with no arguments or handle it separately. The key takeaway is that <strong>fold expressions drastically simplify variadic accumulation logic</strong>: the compiler generates the cascade of <code>+</code> operations for us. This improves both clarity and safety, as there&rsquo;s no recursion or pack-unpacking boilerplate to get wrong.</p>
+<h3 id="logical-conjunction-all-true">Logical Conjunction (All True)</h3>
+<p>Another common scenario is determining if a condition holds for <strong>all</strong> arguments in a pack (a logical conjunction of values). For example, we might want to implement a function <code>allTrue(x1, x2, ..., xN)</code> that returns true if <em>every</em> argument is true (or non-zero) and false if any argument is false. Using a fold with the logical AND operator <code>&amp;&amp;</code> makes this straightforward:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span>... Args<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> allTrue(Args... args) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> (... <span style="color:#f92672">&amp;&amp;</span> args);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This uses a unary left fold of <code>&amp;&amp;</code> over the pack. It effectively expands to <code>((arg1 &amp;&amp; arg2) &amp;&amp; arg3) &amp;&amp; ... &amp;&amp; argN</code>. The result is <code>true</code> only if every <code>arg</code> in the pack is truthy (convertible to true). If the pack is empty, as mentioned, the fold of <code>&amp;&amp;</code> yields <code>true</code> by definition (since an empty conjunction is true – the identity element for logical AND) (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=When%20a%20unary%20fold%20is,the%20following%20operators%20are%20allowed">Fold expressions (since C++17) - cppreference.com</a>). So <code>allTrue()</code> with no arguments would return <code>true</code> (though such a call is probably of limited usefulness).</p>
+<p>Let&rsquo;s see it in action. Suppose we call <code>allTrue(true, true, false, true)</code>: inside <code>allTrue</code>, the fold expands to <code>( (true &amp;&amp; true) &amp;&amp; false ) &amp;&amp; true</code> (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=template,%26%26%20args%29%3B">Fold expressions (since C++17) - cppreference.com</a>), which simplifies to <code>(true &amp;&amp; false) &amp;&amp; true</code> → <code>false &amp;&amp; true</code> → <code>false</code>. Thus, the function returns <code>false</code> because not all arguments were true. If we call <code>allTrue(1 &lt; 2, 10, std::strcmp(s1, s2) == 0)</code>, it will evaluate each expression and combine them with <code>&amp;&amp;</code> in the same manner. Notably, the fold expression preserves the short-circuit semantics of <code>&amp;&amp;</code>. The expansion is fully parenthesised, but each <code>&amp;&amp;</code> will stop evaluating further operands as soon as one <code>false</code> is encountered, just as in a normal chain of <code>&amp;&amp;</code> operations. (Likewise, folding with <code>||</code> will stop on the first <code>true</code> it encounters.) This short-circuit behaviour can be useful if checking a series of conditions that might be expensive — you get the benefit of stopping early if a condition fails.</p>
+<h3 id="computing-the-minimum-value">Computing the Minimum Value</h3>
+<p>Folding is not limited to built-in arithmetic or logical reductions; it can also help with more custom computations. As a more advanced example, let&rsquo;s find the <strong>minimum</strong> value in a pack of arguments. C++ does not have a dedicated binary operator for &ldquo;min&rdquo;, but we can utilise the standard library and the comma operator fold to achieve this. One approach is:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;algorithm&gt;</span><span style="color:#75715e">  </span><span style="color:#75715e">// for std::min
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> T, <span style="color:#66d9ef">typename</span>... Rest<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>T minValue(T head, Rest... tail) {
+</span></span><span style="display:flex;"><span>    T minVal <span style="color:#f92672">=</span> head;
+</span></span><span style="display:flex;"><span>    ((minVal <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>min(minVal, tail)), ...);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> minVal;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Here we take at least one argument (<code>head</code>) and then a parameter pack of the rest. We initialise a variable <code>minVal</code> with the first argument. The fold expression <code>((minVal = std::min(minVal, tail)), ...)</code> uses the comma operator <code>,</code> to expand an assignment operation over each element in <code>tail...</code>. This is a <strong>fold for side effects</strong>: it doesn&rsquo;t directly produce a value (the comma operator&rsquo;s result is discarded in each step, except the last which we don&rsquo;t use), but it updates <code>minVal</code> as a side effect for each argument. After the fold, <code>minVal</code> holds the smallest value encountered. We then return <code>minVal</code>. For example, <code>minValue(5, 2, 8, 1, 4)</code> will return <code>1</code> (the minimum). If we call <code>minValue</code> with only one argument, it simply returns that argument. If we wanted to allow an empty call (no arguments) we would need to provide an initial value and a suitable return type, but in this design we require at least one parameter of type <code>T</code>.</p>
+<p>It’s interesting to note how this works: the fold expands something like:</p>
+<pre tabindex="0"><code>minVal = std::min(minVal, tail1),
+minVal = std::min(minVal, tail2),
+...
+minVal = std::min(minVal, tailN)
+</code></pre><p>with each comma-separated expression executed in order. The result of each comma expression is the result of the rightmost operation (here the assignment), but we aren&rsquo;t using the result value; we only care about the accumulated effect on <code>minVal</code>. This pattern of using a fold with the comma operator is a common idiom to perform an operation for each pack element (such as calling a function for each argument, or updating a state). In our case, it saves us from writing a loop manually. The code is concise yet clear: it initialises <code>minVal</code> and then <em>folds</em> the operation &ldquo;update minVal to the smaller of itself and the next element&rdquo; over all remaining arguments.</p>
+<p><strong>Other Use Cases:</strong> Fold expressions are versatile. In addition to the above scenarios, some other common uses include:</p>
+<ul>
+<li>
+<p><strong>Folding over <code>,</code> to execute a function for each argument:</strong> e.g., calling a user-provided function on each argument in a pack (similar to applying <code>std::initializer_list</code> with a braced initializer). For instance, <code>(... , (doSomething(args)))</code> will call <code>doSomething</code> on each <code>args</code>. This can replace loops or recursion for pack processing.</p>
+</li>
+<li>
+<p><strong>Outputting multiple values:</strong> Using the stream insertion operator <code>&lt;&lt;</code> in a fold is a neat way to print a sequence of arguments. For example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span>... Args<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> printAll(Args<span style="color:#f92672">&amp;&amp;</span>... args) {
+</span></span><span style="display:flex;"><span>    (std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> ... <span style="color:#f92672">&lt;&lt;</span> args) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This will fold <code>&lt;&lt;</code> across all arguments, effectively executing <code>std::cout &lt;&lt; arg1 &lt;&lt; arg2 &lt;&lt; ... &lt;&lt; argN</code>, followed by a newline (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=void%20printer%28Args%26%26...%20args%29%20,%27%5Cn%27%3B">Fold expressions (since C++17) - cppreference.com</a>). This one-liner replaces writing a loop or multiple <code>&lt;&lt;</code> operations manually.</p>
+</li>
+<li>
+<p><strong>Compile-time checks with <code>constexpr</code> and traits:</strong> You can fold logical operators to assert properties about all types in a pack. For example, <code>static_assert((std::is_integral_v&lt;Args&gt; &amp;&amp; ...), &quot;All types must be integral&quot;);</code> will validate at compile time that <em>every</em> type in the parameter pack <code>Args</code> is an integral type. Similarly, one could use folding with <code>&amp;&amp;</code> or <code>||</code> to implement trait checks like &ldquo;any of the types is trivial&rdquo;, etc.</p>
+</li>
+<li>
+<p><strong>Combining standard library containers or tuples:</strong> While more complex, you can imagine folding over <code>+</code> or <code>+=</code> to concatenate strings or accumulate containers, or even use <code>std::tuple_cat</code> in a fold expression to combine multiple tuples into one. Fold expressions can make such code much cleaner.</p>
+</li>
+</ul>
+<p>In all these cases, the theme is that <strong>fold expressions allow a sequence of operations over a pack to be expressed declaratively</strong> in one expression, rather than procedurally in many lines of code. This often leads to code that is shorter and easier to reason about, once you are comfortable with the fold expression syntax.</p>
+<h2 id="best-practices-and-common-pitfalls">Best Practices and Common Pitfalls</h2>
+<p>Fold expressions are powerful, but to use them effectively and safely, consider the following best practices and be mindful of some pitfalls:</p>
+<ul>
+<li>
+<p><strong>Prefer fold expressions for simplicity:</strong> If you need to aggregate or process all arguments in a pack, a fold expression is usually the simplest and most expressive solution. It avoids the clunky recursion of pre-C++17 variadic templates and clearly communicates the intent to the compiler (which can also optimise the code better). The C++ Core Guidelines exemplify using folds for tasks like summation as a modern best practice (<a href="https://cpp-core-guidelines-docs.vercel.app/functions#:~:text=template">F: Functions – C++</a>).</p>
+</li>
+<li>
+<p><strong>Understand the operator&rsquo;s identity (neutral element):</strong> Before choosing a fold, consider what should happen if the parameter pack is empty. If using a logical operator like <code>&amp;&amp;</code> or <code>||</code>, the language defines the result for an empty pack (true for <code>&amp;&amp;</code>, false for <code>||</code>) (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=When%20a%20unary%20fold%20is,the%20following%20operators%20are%20allowed">Fold expressions (since C++17) - cppreference.com</a>). For other operators, decide on an appropriate identity and use a binary fold with an <code>init</code>. For example, for string concatenation you might use <code>init = &quot;&quot;</code> (empty string), for multiplication use <code>init = 1</code>, and for addition use <code>init = 0</code>. Providing an initial value ensures the fold will compile (and produce the identity) even if no arguments are given.</p>
+</li>
+<li>
+<p><strong>Choose left vs. right fold appropriately:</strong> As demonstrated with subtraction, the outcome can differ based on fold direction if the operator is not associative. Generally, arithmetic and bitwise operations should use left folds (to mimic left-to-right evaluation order as one would naturally write them), unless you have a specific reason for right-associative evaluation. Conversely, some scenarios (like building an expression that naturally nests rightwards) might call for a right fold. Always think through a quick example to verify the fold orientation, especially for operators like <code>-</code>, <code>/</code>, <code>^</code> (xor), or even function calls where order matters.</p>
+</li>
+<li>
+<p><strong>Be mindful of short-circuiting and evaluation order:</strong> For <code>&amp;&amp;</code>, <code>||</code>, and <code>,</code> (comma), the evaluation order is well-defined (left-to-right for <code>&amp;&amp;</code> and <code>||</code>, and left-to-right sequencing for comma). A left fold of <code>&amp;&amp;</code> will evaluate from the first argument to the last, stopping when one is false; a right fold of <code>&amp;&amp;</code> will start evaluation at the first argument as well (due to how it is parenthesised) and also stop on the first false. In practice, both <code>(args &amp;&amp; ... )</code> and <code>(... &amp;&amp; args)</code> evaluate in left-to-right order because of <code>&amp;&amp;</code>&rsquo;s semantics. For most other operators (like <code>+</code>, <code>*</code>), C++17 does <em>not</em> guarantee left-to-right evaluation — but since these are usually used for arithmetic without side effects, it shouldn&rsquo;t matter. If your fold operands have side effects (calling functions, etc.), it&rsquo;s wise to not rely on a specific order unless using <code>&amp;&amp;</code>, <code>||</code>, or <code>,</code> where the order is guaranteed. In critical cases, refactor to separate the side effects from the fold, or use comma operator folds which do guarantee order.</p>
+</li>
+<li>
+<p><strong>Ensure the fold expression is well-parenthesised:</strong> Always wrap the entire fold in parentheses, and when in doubt, parenthesise sub-expressions inside the fold. The compiler will complain if you forget the outer parentheses. For inner expressions, as shown earlier, something like <code>(args + ... + x*y)</code> can cause a parse error; writing <code>(args + ... + (x*y))</code> is the correct approach (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=int%20sum%28Args%26%26...%20args%29%20,%2F%2F%20OK">Fold expressions (since C++17) - cppreference.com</a>). The need arises because the ellipsis has lower precedence than almost everything, and the grammar expects the pattern <code>pack op ... op init</code> with those operators at top level. If an <code>init</code> or a part of the pack includes an operator of lower precedence, it must be enclosed in <code>(</code> <code>)</code> to be treated as a single expression in that context.</p>
+</li>
+<li>
+<p><strong>Avoid overly clever folds that harm readability:</strong> While fold expressions can perform astonishing tricks (like the comma-fold trick to retrieve the last element of a pack, or the example to find the minimum using a conditional and comma), not all such code is self-explanatory. Use folds to simplify and clarify code, but if you find yourself writing a very convoluted fold expression, consider if a simple loop or a different approach would be clearer. Modern C++ is about readable <em>and</em> efficient code. A fold expression in itself is quite readable, but chaining multiple different operations in one fold or exploiting short-circuit logic to achieve a side effect (as in some clever one-liners) might confuse readers. When you do use such patterns, add comments or break the steps into separate folds for clarity.</p>
+</li>
+<li>
+<p><strong>Remember that fold expressions only work with binary operators:</strong> You cannot directly fold a function like <code>std::min</code> or a user-defined functor without using one of the allowed operators as a mediator. If you have a custom operation, you may use a lambda or function call inside a fold via the comma operator (as we did with <code>std::min</code> inside the assignment), or consider using <code>std::accumulate</code> or other algorithm if appropriate. In templates, though, folds are often the easiest route as long as you stick to the provided operators.</p>
+</li>
+</ul>
+<p>In summary, stick to the fold expression syntax rules, choose the right form for your needs, and leverage the feature to write cleaner code. Most pitfalls are easy to avoid once you&rsquo;re aware of them, and the benefits in terms of code brevity and clarity are significant.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Fold expressions are a significant addition in C++17 that elevate the expressiveness of variadic templates. By allowing the <strong>automatic expansion of parameter packs with a given operator</strong>, they eliminate the need for tedious boilerplate in many scenarios. I have shown how folds can handle summation, logical checks, and even computing a minimum, all with very succinct code. Adopting fold expressions can both simplify your implementations and improve performance (by making the intent clear to the compiler, enabling better optimisations) (<a href="https://www.modernescpp.com/index.php/from-variadic-templates-to-fold-expressions/#:~:text=A%20fold%20expression%20applies%20a,operator%20to%20a%20parameter%20pack">From Variadic Templates to Fold Expressions – MC++ BLOG</a>).</p>
+<p>From a stylistic perspective, fold expressions encourage a more <em>declarative</em> style of coding in C++ template metaprogramming: you state <em>what</em> reduction to perform, and the language takes care of <em>how</em> to expand it across all arguments. This leads to code that is often closer to the problem statement (e.g., &ldquo;return the sum of all args&rdquo;) and avoids the risk of off-by-one errors or recursion mistakes in manual expansions.</p>
+<p>As with any powerful feature, it pays to understand the subtleties — such as how left vs. right association works and when to provide an initial value. Once these are mastered, fold expressions become an indispensable tool in the modern C++ toolkit, allowing us to write code that is both elegant and efficient. I encourage you to refactor some of your variadic template code using folds and experience the improvement. The examples and guidelines provided here should serve as a solid foundation for using fold expressions confidently in your own projects.</p>
+<h2 id="references">References</h2>
+<ol>
+<li>
+<p><strong>C++17 Standard (ISO/IEC 14882:2017)</strong> – Fold expressions are defined in section <em>[expr.prim.fold]</em> of the ISO C++17 standard. (See also ISO C++20 [expr.prim.fold] for the same rules.) (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=">Fold expressions (since C++17) - cppreference.com</a>) (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=,%284">Fold expressions (since C++17) - cppreference.com</a>)</p>
+</li>
+<li>
+<p><strong>cppreference.com:</strong> <em>&ldquo;Fold expressions (since C++17)&rdquo;</em> – an overview of fold expression syntax, explanation, and examples (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=,%284">Fold expressions (since C++17) - cppreference.com</a>) (<a href="https://en.cppreference.com/w/cpp/language/fold#:~:text=When%20a%20unary%20fold%20is,the%20following%20operators%20are%20allowed">Fold expressions (since C++17) - cppreference.com</a>).</p>
+</li>
+<li>
+<p><strong>C++ Core Guidelines (F.50)</strong> – use of fold expressions for variadic functions, showing a <code>sum</code> example as a good practice (<a href="https://cpp-core-guidelines-docs.vercel.app/functions#:~:text=template">F: Functions – C++</a>).</p>
+</li>
+<li>
+<p><strong>Grimm, R. (2020). &ldquo;From Variadic Templates to Fold Expressions&rdquo;.</strong> <em>Modernes C++ Blog</em>. – Discusses how fold expressions replace recursive variadic templates and provides examples like computing <code>all()</code> with <code>&amp;&amp;</code> (<a href="https://www.modernescpp.com/index.php/from-variadic-templates-to-fold-expressions/#:~:text=The%20variadic%20templates%20,4">From Variadic Templates to Fold Expressions – MC++ BLOG</a>) (<a href="https://www.modernescpp.com/index.php/from-variadic-templates-to-fold-expressions/#:~:text=A%20fold%20expression%20applies%20a,operator%20to%20a%20parameter%20pack">From Variadic Templates to Fold Expressions – MC++ BLOG</a>).</p>
+</li>
+<li>
+<p><strong>Boccara, J. (2021). &ldquo;C++ Fold Expressions 101&rdquo;.</strong> <em>Fluent C++</em>. – Introductory article explaining fold expressions with examples, focusing on associativity differences (<a href="https://www.fluentcpp.com/2021/03/12/cpp-fold-expressions/#:~:text=We%20can%20also%20make%20the,and%20the%20dot%20dot%20dot">C++ Fold Expressions 101 - Fluent C++</a>) (<a href="https://www.fluentcpp.com/2021/03/12/cpp-fold-expressions/#:~:text=match%20at%20L257%20Then%20one,expression%2C%20inside%20of%20the%20parentheses">C++ Fold Expressions 101 - Fluent C++</a>).</p>
+</li>
+</ol>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        4096 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2025-06-11
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2ffold-expressions-in-c-17-simplifying-variadic-template-code%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2ffold-expressions-in-c-17-simplifying-variadic-template-code%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Fold%20Expressions%20in%20C%2b%2b17%3a%20Simplifying%20Variadic%20Template%20Code&amp;caption=Fold%20Expressions%20in%20C%2b%2b17%3a%20Simplifying%20Variadic%20Template%20Code&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2ffold-expressions-in-c-17-simplifying-variadic-template-code%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Fold%20Expressions%20in%20C%2b%2b17%3a%20Simplifying%20Variadic%20Template%20Code&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2ffold-expressions-in-c-17-simplifying-variadic-template-code%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2ffold-expressions-in-c-17-simplifying-variadic-template-code%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2ffold-expressions-in-c-17-simplifying-variadic-template-code%2f;description=Fold%20Expressions%20in%20C%2b%2b17%3a%20Simplifying%20Variadic%20Template%20Code" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2ffold-expressions-in-c-17-simplifying-variadic-template-code%2f&amp;title=Fold%20Expressions%20in%20C%2b%2b17%3a%20Simplifying%20Variadic%20Template%20Code&amp;summary=Fold%20Expressions%20in%20C%2b%2b17%3a%20Simplifying%20Variadic%20Template%20Code&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2ffold-expressions-in-c-17-simplifying-variadic-template-code%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2ffold-expressions-in-c-17-simplifying-variadic-template-code%2f&amp;resubmit=true&amp;title=Fold%20Expressions%20in%20C%2b%2b17%3a%20Simplifying%20Variadic%20Template%20Code" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2ffold-expressions-in-c-17-simplifying-variadic-template-code%2f;title=Fold%20Expressions%20in%20C%2b%2b17%3a%20Simplifying%20Variadic%20Template%20Code" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Fold%20Expressions%20in%20C%2b%2b17%3a%20Simplifying%20Variadic%20Template%20Code%20https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2ffold-expressions-in-c-17-simplifying-variadic-template-code%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2ffold-expressions-in-c-17-simplifying-variadic-template-code%2f&amp;t=Fold%20Expressions%20in%20C%2b%2b17%3a%20Simplifying%20Variadic%20Template%20Code" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Fold%20Expressions%20in%20C%2b%2b17%3a%20Simplifying%20Variadic%20Template%20Code&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2ffold-expressions-in-c-17-simplifying-variadic-template-code%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2025/06/inline-variables-in-c-17-odr-safe-header-definitions/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">Inline Variables in C&#43;&#43;17: ODR-Safe Header Definitions</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2025/06/introduction-to-structured-bindings/">
+                    <span class="button__text">Introduction to Structured Bindings</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

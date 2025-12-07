@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Introduction C&#43;&#43;17 introduced inline variables, a feature designed to address a long-standing challenge in C&#43;&#43;: defining variables in header files without violating the One Definition Rule (ODR). Before C&#43;&#43;17, placing a global variable definition in a header and including it in multiple source files would violate ODR, leading to linker errors or undefined behaviour. Developers had to rely on workarounds like extern declarations or the use of function templates and static variables to avoid multiple definitions. With inline variables, C&#43;&#43; now permits certain variables to be defined in headers (and included in multiple translation units) while treating those definitions as one single entity at link time. This article provides a detailed examination of inline variables, explaining what they are, how they work, why they were introduced, and their implications – both positive and negative – for C&#43;&#43; development.
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2025/06/inline-variables-in-c-17-odr-safe-header-definitions/" />
+
+
+    <title>
+        
+            Inline Variables in C&#43;&#43;17: ODR-Safe Header Definitions :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="Inline Variables in C&#43;&#43;17: ODR-Safe Header Definitions">
+  <meta itemprop="description" content="Introduction C&#43;&#43;17 introduced inline variables, a feature designed to address a long-standing challenge in C&#43;&#43;: defining variables in header files without violating the One Definition Rule (ODR). Before C&#43;&#43;17, placing a global variable definition in a header and including it in multiple source files would violate ODR, leading to linker errors or undefined behaviour. Developers had to rely on workarounds like extern declarations or the use of function templates and static variables to avoid multiple definitions. With inline variables, C&#43;&#43; now permits certain variables to be defined in headers (and included in multiple translation units) while treating those definitions as one single entity at link time. This article provides a detailed examination of inline variables, explaining what they are, how they work, why they were introduced, and their implications – both positive and negative – for C&#43;&#43; development.">
+  <meta itemprop="datePublished" content="2025-06-19T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2025-06-19T00:00:00+00:00">
+  <meta itemprop="wordCount" content="4560">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="C_cpp,Programming">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="Inline Variables in C&#43;&#43;17: ODR-Safe Header Definitions">
+  <meta name="twitter:description" content="Introduction C&#43;&#43;17 introduced inline variables, a feature designed to address a long-standing challenge in C&#43;&#43;: defining variables in header files without violating the One Definition Rule (ODR). Before C&#43;&#43;17, placing a global variable definition in a header and including it in multiple source files would violate ODR, leading to linker errors or undefined behaviour. Developers had to rely on workarounds like extern declarations or the use of function templates and static variables to avoid multiple definitions. With inline variables, C&#43;&#43; now permits certain variables to be defined in headers (and included in multiple translation units) while treating those definitions as one single entity at link time. This article provides a detailed examination of inline variables, explaining what they are, how they work, why they were introduced, and their implications – both positive and negative – for C&#43;&#43; development.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2025/06/inline-variables-in-c-17-odr-safe-header-definitions/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="Inline Variables in C&#43;&#43;17: ODR-Safe Header Definitions">
+  <meta property="og:description" content="Introduction C&#43;&#43;17 introduced inline variables, a feature designed to address a long-standing challenge in C&#43;&#43;: defining variables in header files without violating the One Definition Rule (ODR). Before C&#43;&#43;17, placing a global variable definition in a header and including it in multiple source files would violate ODR, leading to linker errors or undefined behaviour. Developers had to rely on workarounds like extern declarations or the use of function templates and static variables to avoid multiple definitions. With inline variables, C&#43;&#43; now permits certain variables to be defined in headers (and included in multiple translation units) while treating those definitions as one single entity at link time. This article provides a detailed examination of inline variables, explaining what they are, how they work, why they were introduced, and their implications – both positive and negative – for C&#43;&#43; development.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-19T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-06-19T00:00:00+00:00">
+    <meta property="article:tag" content="C_cpp">
+    <meta property="article:tag" content="Programming">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2025-06-19 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        22 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2025/06/inline-variables-in-c-17-odr-safe-header-definitions/">Inline Variables in C++17: ODR-Safe Header Definitions</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="introduction">Introduction</h2>
+<p>C++17 introduced <strong>inline variables</strong>, a feature designed to address a long-standing challenge in C++: defining variables in header files without violating the One Definition Rule (ODR). Before C++17, placing a global variable definition in a header and including it in multiple source files would violate ODR, leading to linker errors or undefined behaviour. Developers had to rely on workarounds like <code>extern</code> declarations or the use of function templates and static variables to avoid multiple definitions. With inline variables, C++ now permits certain variables to be defined in headers (and included in multiple translation units) while treating those definitions as one single entity at link time. This article provides a detailed examination of inline variables, explaining what they are, how they work, why they were introduced, and their implications – both positive and negative – for C++ development.</p>
+<h2 id="what-are-inline-variables-in-c17">What Are Inline Variables in C++17?</h2>
+<p>Inline variables are variables declared with the <code>inline</code> specifier, which gives them special linkage and ODR properties. In essence, an <strong>inline variable</strong> behaves similarly to an inline function: it can be defined in multiple translation units (for example, by being defined in a header file that is included by many source files), but the C++ program will treat those as one single definition. The C++17 standard specifies that if a variable is declared <code>inline</code>:</p>
+<ul>
+<li><strong>Multiple Definitions Allowed:</strong> You may have the <strong>same definition</strong> in different translation units (typically by including the same header). Such definitions must be identical in every translation unit. If they differ, the program is ill-formed (violating ODR) – no diagnostic required, meaning the compiler might not catch the error.</li>
+<li><strong>Single Entity Linkage:</strong> All those definitions across translation units refer to <strong>one and the same variable</strong>. Notably, an inline variable has one unified address in the program, regardless of how many times the definition is present.</li>
+<li><strong>Definition in Every Usage TU:</strong> The variable must be declared (and typically defined) <code>inline</code> in every translation unit where it is <em>odr-used</em>. ODR-use means the program requires the variable&rsquo;s definition (for example, taking its address or binding a reference to it). If any translation unit odr-uses the variable but does not see its inline definition, the program violates ODR.</li>
+</ul>
+<p>In more formal terms, the C++17 working draft N4659 (and the finalized standard) extended the ODR to allow multiple definitions for inline variables. Just as inline functions have been an exception to the &ldquo;one definition&rdquo; rule since C++98, now <strong>inline variables are an exception to ODR as well</strong>. The C++17 standard draft states that “an inline function or variable shall be defined in every translation unit in which it is odr-used” (<a href="https://timsong-cpp.github.io/cppwp/n4659/basic.def.odr#:~:text=Every%20program%20shall%20contain%20exactly,outside%20of%20a%20discarded%20statement">[basic.def.odr]</a>), and that there can be more than one definition of an inline variable in a program as long as each appears in a different translation unit and all definitions are identical. This effectively means the linker (or the compiler in link-time code generation models) will merge all these definitions into a single object in the final program.</p>
+<p><strong>Key difference from regular (non-inline) variables:</strong> Normally, a non-inline variable with external linkage (e.g. a global variable) <em>must</em> be defined exactly once in the entire program. Putting its definition in a header would cause multiple definitions when the header is included in multiple source files, violating ODR. Inline variables, however, <em>relax</em> this by allowing the same definition to appear multiple times. The program behaves &ldquo;as if there is exactly one variable&rdquo; in the whole program, thus sidestepping the usual ODR restriction.</p>
+<p><strong>ODR-Safety in Headers:</strong> Because of these rules, inline variables enable safe definitions in header files. This was a pivotal reason for their introduction – to support header-only libraries and easier maintenance of constants or global objects across multiple translation units. In short, an inline variable in a header file can be included in many .cpp files without causing multiple-definition errors, provided the definition is marked inline and is identical in each inclusion.</p>
+<h2 id="why-were-inline-variables-introduced">Why Were Inline Variables Introduced?</h2>
+<p>Inline variables were introduced to solve practical problems C++ developers faced and to simplify certain patterns. Prior to C++17, defining a variable in a header that was included in multiple source files either caused ODR violations or required cumbersome workarounds:</p>
+<ul>
+<li><strong>The <code>extern</code> Pattern:</strong> A common pattern was to declare a global in a header with <code>extern</code> and then provide exactly one definition in a single .cpp file. For example, in a header: <code>extern int globalCount;</code> and in one source file: <code>int globalCount = 42;</code>. This works but adds extra ceremony and can lead to linker errors if the definition is forgotten or duplicated by mistake. It also hinders header-only library distribution since you must ship a source file for the definitions.</li>
+<li><strong>Static Variables in Headers:</strong> Marking a global as <code>static</code> in a header gives it internal linkage, meaning each translation unit gets its own private copy. This avoids linkage conflicts but means you end up with multiple independent copies of what was intended to be one variable – not the desired effect if you truly wanted a single shared state.</li>
+<li><strong>Constexpr and In-Class Constants:</strong> C++11 allowed <code>constexpr</code> variables and certain in-class constant static members to be defined in headers, because they were usually treated as compile-time constants. However, those had restrictions (e.g., only literal types, and odr-use of a static constexpr still required an out-of-class definition in C++14, unless it was also inline by virtue of being constexpr in-class). There was inconsistency in what you could define in a header and how.</li>
+</ul>
+<p>The C++ committee recognized these issues. Herb Sutter remarked that <em>inline variables make it easier to define global variables (the &ldquo;bad news&rdquo;) correctly (the &ldquo;good news&rdquo;), including in header files. Code that people already wrote (often incorrectly) can now be made to work correctly</em>. In other words, developers were already attempting to define variables in headers (for convenience or to build header-only libraries), often through tricks or getting undefined behaviour. Inline variables officially support this pattern in a safe manner.</p>
+<p>Another major motivation was to <strong>simplify header-only libraries and components</strong>. Many modern C++ libraries are header-only (for example, header-only JSON or XML libraries, single-header utility libraries, etc.). Inline variables remove the “one definition” obstacle for shipping such libraries. As noted in cppreference, <em>inline variables eliminate the main obstacle to packaging C++ code as header-only libraries</em>. Library authors can now include variables (even those requiring dynamic initialization or non-constexpr objects) directly in headers without forcing users to link an additional translation unit for definitions or using less desirable patterns.</p>
+<p>Additionally, inline variables were a natural extension of the meaning of the <code>inline</code> keyword. Over time, the primary meaning of <code>inline</code> in C++ has shifted from an optimization hint (&ldquo;please inline-expand this function&rdquo;) to an ODR mechanism (&ldquo;this function/variable can have multiple definitions across TUs&rdquo;) (<a href="https://en.cppreference.com/w/cpp/language/inline#:~:text=shared%20statics%20listed%20above">inline specifier - cppreference.com</a>). Given that inline functions had proven useful to avoid ODR issues for functions defined in headers, it was logical to extend the same facility to variables.</p>
+<p><strong>Static Class Member Improvement:</strong> C++17 inline variables also improved the situation for static class members. Before C++17, if you had a static data member of a class, you typically had to define it in a single .cpp file if it was odr-used. C++11 <code>constexpr</code> static members could be defined in-class, but only for literal types and still had restrictions. With C++17, you can declare a static data member as <code>inline</code> inside the class definition, which means you no longer need a separate out-of-class definition for it. This change was introduced to streamline class definitions and remove the need for a redundant definition in an implementation file. (For example, <code>struct Config { inline static std::string name = &quot;default&quot;; };</code> is now valid and defines <code>Config::name</code> in the header. In C++14, one would have needed to also write <code>std::string Config::name;</code> in a .cpp file in addition to the in-class declaration.)</p>
+<p>In summary, inline variables were introduced to <strong>simplify code structure, enable header-only designs, and resolve awkward special cases</strong> where the language previously required out-of-line definitions. They save developer effort and reduce potential for error by allowing a more intuitive placement of definitions (directly where the variable is declared, even if that&rsquo;s a header).</p>
+<h2 id="how-do-inline-variables-work">How Do Inline Variables Work?</h2>
+<p>From a language semantics perspective, an inline variable has some specific rules that govern its behaviour, especially in the context of the One Definition Rule:</p>
+<ul>
+<li><strong>Multiple Identical Definitions:</strong> You can (and in fact, must, if it&rsquo;s used) have the variable defined in every translation unit that uses it, but each definition must be identical. Typically, this means you put the definition in a header file, and include that header wherever needed. The compiler will see a definition in each source file (translation unit), but the linker will treat them as one. This is very similar to how inline functions or templates work.</li>
+<li><strong>External Linkage by Default:</strong> An inline variable at namespace scope has external linkage by default (even if it&rsquo;s const). This is a subtle point: normally, a non-inline <code>const</code> at namespace scope has internal linkage unless marked <code>extern</code>. But an <code>inline const</code> variable will have external linkage, because it&rsquo;s meant to be a single shared entity across TUs. This ensures all TUs refer to the same object rather than each having a private copy.</li>
+<li><strong>Single Memory Instance:</strong> All translation units refer to the <em>same</em> memory for an inline variable. If you take the address of an inline variable in different object files, you&rsquo;ll get the same address at runtime. The standard guarantees this (the address is one and the same in every translation unit). Under the hood, the linker typically merges the definitions. On many compilers, inline variables are implemented using COMDAT sections or similar mechanisms so that one definition is kept and duplicates are discarded or merged.</li>
+<li><strong>ODR Use Requires Definition:</strong> If the variable is ODR-used (for example, you pass it by reference or do anything that requires a symbol for it), you need that inline definition available in that translation unit. If you forget to include the header in one file that uses the variable, you&rsquo;ll get an undefined reference error at link time (because the inline definition wasn&rsquo;t present in that TU). This is analogous to how not including a header with an inline function would cause an undefined function reference.</li>
+<li><strong>Initialization</strong>: Inline variables, like other global variables, can be <strong>constant-initialized</strong> (e.g., initialized with a constant expression) or <strong>dynamically initialized</strong> (with a runtime computation or constructor). If an inline variable is constant-initialized (such as a constexpr or literal constant), each translation unit might fold it to a compile-time constant, and no runtime initialization is needed. If it requires dynamic initialization (e.g., calling a non-constexpr constructor or a function), then each translation unit will have code to initialize the variable, but the implementation must ensure it only runs once. Typically, the compiler generates <strong>guard variables</strong> or threadsafe mechanisms to ensure the initialization happens exactly once, even if multiple TUs have a copy of the initialization code. We will discuss this further in the implications section.</li>
+</ul>
+<p>Let&rsquo;s illustrate how inline variables work with a concrete example.</p>
+<h2 id="using-inline-variables-examples">Using Inline Variables: Examples</h2>
+<h3 id="inline-variable-in-a-header-global-scope">Inline Variable in a Header (Global Scope)</h3>
+<p>Consider a header-only library that needs a global counter variable:</p>
+<p><strong><code>counter.h</code>:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#ifndef COUNTER_H
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#define COUNTER_H
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">int</span> global_counter <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;  <span style="color:#75715e">// define an inline global variable in header
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#endif
+</span></span></span></code></pre></div><p>This header defines an <code>inline int global_counter</code> and initializes it to 0. Because it&rsquo;s marked <code>inline</code>, we are allowed to include this header in multiple source files.</p>
+<p>For instance:</p>
+<p><strong><code>a.cpp</code>:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;counter.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">increment</span>() {
+</span></span><span style="display:flex;"><span>    global_counter <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;  <span style="color:#75715e">// use the inline variable
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span></code></pre></div><p><strong><code>b.cpp</code>:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;counter.h&#34;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">printCounter</span>() {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Counter = &#34;</span> <span style="color:#f92672">&lt;&lt;</span> global_counter <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Both <em>a.cpp</em> and <em>b.cpp</em> include the header and thus contain a definition of <code>global_counter</code>. Thanks to the inline specifier, this is not a violation of ODR – the two definitions are allowed as long as they are identical. The program, when linked, will treat <code>global_counter</code> as one variable. If <code>increment()</code> is called and then <code>printCounter()</code> is called, the output will reflect the incremented value. There will be exactly one <code>global_counter</code> alive in the program, shared between the source files.</p>
+<p>Without inline variables (in C++14), we would have had to declare <code>extern int global_counter;</code> in <em>counter.h</em> and provide <code>int global_counter = 0;</code> in one source file (and ensure it&rsquo;s linked). Inline variables eliminate that extra step and the potential for mismatch between declaration and definition.</p>
+<p><strong>Verification of ODR compliance:</strong> If we tried to define <code>global_counter</code> in two separate source files without <code>inline</code>, the linker would error out with a &ldquo;multiple definition&rdquo; or we&rsquo;d have undefined behaviour. With <code>inline</code>, the definitions are allowed and merged. The C++17 standard guarantees that as long as the definitions are the same and the inline keyword is present, the program behaves as if only one definition exists.</p>
+<h3 id="inline-static-data-member-of-a-class">Inline Static Data Member of a Class</h3>
+<p>Inline variables also apply to static members of classes. For example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Config</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">double</span> threshold <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.5</span>;   <span style="color:#75715e">// inline static member
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Demo&#34;</span>; <span style="color:#75715e">// inline static constant member
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>};
+</span></span></code></pre></div><p>Prior to C++17, if you had <code>struct Config { static double threshold; };</code> you would need to define <code>double Config::threshold = 1.5;</code> in a .cpp file. If <code>threshold</code> was odr-used (for instance, if you took its address or it wasn’t a const literal), you had to supply a definition. Now, by marking it <code>inline</code> inside the class, the definition is provided inline and you do <strong>not</strong> need a separate out-of-class definition. You can include this struct in multiple source files and use <code>Config::threshold</code> or <code>Config::name</code> freely. All translation units will refer to the same <code>Config::threshold</code> variable (again, one merged variable with a single address).</p>
+<p>Notably, C++17 also adjusted the rules so that a <code>constexpr</code> static data member is implicitly an inline variable if defined in-class. In earlier standards, <code>constexpr</code> static members still needed an out-of-class definition if they were odr-used. C++17 changed this such that the <code>constexpr</code> specifier on a static data member implies inline, removing the requirement for a separate definition. For namespace-scope <code>constexpr</code> variables, however, the specifier does <em>not</em> automatically imply inline – you would need to explicitly add <code>inline</code> if you want to allow multiple definitions. This means if you have a non-member <code>constexpr</code> in a header used in multiple TUs and you want a single shared object (particularly if its address is taken), you should declare it as <code>inline constexpr</code> to be safe.</p>
+<h3 id="inline-variables-vs-extern-vs-static--a-quick-comparison">Inline Variables vs. <code>extern</code> vs. <code>static</code> – A Quick Comparison</h3>
+<ul>
+<li><strong>Inline vs Extern:</strong> Both solve the multi-definition issue but in different ways. <code>extern</code> avoids multiple definitions by only declaring in the header (no definition), and having one actual definition elsewhere. Inline allows the definition in the header by permitting duplicates. Inline tends to be more convenient for header-only usage, whereas <code>extern</code> requires managing a separate implementation file. Inline also ensures the initializer is present in every TU (which can be important for constant expressions and header-only constants).</li>
+<li><strong>Inline vs Static in Header:</strong> A <code>static</code> variable in a header gives each file its own copy (internal linkage), whereas an inline variable is one shared entity (external linkage, merged definition). If you want one global state across the program, static in header fails that goal – each file would increment its own counter, for example, with no cross-talk. Inline achieves a single shared state.</li>
+<li><strong>Inline vs non-inline (regular global):</strong> A regular global in a header violates ODR because it would produce multiple external definitions. Inline is the proper way to make it legal. And a regular global defined in a source file (with extern in header) is just the traditional approach that inline variables streamline.</li>
+</ul>
+<h2 id="benefits-of-inline-variables">Benefits of Inline Variables</h2>
+<p>Inline variables bring several benefits to C++ developers, especially those building libraries or large projects:</p>
+<ul>
+<li><strong>Header-Only Libraries:</strong> As mentioned, the primary benefit is enabling header-only libraries to include variables (not just templates and inline functions) without needing a .cpp file. This makes distribution and usage of libraries easier – users only need to include headers, and everything (classes, functions, <em>and now variables</em>) is taken care of. The feature <em>“eliminate[s] the main obstacle to packaging C++ code as header-only libraries”</em>.</li>
+<li><strong>No More Extern Boilerplate:</strong> It removes the need for the <code>extern</code> declaration and separate definition pattern for global variables and static class members. This reduces boilerplate and the chance of mismatches (e.g., forgetting to define an extern, or defining it with a different initial value by accident).</li>
+<li><strong>Consistency with Inline Functions:</strong> It completes the symmetry with inline functions. Now that variables can be inline, the mental model of &ldquo;ODR exceptions&rdquo; is easier – both functions and variables follow similar rules. In fact, the language rules for inline variables are effectively the same as for inline functions. This uniformity can make the language easier to teach and understand at an advanced level.</li>
+<li><strong>Better Static Member Management:</strong> Inline static data members of classes simplify class definitions, especially for constants or singletons. You can now define static members (even complex ones like <code>std::vector</code> or <code>std::map</code> as a static member) in the header without an extra definition file, which was not possible before. This encourages putting initialization with the declaration, which often makes the code more readable.</li>
+<li><strong>Potential for Constant Expressions:</strong> An inline variable can also be <code>constexpr</code> if appropriate. For example, <code>inline constexpr int Answer = 42;</code> in a header is allowed. This provides a single definition that is available for compile-time use in every translation unit, again without needing a separate definition. Essentially, <code>inline constexpr</code> gives you a compile-time constant that&rsquo;s one-per-program, whereas previously one might have relied on <code>constexpr</code> (which had internal linkage if not extern) or static constexpr members.</li>
+</ul>
+<p>All these benefits come with the important caveat that the definitions must be identical and consistent. When used properly (typically by defining the inline variable in a single header), the compiler/linker ensures ODR is satisfied.</p>
+<h2 id="drawbacks-and-considerations">Drawbacks and Considerations</h2>
+<p>While inline variables are a powerful addition, developers should be aware of some implications and potential drawbacks:</p>
+<ul>
+<li>
+<p><strong>Global State (Design Concern):</strong> Inline variables make it easier to define global variables, which are sometimes considered a questionable design practice. Herb Sutter half-jokingly called it &ldquo;the bad news&rdquo; that it&rsquo;s easier to define globals now. Just because you <em>can</em> put lots of global variables in headers now doesn’t mean you <em>should</em>. Excessive use of global state can lead to hard-to-maintain code. The feature should be used judiciously – for example, for constants or singletons or configuration that genuinely needs to be globally shared.</p>
+</li>
+<li>
+<p><strong>Initialization Order and Guards:</strong> If an inline variable requires dynamic initialization (i.e., not a constexpr or literal), <strong>each translation unit will have an initialization to run</strong>. C++ already had to handle dynamic initialization order across different translation units, and inline variables add a twist to that. The implementation will ensure the initialization happens only once globally, typically by using thread-safe guard code. As C++ expert Jonathan Wakely explains, <em>&ldquo;Every file that contains the definition and uses it will try to initialize the variable. Even if that happens serially, you still need a way to mark the variable as initialized, so that only the first occurrence will initialize it and later attempts won&rsquo;t do anything. Also, you can have multiple threads before <code>main</code> starts&hellip; multiple pieces of code, all executing before <code>main</code>, all trying to initialize the same variable. That&rsquo;s what the guards are for.&rdquo;</em>. In practice, this means an inline variable with a non-trivial constructor might incur a slight overhead: a once-per-program initialization that is checked in each TU. This overhead is usually negligible, but it is there (similar to how function-local static variables are guarded).</p>
+</li>
+<li>
+<p><strong>ODR Violations Still Possible if Misused:</strong> The inline keyword prevents ODR violations only if used correctly. If two different headers or two versions of a header both declare the same inline variable name differently, the program is ill-formed (ODR violation) with no diagnostic required. This scenario might occur if, for example, you have an inline variable in a header and someone accidentally provides another definition in a different header or source (without inline). In such cases, the protection is off and you may get undefined behaviour. Essentially, you still need to ensure that there is exactly one logical definition of the inline variable across the codebase. Using inline variables doesn’t remove the need for careful design; it only allows the linker to consider multiple instances of that one definition as one entity.</p>
+</li>
+<li>
+<p><strong>Linker and Tooling Support:</strong> In general, modern compilers and linkers handle inline variables well (since C++17 is now well-supported). However, in the early days, there were some linker issues with multiple definitions until toolchains caught up. When using inline variables, one must ensure all object files are compiled as C++17 or later so the semantics are understood. This is more of a transitional concern than a long-term drawback.</p>
+</li>
+<li>
+<p><strong>Difference from <code>constexpr</code> at Namespace Scope:</strong> It&rsquo;s worth noting that a <code>constexpr</code> variable at namespace scope is <strong>not automatically inline</strong> in C++17 (unlike static members). If you want a <code>constexpr</code> in a header to be one entity, you should explicitly mark it <code>inline constexpr</code>. Otherwise, you technically have an ODR violation if it&rsquo;s ODR-used in multiple TUs (though compilers may not complain if you never take its address, since they might treat it as internal linkage due to it being const). This could be confusing to some – the language rule change was subtle. Best practice is to add <code>inline</code> to global <code>constexpr</code> variables defined in headers to clearly indicate your intent.</p>
+</li>
+<li>
+<p><strong>Memory Considerations:</strong> Generally, inline variables don&rsquo;t cost extra memory beyond a normal global. There is still only one instance. The code for initialization might appear in multiple object files, but only one will run. One should be cautious if the initializer is heavy or has side effects – it will run exactly once, but it&rsquo;s easy to forget that it runs at program startup (or on first ODR-use if that&rsquo;s deferred). The order of initialization relative to other globals (inline or not) across translation units can still be complex. C++17’s wording introduces the concept of <em>“partially-ordered”</em> initialization for inline variables: if one inline variable is defined before another in every translation unit where the second appears, their initialization order is deterministic; otherwise, it’s indeterminately sequenced (essentially unpredictable). This is an advanced point, but in simpler terms: you should not rely on the order in which global inline variables in different headers are initialized, unless one is clearly dependent on the other in every compile unit. This is the same advice as for any global initialization in C++.</p>
+</li>
+<li>
+<p><strong>Debugging and Symbol Inspection:</strong> One minor point is that when debugging or inspecting symbols, an inline variable will still appear in each object file&rsquo;s symbol table (often as a weak or COMDAT symbol). Usually the debugger will realize they&rsquo;re the same, but it&rsquo;s something to be aware of – you might see multiple symbol instances for the &ldquo;same&rdquo; variable in raw symbol dumps, all of which actually refer to one merged entity.</p>
+</li>
+</ul>
+<p>In practice, these drawbacks are manageable. The introduction of inline variables was welcomed by most C++ experts, with cautions primarily about not abusing them for unnecessary globals. The benefit of simpler code often outweighs the minor costs.</p>
+<h2 id="critical-analysis-and-advanced-notes">Critical Analysis and Advanced Notes</h2>
+<p>From a language design perspective, inline variables filled a gap in C++&rsquo;s support for <em>DRY (Don&rsquo;t Repeat Yourself)</em> principles in the context of global state and constants. By letting the programmer provide the initializer in one place (the header) and have that be the one true definition, it reduces redundancy and chances for error. It also makes templates and generic code more powerful, since now you can, for example, have a template class with an inline static member of a complex type and not worry about providing separate definitions per instantiation or violating ODR.</p>
+<p>It’s also instructive to compare inline variables with an alternative approach introduced later: <strong>modules</strong> (C++20). C++20 modules address the ODR in a different way – by avoiding redundant definitions through a sealed interface. In a modules world, one might expose a variable from a module interface and define it in the implementation part of the module, and the compiler ensures it&rsquo;s treated as one definition. However, not all code uses modules yet, and inline variables remain useful even in modular code (especially for header-only module interfaces). In some sense, inline variables were a bridge between the header-only world of C++17 and the module world of C++20+, easing some ODR pains in the interim and beyond.</p>
+<p>Another advanced consideration is combining <code>inline</code> with <code>constexpr</code> and the new C++20 keyword <code>constinit</code>. If you have an inline variable that you want to guarantee is initialized at compile-time (and avoid any runtime initialization or the associated guard), you can use <code>constexpr</code> (if it’s a constant expression) or mark it with <code>constinit</code> in C++20 to enforce that it has static initialization. For example, <code>inline constinit int cacheSize = computeCacheSize();</code> (assuming <code>computeCacheSize()</code> is constexpr or otherwise guarantees static init) would ensure that the initialization does not happen after the program starts running. This can mitigate concerns about initialization order for certain variables.</p>
+<h2 id="conclusion-and-future-considerations">Conclusion and Future Considerations</h2>
+<p>Inline variables in C++17 represent a significant quality-of-life improvement for C++ developers, particularly those building libraries or maintaining large codebases. They allow developers to define variables in header files in a straightforward way without tripping over the One Definition Rule. This feature brings consistency (treating variables much like inline functions in terms of linkage) and reduces the need for boilerplate and separation of declaration/definition.</p>
+<p>We discussed how inline variables work and why they were added: to enable header-only definitions and solve real-world pain points in a type-safe, ODR-compliant manner. We also explored examples demonstrating their use for global variables and static class members, and we analysed their benefits (simpler code, header-only libraries, unified definitions) as well as their drawbacks (potential global abuse, initialization complexity, etc.).</p>
+<p>In summary, inline variables make C++ code more expressive and easier to manage, at the cost of some internal complexity that the C++ implementation handles on our behalf. For intermediate and advanced C++ developers, understanding inline variables is important for writing modern C++17 code, especially when designing libraries or APIs. It is now possible to provide well-encapsulated global objects or constants directly in headers with minimal fuss.</p>
+<p><strong>Future considerations:</strong> Going forward, features like C++20 modules will further alleviate ODR-related issues by providing alternative ways to distribute definitions. Nonetheless, inline variables will continue to be a useful tool, even in modular code, when one wants a truly global (program-wide) object accessible across translation units. Developers should also pay attention to C++20’s <code>constinit</code> and perhaps future proposals that address initialization order, to combine with inline variables for maximum safety. Another area to watch is guidelines and best practices (such as the C++ Core Guidelines) for global state; as the language makes it easier to declare such state, the guidance on when and how to use it evolves accordingly.</p>
+<p>Inline variables may be a small language feature in terms of syntax, but they have a disproportionately positive effect on how we can structure programs. By allowing definitions in headers without ODR pitfalls, C++17 gave us a tool to write cleaner, more maintainable code – just be sure to use it responsibly, keeping in mind the considerations discussed. <strong>Inline variables ensure that “one definition” really can be one <em>logical</em> definition, even if repeated in many places, which is a powerful concept in a language as complex as C++</strong>.</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        4560 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2025-06-19
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2finline-variables-in-c-17-odr-safe-header-definitions%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2finline-variables-in-c-17-odr-safe-header-definitions%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Inline%20Variables%20in%20C%2b%2b17%3a%20ODR-Safe%20Header%20Definitions&amp;caption=Inline%20Variables%20in%20C%2b%2b17%3a%20ODR-Safe%20Header%20Definitions&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2finline-variables-in-c-17-odr-safe-header-definitions%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Inline%20Variables%20in%20C%2b%2b17%3a%20ODR-Safe%20Header%20Definitions&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2finline-variables-in-c-17-odr-safe-header-definitions%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2finline-variables-in-c-17-odr-safe-header-definitions%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2finline-variables-in-c-17-odr-safe-header-definitions%2f;description=Inline%20Variables%20in%20C%2b%2b17%3a%20ODR-Safe%20Header%20Definitions" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2finline-variables-in-c-17-odr-safe-header-definitions%2f&amp;title=Inline%20Variables%20in%20C%2b%2b17%3a%20ODR-Safe%20Header%20Definitions&amp;summary=Inline%20Variables%20in%20C%2b%2b17%3a%20ODR-Safe%20Header%20Definitions&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2finline-variables-in-c-17-odr-safe-header-definitions%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2finline-variables-in-c-17-odr-safe-header-definitions%2f&amp;resubmit=true&amp;title=Inline%20Variables%20in%20C%2b%2b17%3a%20ODR-Safe%20Header%20Definitions" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2finline-variables-in-c-17-odr-safe-header-definitions%2f;title=Inline%20Variables%20in%20C%2b%2b17%3a%20ODR-Safe%20Header%20Definitions" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Inline%20Variables%20in%20C%2b%2b17%3a%20ODR-Safe%20Header%20Definitions%20https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2finline-variables-in-c-17-odr-safe-header-definitions%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2finline-variables-in-c-17-odr-safe-header-definitions%2f&amp;t=Inline%20Variables%20in%20C%2b%2b17%3a%20ODR-Safe%20Header%20Definitions" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Inline%20Variables%20in%20C%2b%2b17%3a%20ODR-Safe%20Header%20Definitions&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2finline-variables-in-c-17-odr-safe-header-definitions%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2025/06/template-argument-deduction-for-class-templates-in-c-17/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">Template Argument Deduction for Class Templates in C&#43;&#43;17</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2025/06/fold-expressions-in-c-17-simplifying-variadic-template-code/">
+                    <span class="button__text">Fold Expressions in C&#43;&#43;17: Simplifying Variadic Template Code</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

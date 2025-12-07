@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Modern C&#43;&#43; embraces the reality of multicore processors by providing high-level tools for parallelism. The C&#43;&#43;17 standard introduced parallel algorithms, essentially parallelised versions of existing STL algorithms, to help programs take advantage of multiple cores for improved performance. In this post, we explore how C&#43;&#43;17 parallel algorithms work, focusing on the execution policies (std::execution::seq, par, and par_unseq), with examples of their use. We also discuss the performance benefits of parallel execution and critically examine the limitations – including overhead, portability, and scenarios where parallelism may not pay off. The tone is analytical and formal, with a viewpoint that whilst parallelism is powerful, it must be applied judiciously.
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2025/07/parallel-algorithms-in-c-17-execution-policies-advantages-and-limitations/" />
+
+
+    <title>
+        
+            Parallel Algorithms in C&#43;&#43;17 – Execution Policies, Advantages, and Limitations :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="Parallel Algorithms in C&#43;&#43;17 – Execution Policies, Advantages, and Limitations">
+  <meta itemprop="description" content="Modern C&#43;&#43; embraces the reality of multicore processors by providing high-level tools for parallelism. The C&#43;&#43;17 standard introduced parallel algorithms, essentially parallelised versions of existing STL algorithms, to help programs take advantage of multiple cores for improved performance. In this post, we explore how C&#43;&#43;17 parallel algorithms work, focusing on the execution policies (std::execution::seq, par, and par_unseq), with examples of their use. We also discuss the performance benefits of parallel execution and critically examine the limitations – including overhead, portability, and scenarios where parallelism may not pay off. The tone is analytical and formal, with a viewpoint that whilst parallelism is powerful, it must be applied judiciously.">
+  <meta itemprop="datePublished" content="2025-07-11T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2025-07-11T00:00:00+00:00">
+  <meta itemprop="wordCount" content="3198">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="C_cpp,Programming">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="Parallel Algorithms in C&#43;&#43;17 – Execution Policies, Advantages, and Limitations">
+  <meta name="twitter:description" content="Modern C&#43;&#43; embraces the reality of multicore processors by providing high-level tools for parallelism. The C&#43;&#43;17 standard introduced parallel algorithms, essentially parallelised versions of existing STL algorithms, to help programs take advantage of multiple cores for improved performance. In this post, we explore how C&#43;&#43;17 parallel algorithms work, focusing on the execution policies (std::execution::seq, par, and par_unseq), with examples of their use. We also discuss the performance benefits of parallel execution and critically examine the limitations – including overhead, portability, and scenarios where parallelism may not pay off. The tone is analytical and formal, with a viewpoint that whilst parallelism is powerful, it must be applied judiciously.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2025/07/parallel-algorithms-in-c-17-execution-policies-advantages-and-limitations/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="Parallel Algorithms in C&#43;&#43;17 – Execution Policies, Advantages, and Limitations">
+  <meta property="og:description" content="Modern C&#43;&#43; embraces the reality of multicore processors by providing high-level tools for parallelism. The C&#43;&#43;17 standard introduced parallel algorithms, essentially parallelised versions of existing STL algorithms, to help programs take advantage of multiple cores for improved performance. In this post, we explore how C&#43;&#43;17 parallel algorithms work, focusing on the execution policies (std::execution::seq, par, and par_unseq), with examples of their use. We also discuss the performance benefits of parallel execution and critically examine the limitations – including overhead, portability, and scenarios where parallelism may not pay off. The tone is analytical and formal, with a viewpoint that whilst parallelism is powerful, it must be applied judiciously.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-07-11T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-07-11T00:00:00+00:00">
+    <meta property="article:tag" content="C_cpp">
+    <meta property="article:tag" content="Programming">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2025-07-11 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        16 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2025/07/parallel-algorithms-in-c-17-execution-policies-advantages-and-limitations/">Parallel Algorithms in C++17 – Execution Policies, Advantages, and Limitations</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <p>Modern C++ embraces the reality of multicore processors by providing high-level tools for parallelism. The C++17 standard introduced <em>parallel algorithms</em>, essentially parallelised versions of existing STL algorithms, to help programs take advantage of multiple cores for improved performance. In this post, we explore how C++17 parallel algorithms work, focusing on the <strong>execution policies</strong> (<code>std::execution::seq</code>, <code>par</code>, and <code>par_unseq</code>), with examples of their use. We also discuss the performance benefits of parallel execution and critically examine the limitations – including overhead, portability, and scenarios where parallelism may not pay off. The tone is analytical and formal, with a viewpoint that whilst parallelism is powerful, it must be applied judiciously.</p>
+<h2 id="execution-policies-in-c17-standard-algorithms">Execution Policies in C++17 Standard Algorithms</h2>
+<p>Parallel algorithms in C++17 are enabled by <em>execution policies</em>, defined in the <code>&lt;execution&gt;</code> header. These policy objects are passed as the first argument to a standard algorithm call, indicating how the algorithm is allowed to execute. C++17 defines three such policies:</p>
+<ul>
+<li><strong><code>std::execution::seq</code> (sequenced)</strong> – Execute the algorithm strictly sequentially (no parallelism). This is equivalent to the usual serial execution and is the default if no policy is specified.</li>
+<li><strong><code>std::execution::par</code> (parallel)</strong> – Allow the algorithm to execute in parallel across threads (multiple threads may divide the work). However, execution within each thread remains sequential (no inter-thread vectorisation).</li>
+<li><strong><code>std::execution::par_unseq</code> (parallel unsequenced)</strong> – Allow full parallelism: multiple threads and unsequenced execution (vectorisation) within threads. This gives the implementation freedom to reorder and vectorise operations in addition to using multiple threads. (For completeness, C++20 later added <code>std::execution::unseq</code> for vectorisation without multithreading, but we will focus on the C++17 policies.)</li>
+</ul>
+<p>Using an execution policy is straightforward: you simply include <code>&lt;execution&gt;</code> and pass the policy to the algorithm call. The library provides overloads of many standard algorithms that take an <code>ExecutionPolicy</code> parameter. The only change from a normal call is this extra first argument, which makes it easy to upgrade a sequential algorithm to run in parallel. For example, here we use <code>std::transform</code> to square a range of numbers in parallel:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;vector&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;execution&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;algorithm&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ... (initialize a std::vector&lt;int&gt; data with values)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> result(data.size());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Parallel transform: square each element in data, store in result.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>std<span style="color:#f92672">::</span>transform(std<span style="color:#f92672">::</span>execution<span style="color:#f92672">::</span>par_unseq,
+</span></span><span style="display:flex;"><span>               data.begin(), data.end(),
+</span></span><span style="display:flex;"><span>               result.begin(),
+</span></span><span style="display:flex;"><span>               [](<span style="color:#66d9ef">int</span> x) { <span style="color:#66d9ef">return</span> x <span style="color:#f92672">*</span> x; });
+</span></span></code></pre></div><p>In this snippet, the only difference from a traditional <code>std::transform</code> call is the <code>std::execution::par_unseq</code> policy specified as the first argument. This hints to the library that it may perform the transformation in parallel and with vectorised instructions, dividing work among threads as appropriate. The code remains clear and declarative – we express <em>what</em> to do (square each element) while the library decides <em>how</em> to do it in parallel. Similarly, we can sort a large container with minimal changes to the call:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">double</span><span style="color:#f92672">&gt;</span> bigData <span style="color:#f92672">=</span> <span style="color:#75715e">/* ... */</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Sequential sort:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>std<span style="color:#f92672">::</span>sort(bigData.begin(), bigData.end());
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Parallel sort using multiple threads:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>std<span style="color:#f92672">::</span>sort(std<span style="color:#f92672">::</span>execution<span style="color:#f92672">::</span>par, bigData.begin(), bigData.end());
+</span></span></code></pre></div><p>By simply adding <code>std::execution::par</code>, the sorting algorithm is permitted to utilise multiple threads to sort the data, which can greatly accelerate sorting of big datasets (e.g. millions of elements) without any further code changes. If no execution policy is given, the call defaults to the sequenced (<code>seq</code>) behavior, so explicitly using <code>seq</code> is mainly for clarity or to force sequential execution when desired.</p>
+<p><strong>Algorithm support:</strong> Most standard algorithms that make sense to parallelise have overloads for execution policies. This includes algorithms like <code>std::for_each</code>, <code>std::transform</code>, <code>std::copy</code>, sorting algorithms (<code>std::sort</code>, <code>std::stable_sort</code>), partitioning and searching algorithms, and new algorithms introduced in C++17 such as <code>std::reduce</code> (a parallel-friendly alternative to <code>std::accumulate</code>). Not every algorithm is parallelised (for example, <code>std::accumulate</code> itself remains sequential to guarantee left-to-right order, whereas <code>std::reduce</code> allows arbitrary grouping for parallelism), but the library covers a broad set of common computations with parallel counterparts.</p>
+<p><strong>Requirements and safety:</strong> It is the programmer’s responsibility to ensure that the operation used in a parallel algorithm is safe for concurrent execution. In practice, this means the functor or lambda you pass should not introduce <em>data races</em> – e.g. writing to shared variables without synchronisation – and should not rely on element processing order. Under <code>par</code> policy, invocations run concurrently on different threads, so they must obey the usual rules of concurrent code (multiple readers or one writer per memory location, no unsynchronised data sharing). Under <code>par_unseq</code>, the requirements are even stricter: the callable must be <em>vectorisation-safe</em>. In other words, it cannot perform operations that inherently require a strict sequence or mutual exclusion, such as acquiring locks or other synchronisation primitives. If code uses a mutex or other blocking synchronization inside a <code>par_unseq</code> algorithm, it could lead to deadlocks or undefined behavior, since the policy permits the implementation to interleave operations without the usual sequential ordering. <strong>Rule of thumb:</strong> if your functor would cause data races when executed in parallel, stick to <code>seq</code> (or fix the data sharing); if it uses something like locks or I/O that cannot be safely vectorised, prefer <code>par</code> over <code>par_unseq</code>. When in doubt, using the <code>par</code> policy is safer, as it forbids certain aggressive optimisations but still allows multi-threading.</p>
+<p>Finally, note that exceptions thrown inside parallel algorithms are <em>not</em> propagated in the usual way. The C++17 standard dictates that if a user-provided operation invoked by a standard algorithm with a parallel policy throws an exception, the program will call <code>std::terminate</code> (effectively aborting). This design avoids complex error-handling across threads, but it means you should avoid throwing exceptions from within the algorithm’s functors. Any needed error handling should be done by other means (e.g. use atomic flags or pre-validation of data) because a thrown exception will end the whole program when using <code>par</code>/<code>par_unseq</code>.</p>
+<h2 id="advantages-of-using-c17-parallel-algorithms">Advantages of Using C++17 Parallel Algorithms</h2>
+<p>Using parallel execution policies can significantly improve performance in compute-intensive scenarios by utilising the full power of modern CPUs. Instead of being limited to a single thread, algorithms like sort, transform, or reduce can engage multiple cores and even vector units, potentially executing many operations simultaneously. This <em>data-parallel</em> approach can yield near-linear speedups relative to sequential execution, in ideal cases, as workload is divided among threads. The standard library’s goal for adding parallel algorithms was exactly to enable such performance gains with minimal effort. Developers no longer need to rewrite algorithms with low-level threading primitives; you can achieve parallel execution by tweaking one line of code. This high-level approach also lets the library apply optimisations automatically. For example, with the <code>par_unseq</code> policy, an implementation might utilise SIMD instructions (vectorising operations on contiguous data) and even adjust workload distribution dynamically (work-stealing scheduling) to maximise throughput. These optimisations happen behind the scenes, potentially improving performance beyond what a naïve manual threading might accomplish, especially for algorithms that can be efficiently vectorised (such as element-wise transformations).</p>
+<p>Another major benefit is <strong>ease of use and integration</strong>. Parallel algorithms are designed to be a drop-in replacement for their sequential counterparts: the code using them looks virtually identical to the original. As demonstrated earlier, converting a serial algorithm call to a parallel one is as simple as adding an execution policy parameter. This preserves code clarity and maintainability – the algorithm’s intent and structure remain explicit, and one does not have to refactor logic into low-level thread management code. It lowers the barrier to entry for parallel programming; developers can leverage multicore hardware without delving into threads, mutexes, and condition variables. In a sense, the execution policy approach is <em>declarative</em>: you declare that an algorithm <em>may</em> run in parallel, and the library takes care of <em>how</em>. This can lead to fewer bugs than hand-written threading, since the library implementation handles the tricky parts of splitting work and synchronising results. The consistency of using standard algorithms also means you are using well-tested components, and your code remains portable standard C++.</p>
+<p>Because this functionality is part of the ISO C++ standard, it is (in principle) portable across compilers and platforms. A code using <code>std::for_each(std::execution::par, ...)</code> should compile and run with parallelism on any conforming C++17 implementation that supports the feature. There is no dependency on proprietary frameworks or non-standard extensions – you express parallelism in pure ISO C++, which is important for longevity and portability of code (assuming support is present on the target platform). In practice, major compilers have caught up: modern GCC, Clang, and MSVC all support C++17 parallel algorithms (GCC since roughly version 10, Clang since version 11, and MSVC since VS 2017 updates). This broad support means developers can increasingly rely on these features in production code across different environments.</p>
+<p>Finally, parallel algorithms often compose cleanly with other standard library features. For example, one can generate data, sort it in parallel, then use <code>std::reduce</code> to compute a result, all using the STL interface. This promotes an <em>algorithmic</em> style of programming where performance-critical loops are handled by the library. The result is usually both concise and efficient, leveraging well-understood idioms instead of custom loop-and-thread code.</p>
+<h2 id="limitations-and-when-not-to-use-parallel-policies">Limitations and When Not to Use Parallel Policies</h2>
+<p>Despite their appeal, C++17 parallel algorithms are not a magic solution and come with important limitations. Developers should consider the following caveats and scenarios where using <code>par</code> or <code>par_unseq</code> may be counterproductive:</p>
+<ul>
+<li>
+<p><strong>Overhead and Small Tasks:</strong> Parallelism introduces overhead – spawning threads, synchronising their results, and managing workloads all incur costs. If the amount of work in the algorithm is small (for example, iterating over a short range or doing a very cheap operation per element), these overheads can outweigh the benefits. In such cases, a parallel algorithm might even run <em>slower</em> than the sequential version. As a rule, you need a sufficiently large <code>N</code> or expensive computations to amortise the parallel overhead. Amdahl’s Law reminds us that the speedup from parallelism is limited by any remaining serial portion and by coordination costs. Empirically, it’s known that for very small loops or trivial operations, the sequential execution will likely be fastest. The standard guidance is to benchmark and ensure the parallel version is actually an improvement. If the loop’s total work is minimal, or if you only have a few elements, stick with <code>seq</code> – parallelism “does not come for free”.</p>
+</li>
+<li>
+<p><strong>Contention and False Sharing:</strong> Related to overhead, if the algorithm’s work involves contended resources, parallelising can backfire. For example, if each iteration of a loop writes to the same global variable or performs I/O to a single device (like printing to console or writing to one file), multiple threads will contend and serialize on that resource. The Microsoft C++ team notes that additional parallelism can create contention on external resources like disk I/O, limiting any speed gains. Similarly, parallel threads operating on data that lies close in memory can suffer performance degradation due to false sharing (cache contention). In such scenarios, the theoretical parallel speedup is nullified by the bottleneck, and using a sequential approach (or redesigning the workload to avoid contention) is preferable.</p>
+</li>
+<li>
+<p><strong>Non-random-access Iterators:</strong> C++17 parallel algorithms are most effective with random-access iterators (e.g. arrays, vectors) where the number of elements is known and they can be evenly partitioned. If you attempt to use them with linked lists or other non-contiguous sequences, the benefits may be limited or nonexistent. Some implementations may even refrain from parallelising algorithms on linked lists because the overhead of chasing pointers in multiple threads can outweigh any gains. The MSVC documentation cautions that parallelisation is “not always faster, particularly for non-random-access iterators”. In other words, if an algorithm is going to end up doing serial work anyway (like traversing a list node by node), adding threads doesn’t help. Know your data structures – a parallel algorithm on a <code>std::list</code> is unlikely to speed things up, whereas on a <code>std::vector</code> it very well might.</p>
+</li>
+<li>
+<p><strong>Thread Safety and Correctness:</strong> The introduction of execution policies does not free you from reasoning about thread safety. <strong>The library does not automatically make your operations safe</strong> – it only provides the framework for parallel execution. If your functor or predicate writes to shared data or modifies the range in unintended ways, you can still have data races and undefined behavior. For example, doing a <code>std::for_each(std::execution::par, vec.begin(), vec.end(), f)</code> where <code>f</code> appends to the same vector will wreak havoc. The onus is on the developer to ensure the work done per element is independent or properly synchronised. In many cases, dependencies in the computation will <em>force</em> sequential execution for correctness. In such cases, you have no choice but to use <code>seq</code>. As noted earlier, even using locks inside a <code>par_unseq</code> algorithm is disallowed – it can lead to deadlock because the execution order is unsequenced. In summary, <em>correctness trumps speed</em>: you should prefer sequential execution (or redesign the algorithm) if parallel execution would introduce races or inconsistent results.</p>
+</li>
+<li>
+<p><strong>Debugging Difficulty:</strong> Parallel algorithms can be harder to debug than their sequential counterparts. When you add an execution policy, the execution order becomes non-deterministic (especially with <code>par_unseq</code>). This can complicate debugging because breakpoints or logging statements may behave differently, and race conditions might cause intermittent failures. Also, using standard algorithms means the actual looping is happening inside the library – you can’t easily step through each iteration in a debugger. If you suspect a logic bug inside the operation, it might be simpler to run it sequentially first. The simplicity of a sequential execution is often helpful for initial implementation and debugging. Only once it’s correct should you consider parallelising the code. This is in line with a common approach: <em>get it right with <code>seq</code>, then optimise with <code>par</code> if needed</em>. Furthermore, tools for debugging multi-threaded execution (like thread sanitizers) might not directly trace into the internals of parallel STL algorithms, so figuring out concurrency issues can be tricky. Be prepared for this added complexity when opting for <code>par</code> or <code>par_unseq</code>.</p>
+</li>
+<li>
+<p><strong>Exception Handling and Termination:</strong> As mentioned, if something goes wrong inside a parallel algorithm (e.g. an exception is thrown), the program will call <code>std::terminate</code>. This behaviour is by design, but it means you lose the ability to catch and handle exceptions at the call site. This is a limitation to be mindful of – for instance, if your functor performs an operation that might throw (say, converting a string to number, which could throw on bad input), you won’t be able to catch that exception normally. In a sequential algorithm, you could catch exceptions around the loop; in a parallel algorithm, you cannot (the program will simply terminate unless you have a global terminate handler). Thus, any potentially throwing operation should either be avoided or wrapped in a try/catch inside the functor itself (catching internally and handling error by other means). The lack of graceful error propagation is a trade-off to simplify implementations, but it’s a semantic difference from sequential code that can surprise the unwary.</p>
+</li>
+<li>
+<p><strong>Portability and Implementation Variance:</strong> Although parallel algorithms are standardized, the standard deliberately does not mandate how they are implemented. This means that the performance characteristics – and even the availability of true parallelism – can vary between library implementations. In the early days of C++17, not all standard libraries provided an implementation of parallel execution policies; for example, GCC’s libstdc++ did not have support until version 9/10 and required certain builds, and Clang’s libc++ followed later. Even today, an implementation is allowed to fall back to sequential execution if it cannot parallelise a given call. In fact, a poorly optimised implementation might use a thread pool or task scheduler that doesn’t scale well, yielding less speedup than expected. There are also differences in how <code>par_unseq</code> is utilised: some standard libraries (such as MSVC’s as of C++17) implemented <code>par</code> and <code>par_unseq</code> in the same way internally, meaning no additional vectorisation benefits were realised. In contrast, other compilers or special platforms might take advantage of <code>par_unseq</code> to enable explicit SIMD instructions. The bottom line is that performance is not uniform across platforms – you should test on the platforms you care about. <em>Portability</em> here also extends to hardware: the execution policies are meant to be general enough to allow execution on GPUs or other accelerators, but using them doesn’t magically offload computation to a GPU unless you are using a toolchain that supports that (for example, some compilers like NVCC or special libraries could map <code>par</code> to GPU kernels). For typical CPU use, ensure that your target compiler+library actually supports the parallel algorithms and that any required support libraries (like threading backends) are present. If not, your code may compile but always run sequentially, or fail to compile altogether.</p>
+</li>
+<li>
+<p><strong>Compilation Overhead:</strong> A lesser-known drawback is that including <code>&lt;execution&gt;</code> and using parallel algorithms can increase <strong>compile times</strong> and binary size. The parallel algorithms feature is template-heavy and may pull in concurrency support code under the hood. Lucian Teodorescu notes that parallel algorithms can add significant compile-time overhead in some cases. This might matter in large projects or for developers concerned with compilation performance. It’s not a show-stopper, but worth noting if you observe a slowdown in build times after adopting parallel algorithms.</p>
+</li>
+</ul>
+<h2 id="conclusion">Conclusion</h2>
+<p>Parallel algorithms in C++17 provide a powerful, high-level mechanism to exploit concurrency directly within the standard library. The ability to simply apply <code>std::execution::par</code> or <code>par_unseq</code> to an existing algorithm call and potentially gain a substantial speedup is a notable advancement in the language’s capabilities. In the author’s view, this feature embodies the modern C++ approach: <strong>embracing efficiency while preserving abstraction</strong>. We no longer have to drop down to low-level threads for many common data-processing tasks; instead, we express <em>what</em> we want done, and let the library decide <em>how to do it concurrently</em>. This leads to code that is both efficient and expressive.</p>
+<p>That said, parallel algorithms are not a silver bullet. As we’ve analysed, one must apply them with <em>prudence</em>. Not every problem will benefit from parallel execution, and in some cases it can be detrimental. It remains crucial to <strong>measure</strong> performance and ensure that parallelism is actually helping for your particular workload and environment. A thoughtful developer will consider factors like data size, algorithm complexity, and hardware topology before blindly parallelising every algorithm call. In essence, C++17’s parallel execution policies give us a powerful tool in the toolbox, but it’s up to us to use the right tool for the job. Used appropriately, they can greatly improve application performance on modern CPUs without sacrificing code clarity. Used inappropriately, they can introduce complexity and overhead for little gain. The arrival of parallel algorithms in the standard is a positive step that moves C++ in the direction of higher-level concurrency, but it does not absolve us from thinking carefully about <em>when</em> and <em>how</em> to leverage parallelism.</p>
+<p>In summary, <strong>C++17 parallel algorithms</strong> enable elegant and potentially fast solutions by combining familiar STL patterns with the power of multicore execution. By understanding the execution policies and their constraints, we can write code that is both clean and scalable. Just remember that with great power comes great responsibility: profile, test, and ensure correctness when unleashing parallel execution in your programs. With that approach, the parallel STL can be a robust ally in building high-performance C++ software.</p>
+<p><strong>References:</strong></p>
+<ol>
+<li>ISO C++ Standard (2017) – <em>Sections [algorithms.parallel]</em> (Parallel algorithms)</li>
+<li>Cppreference – “Execution policy” (online reference)</li>
+<li>Microsoft C++ Team Blog – <em>Using C++17 Parallel Algorithms for Better Performance</em> (2018)</li>
+<li>Teodorescu, Lucian – <em>A Case Against Blind Use of C++ Parallel Algorithms</em>, ACCU Overload 161 (2021)</li>
+<li>Stack Overflow – <em>Difference between execution policies and when to use them</em> (Philipp, 2017)</li>
+<li>Stack Overflow – <em>C++ compiler support for std::execution</em> (2021)</li>
+</ol>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        3198 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2025-07-11
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fparallel-algorithms-in-c-17-execution-policies-advantages-and-limitations%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fparallel-algorithms-in-c-17-execution-policies-advantages-and-limitations%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Parallel%20Algorithms%20in%20C%2b%2b17%20%e2%80%93%20Execution%20Policies%2c%20Advantages%2c%20and%20Limitations&amp;caption=Parallel%20Algorithms%20in%20C%2b%2b17%20%e2%80%93%20Execution%20Policies%2c%20Advantages%2c%20and%20Limitations&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fparallel-algorithms-in-c-17-execution-policies-advantages-and-limitations%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Parallel%20Algorithms%20in%20C%2b%2b17%20%e2%80%93%20Execution%20Policies%2c%20Advantages%2c%20and%20Limitations&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fparallel-algorithms-in-c-17-execution-policies-advantages-and-limitations%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fparallel-algorithms-in-c-17-execution-policies-advantages-and-limitations%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fparallel-algorithms-in-c-17-execution-policies-advantages-and-limitations%2f;description=Parallel%20Algorithms%20in%20C%2b%2b17%20%e2%80%93%20Execution%20Policies%2c%20Advantages%2c%20and%20Limitations" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fparallel-algorithms-in-c-17-execution-policies-advantages-and-limitations%2f&amp;title=Parallel%20Algorithms%20in%20C%2b%2b17%20%e2%80%93%20Execution%20Policies%2c%20Advantages%2c%20and%20Limitations&amp;summary=Parallel%20Algorithms%20in%20C%2b%2b17%20%e2%80%93%20Execution%20Policies%2c%20Advantages%2c%20and%20Limitations&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fparallel-algorithms-in-c-17-execution-policies-advantages-and-limitations%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fparallel-algorithms-in-c-17-execution-policies-advantages-and-limitations%2f&amp;resubmit=true&amp;title=Parallel%20Algorithms%20in%20C%2b%2b17%20%e2%80%93%20Execution%20Policies%2c%20Advantages%2c%20and%20Limitations" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fparallel-algorithms-in-c-17-execution-policies-advantages-and-limitations%2f;title=Parallel%20Algorithms%20in%20C%2b%2b17%20%e2%80%93%20Execution%20Policies%2c%20Advantages%2c%20and%20Limitations" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Parallel%20Algorithms%20in%20C%2b%2b17%20%e2%80%93%20Execution%20Policies%2c%20Advantages%2c%20and%20Limitations%20https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fparallel-algorithms-in-c-17-execution-policies-advantages-and-limitations%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fparallel-algorithms-in-c-17-execution-policies-advantages-and-limitations%2f&amp;t=Parallel%20Algorithms%20in%20C%2b%2b17%20%e2%80%93%20Execution%20Policies%2c%20Advantages%2c%20and%20Limitations" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Parallel%20Algorithms%20in%20C%2b%2b17%20%e2%80%93%20Execution%20Policies%2c%20Advantages%2c%20and%20Limitations&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f07%2fparallel-algorithms-in-c-17-execution-policies-advantages-and-limitations%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2025/07/embracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany/">
+                    <span class="button__text">Embracing Type Safety in C&#43;&#43;17: std::optional, std::variant, and std::any</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

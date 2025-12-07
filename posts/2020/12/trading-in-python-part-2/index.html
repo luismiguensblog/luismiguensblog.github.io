@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="In the previous post, we wrote the basics of stock trading in Python. We saw how to make a small wallet to record transactions, how to fetch data from investing.com in a python object and we wrote some generic classes to buy and sell when a security crosses a thresold.
+Now we will continue our exercise writing a program to run several strategias over a period of time.
+As we are going to run different scenarios, it is a good idea to use parallelisation in our design.
+" />
+<meta name="keywords" content=", trading, investing, python, finance" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2020/12/trading-in-python-part-2/" />
+
+
+    <title>
+        
+            Trading in Python: Part 2 :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="Trading in Python: Part 2">
+  <meta itemprop="description" content="In the previous post, we wrote the basics of stock trading in Python. We saw how to make a small wallet to record transactions, how to fetch data from investing.com in a python object and we wrote some generic classes to buy and sell when a security crosses a thresold.
+Now we will continue our exercise writing a program to run several strategias over a period of time.
+As we are going to run different scenarios, it is a good idea to use parallelisation in our design.">
+  <meta itemprop="datePublished" content="2020-12-15T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2020-12-15T00:00:00+00:00">
+  <meta itemprop="wordCount" content="3003">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="Trading,Investing,Python,Finance">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="Trading in Python: Part 2">
+  <meta name="twitter:description" content="In the previous post, we wrote the basics of stock trading in Python. We saw how to make a small wallet to record transactions, how to fetch data from investing.com in a python object and we wrote some generic classes to buy and sell when a security crosses a thresold.
+Now we will continue our exercise writing a program to run several strategias over a period of time.
+As we are going to run different scenarios, it is a good idea to use parallelisation in our design.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2020/12/trading-in-python-part-2/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="Trading in Python: Part 2">
+  <meta property="og:description" content="In the previous post, we wrote the basics of stock trading in Python. We saw how to make a small wallet to record transactions, how to fetch data from investing.com in a python object and we wrote some generic classes to buy and sell when a security crosses a thresold.
+Now we will continue our exercise writing a program to run several strategias over a period of time.
+As we are going to run different scenarios, it is a good idea to use parallelisation in our design.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2020-12-15T00:00:00+00:00">
+    <meta property="article:modified_time" content="2020-12-15T00:00:00+00:00">
+    <meta property="article:tag" content="Trading">
+    <meta property="article:tag" content="Investing">
+    <meta property="article:tag" content="Python">
+    <meta property="article:tag" content="Finance">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="business" />
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2020-12-15 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        15 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2020/12/trading-in-python-part-2/">Trading in Python: Part 2</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <p>In the previous post, we wrote the basics of stock trading in Python. We saw how to make a small wallet to record transactions, how to fetch data from investing.com in a python object and we wrote some generic classes to buy and sell when a security crosses a thresold.</p>
+<p>Now we will continue our exercise writing a program to run several strategias over a period of time.</p>
+<p>As we are going to run different scenarios, it is a good idea to use parallelisation in our design.</p>
+<p>Here is the code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">%</span>cat Simulation<span style="color:#f92672">.</span>py
+</span></span></code></pre></div><pre><code>import multiprocessing
+import time
+import json
+from datetime import datetime, timedelta
+
+import numpy as np
+import pandas as pd
+
+from Security import Security
+from Wallet import Wallet
+from Strategies import *
+from Global import *
+
+from tqdm.notebook import tqdm, trange
+
+def simulate(portfolio_excel, years, p_bar=None):
+
+    date_format='%Y-%m-%d'
+    today = datetime.today()
+    time_ago = datetime.today() - timedelta(days=365*years)
+    today_str = today.strftime(date_format)
+    time_ago_str = time_ago.strftime(date_format)
+
+
+    portfolio = pd.read_excel(portfolio_excel, engine='openpyxl').astype(str) 
+
+    cases = []
+    
+    if p_bar is not None:
+        p_bar.reset(total=len(portfolio))
+        p_bar.set_description('Fetching information for scenario: {} year(s)'.format(years))
+        
+    for index, row in portfolio.iterrows():
+        try:
+            isin = row['ISIN']
+            country = row['Country'] if row['Country'] != 'nan' else None
+            exchange = row['Exchange'] if row['Exchange'] != 'nan' else None
+            currency = row['Currency'] if row['Currency'] != 'nan' else 'EUR'
+
+            stock = Security(isin, currency, country, exchange)
+
+            case = Strategy_Hold_And_Sell(stock)
+            cases.append(case)
+          
+            magic_numbers = [20, 50, 100, 200]
+            for i in magic_numbers:
+                for j in magic_numbers:
+                    if i != j:
+                        for k in ['SMA', 'EMA']:
+                                case = Strategy_Buy_Value0_LT_Value1(stock, (k, i, j))
+                                cases.append(case)
+
+            for i in [0.0, 0.25, 0.5]:
+                case = Strategy_Buy_dSMA20(stock, i)
+                cases.append(case)
+
+
+        except Exception as e:
+            print(e)
+            continue
+        
+        if p_bar is not None:
+            p_bar.update()
+
+    running_jobs = []
+
+    manager = multiprocessing.Manager()
+    results = manager.list()
+
+    jobs_todo = [ multiprocessing.Process(target=case.simulate,
+                                          args=(time_ago_str, today_str, 5.0, results,),
+                                          name=case.security.name
+                                         ) for case in cases ]
+    if p_bar is not None:
+        p_bar.reset(total=len(jobs_todo))
+        p_bar.set_description('Running simulation of scenario: {} year(s)'.format(years))
+    
+    while jobs_todo or running_jobs:
+        while len(running_jobs) &lt; 4 and len(jobs_todo) &gt; 0:
+            job = jobs_todo.pop()
+            job.start()
+            running_jobs.append(job)
+
+        counter=0
+        for job in running_jobs:
+            if not job.is_alive():
+                job.join()
+                running_jobs.remove(job)
+                counter = counter + 1
+        
+        if p_bar is not None:
+            p_bar.update(counter)
+
+        time.sleep(0.1)
+
+    dataframe=pd.DataFrame(results[:])  
+    dataframe_result=pd.DataFrame()
+
+    for isin in dataframe['ISIN'].drop_duplicates().values:
+        isin_dataframe = dataframe[dataframe['ISIN'] == isin]
+        yield_hold = isin_dataframe[isin_dataframe['Strategy'] == 'Buy, Hold and Sell']['Yield'].sum()
+        sorted_dataframe = isin_dataframe.sort_values(by='Yield', ascending=False)
+        yield_winner_strategy = sorted_dataframe.iloc[0]['Yield']
+        if yield_winner_strategy &gt; yield_hold:
+            winner_dataframe = isin_dataframe[isin_dataframe['Yield'] &gt;= yield_winner_strategy].copy()
+            winner_dataframe['Strategy Yield Increment'] = yield_winner_strategy - yield_hold
+        else:
+            winner_dataframe = isin_dataframe[isin_dataframe['Strategy'] == 'Buy, Hold and Sell'].copy()
+            winner_dataframe['Strategy Yield Increment'] = 0
+        dataframe_result = dataframe_result.append(winner_dataframe)
+    
+    return dataframe_result
+</code></pre>
+<p>Now that we have our files in place, we can start playing.</p>
+<p>First, let&rsquo;s do the imports</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> Simulation <span style="color:#f92672">import</span> simulate
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> tqdm.notebook <span style="color:#f92672">import</span> tqdm, trange
+</span></span></code></pre></div><p>We also need to provide information about the ETFs and Stocks we want to simulate.</p>
+<p>We do that in an excel file, that should like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>pd<span style="color:#f92672">.</span>read_excel(<span style="color:#e6db74">&#39;excel/portfolio.xlsx&#39;</span>, engine<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;openpyxl&#39;</span>)<span style="color:#f92672">.</span>astype(str) 
+</span></span></code></pre></div>
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Security Name</th>
+      <th>Security Type</th>
+      <th>Ticker</th>
+      <th>ISIN</th>
+      <th>Country</th>
+      <th>Exchange</th>
+      <th>Currency</th>
+      <th>Strategy</th>
+      <th>Strategy Class Name</th>
+      <th>Strategy Config</th>
+      <th>Yield</th>
+      <th>Yield Increase due to strategy</th>
+      <th>Monitor</th>
+      <th>Position</th>
+      <th>Action</th>
+      <th>Broker</th>
+      <th>Last Entry</th>
+      <th>Log</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Advanced Micro Devices Inc</td>
+      <td>Stocks</td>
+      <td>AMD</td>
+      <td>US0079031078</td>
+      <td>United States</td>
+      <td>NASDAQ</td>
+      <td>USD</td>
+      <td>Buy, Hold and Sell</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+      <td>0.91</td>
+      <td>0.0</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Airbus Group SE</td>
+      <td>Stocks</td>
+      <td>AIR</td>
+      <td>NL0000235190</td>
+      <td>France</td>
+      <td>Paris</td>
+      <td>EUR</td>
+      <td>Buy on SMA 100 days LT SMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 100, 200]</td>
+      <td>0.62</td>
+      <td>0.92</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-28</td>
+      <td>Yield 40% with hold position with the hypothes...</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Alphabet Inc Class A</td>
+      <td>Stocks</td>
+      <td>GOOGL</td>
+      <td>US02079K3059</td>
+      <td>United States</td>
+      <td>NASDAQ</td>
+      <td>USD</td>
+      <td>Buy on SMA 20 days LT SMA 100 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 20, 100]</td>
+      <td>0.33</td>
+      <td>0.15</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>Sell position</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Amazon.com Inc</td>
+      <td>Stocks</td>
+      <td>AMZN</td>
+      <td>US0231351067</td>
+      <td>United States</td>
+      <td>NASDAQ</td>
+      <td>USD</td>
+      <td>Buy, Hold and Sell</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+      <td>0.61</td>
+      <td>0.0</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-28</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Apple Inc</td>
+      <td>Stocks</td>
+      <td>AAPL</td>
+      <td>US0378331005</td>
+      <td>United States</td>
+      <td>NASDAQ</td>
+      <td>USD</td>
+      <td>Buy, Hold and Sell</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+      <td>0.68</td>
+      <td>0.0</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>BAE Systems PLC</td>
+      <td>Stocks</td>
+      <td>BAES</td>
+      <td>GB0002634946</td>
+      <td>United Kingdom</td>
+      <td>London</td>
+      <td>GBP</td>
+      <td>Buy on SMA 20 days LT SMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 20, 200]</td>
+      <td>0.27</td>
+      <td>0.37</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>Trading212</td>
+      <td>2020-12-30</td>
+      <td>Sell position</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>Boeing Co</td>
+      <td>Stocks</td>
+      <td>BA</td>
+      <td>US0970231058</td>
+      <td>United States</td>
+      <td>NYSE</td>
+      <td>USD</td>
+      <td>nan</td>
+      <td>nan</td>
+      <td>nan</td>
+      <td>0.5</td>
+      <td>nan</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Evaluate Jun 21</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>Potential yield of 50% if it recovers in one y...</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>Cisco Systems Inc</td>
+      <td>Stocks</td>
+      <td>CSCO</td>
+      <td>US17275R1023</td>
+      <td>United States</td>
+      <td>NASDAQ</td>
+      <td>USD</td>
+      <td>Buy on SMA 50 days LT SMA 100 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 50, 100]</td>
+      <td>0.22</td>
+      <td>0.35</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-28</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>Coca-Cola Company</td>
+      <td>Stocks</td>
+      <td>KO</td>
+      <td>US1912161007</td>
+      <td>United States</td>
+      <td>NYSE</td>
+      <td>USD</td>
+      <td>Buy on EMA 50 days LT EMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 50, 200]</td>
+      <td>0.22</td>
+      <td>0.32</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>nan</td>
+      <td>nan</td>
+      <td>NaT</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>GlaxoSmithKline PLC</td>
+      <td>Stocks</td>
+      <td>GSK</td>
+      <td>GB0009252882</td>
+      <td>United Kingdom</td>
+      <td>London</td>
+      <td>GBP</td>
+      <td>Buy, Hold and Sell</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+      <td>0.14</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Not interested</td>
+      <td>nan</td>
+      <td>NaT</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>Hyundai Motor Co DRC</td>
+      <td>Stocks</td>
+      <td>05380</td>
+      <td>USY384721251</td>
+      <td>Germany</td>
+      <td>Frankfurt</td>
+      <td>EUR</td>
+      <td>Buy on SMA 20 days LT SMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 20, 200]</td>
+      <td>0.29</td>
+      <td>0.07</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>Sell position</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>International Business Machines</td>
+      <td>Stocks</td>
+      <td>IBM</td>
+      <td>US4592001014</td>
+      <td>United States</td>
+      <td>NYSE</td>
+      <td>EUR</td>
+      <td>Buy on SMA 50 days LT SMA 100 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 50, 100]</td>
+      <td>0.46</td>
+      <td>0.54</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-28</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>International Consolidated Airlines Group S.A.</td>
+      <td>Stocks</td>
+      <td>ICAG</td>
+      <td>ES0177542018</td>
+      <td>Spain</td>
+      <td>Madrid</td>
+      <td>EUR</td>
+      <td>Buy, Hold and Sell</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+      <td>0.32</td>
+      <td>nan</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Sell on value</td>
+      <td>DeGiro</td>
+      <td>2020-12-29</td>
+      <td>After reaching pre-Covid level of 4.78 EUR per...</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>Invesco Physical Gold ETC</td>
+      <td>Etfs</td>
+      <td>SGLD</td>
+      <td>IE00B579F325</td>
+      <td>Netherlands</td>
+      <td>Amsterdam</td>
+      <td>EUR</td>
+      <td>Buy on EMA 50 days LT EMA 20 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 50, 20]</td>
+      <td>0.16</td>
+      <td>0.05</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Not interested</td>
+      <td>nan</td>
+      <td>NaT</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>iShares Core MSCI World UCITS ETF USD (Acc)</td>
+      <td>Etfs</td>
+      <td>IWDA</td>
+      <td>IE00B4L5Y983</td>
+      <td>Netherlands</td>
+      <td>Amsterdam</td>
+      <td>USD</td>
+      <td>Buy on EMA 50 days LT EMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 50, 200]</td>
+      <td>0.32</td>
+      <td>0.37</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>Sell position</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>iShares Core S&amp;P 500 UCITS ETF USD (Acc)</td>
+      <td>Etfs</td>
+      <td>CSP1</td>
+      <td>IE00B5BMR087</td>
+      <td>Netherlands</td>
+      <td>Amsterdam</td>
+      <td>USD</td>
+      <td>Buy on SMA 20 days LT SMA 100 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 20, 100]</td>
+      <td>0.27</td>
+      <td>0.31</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>Sell position</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>iShares European Property Yield UCITS ETF EUR ...</td>
+      <td>Etfs</td>
+      <td>IPRE</td>
+      <td>IE00BGDQ0L74</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>EUR</td>
+      <td>Buy on EMA 50 days LT EMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 50, 200]</td>
+      <td>0.28</td>
+      <td>0.4</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>nan</td>
+      <td>NaT</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>JPMorgan Funds - Global Healthcare Fund</td>
+      <td>Funds</td>
+      <td>Fund</td>
+      <td>LU0432979887</td>
+      <td>United States</td>
+      <td>Funds</td>
+      <td>USD</td>
+      <td>Buy, Hold and Sell</td>
+      <td>nan</td>
+      <td>nan</td>
+      <td>0.3</td>
+      <td>nan</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Hold</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>Info: https://am.jpmorgan.com/gb/en/asset-mana...</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>Kraft Heinz Co</td>
+      <td>Stocks</td>
+      <td>KHC</td>
+      <td>US5007541064</td>
+      <td>United States</td>
+      <td>NASDAQ</td>
+      <td>USD</td>
+      <td>Buy on SMA 50 days LT SMA 100 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 50, 100]</td>
+      <td>0.33</td>
+      <td>0.3</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-28</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>Lockheed Martin Corporation</td>
+      <td>Stocks</td>
+      <td>LMT</td>
+      <td>US5398301094</td>
+      <td>United States</td>
+      <td>NYSE</td>
+      <td>USD</td>
+      <td>Buy on EMA 50 days LT EMA 100 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 50, 100]</td>
+      <td>0.18</td>
+      <td>0.35</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Not interested</td>
+      <td>nan</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>Melia Hotels</td>
+      <td>Stocks</td>
+      <td>MEL</td>
+      <td>ES0176252718</td>
+      <td>Spain</td>
+      <td>Madrid</td>
+      <td>EUR</td>
+      <td>nan</td>
+      <td>nan</td>
+      <td>nan</td>
+      <td>0.13</td>
+      <td>0.42</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Sell on value</td>
+      <td>DeGiro</td>
+      <td>2020-12-29</td>
+      <td>Potential yield of 37% if it recovers in one y...</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>Merck &amp; Company Inc</td>
+      <td>Stocks</td>
+      <td>MRK</td>
+      <td>US58933Y1055</td>
+      <td>United States</td>
+      <td>NYSE</td>
+      <td>USD</td>
+      <td>Buy, Hold and Sell</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+      <td>0.06</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Sell on value</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>24% yield if it recovers to pre-COVID 90$ in 6...</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>Microsoft Corporation</td>
+      <td>Stocks</td>
+      <td>MSFT</td>
+      <td>US5949181045</td>
+      <td>United States</td>
+      <td>NASDAQ</td>
+      <td>USD</td>
+      <td>Buy, Hold and Sell</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+      <td>0.28</td>
+      <td>0.0</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-28</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>Nestle SA</td>
+      <td>Stocks</td>
+      <td>NESN</td>
+      <td>CH0038863350</td>
+      <td>Switzerland</td>
+      <td>Switzerland</td>
+      <td>CHF</td>
+      <td>Buy on EMA 50 days LT EMA 100 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 50, 100]</td>
+      <td>0.13</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Not interested</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>NH Hoteles</td>
+      <td>Stocks</td>
+      <td>NHH</td>
+      <td>ES0161560018</td>
+      <td>Spain</td>
+      <td>Madrid</td>
+      <td>EUR</td>
+      <td>nan</td>
+      <td>nan</td>
+      <td>nan</td>
+      <td>0.35</td>
+      <td>0.61</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Sell on value</td>
+      <td>DeGiro</td>
+      <td>2020-12-28</td>
+      <td>Potential yield of 19% if it recovers in one y...</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td>Nokia Oyj</td>
+      <td>Stocks</td>
+      <td>NOKIA</td>
+      <td>FI0009000681</td>
+      <td>Finland</td>
+      <td>Helsinki</td>
+      <td>EUR</td>
+      <td>Buy on SMA 20 days LT SMA 100 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 20, 100]</td>
+      <td>0.54</td>
+      <td>0.67</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>NVIDIA Corporation</td>
+      <td>Stocks</td>
+      <td>NVDA</td>
+      <td>US67066G1040</td>
+      <td>United States</td>
+      <td>NASDAQ</td>
+      <td>USD</td>
+      <td>Buy, Hold and Sell</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+      <td>0.97</td>
+      <td>0.0</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Strategy</td>
+      <td>Trading212</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>PepsiCo Inc</td>
+      <td>Stocks</td>
+      <td>PEP</td>
+      <td>US7134481081</td>
+      <td>United States</td>
+      <td>NASDAQ</td>
+      <td>USD</td>
+      <td>Buy on EMA 50 days LT EMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 50, 200]</td>
+      <td>0.23</td>
+      <td>0.25</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>Procter &amp; Gamble Company</td>
+      <td>Stocks</td>
+      <td>PG</td>
+      <td>US7427181091</td>
+      <td>United States</td>
+      <td>NYSE</td>
+      <td>USD</td>
+      <td>Buy on EMA 50 days LT EMA 100 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 50, 100]</td>
+      <td>0.19</td>
+      <td>0.05</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-05-01</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>Qualcomm Incorporated</td>
+      <td>Stocks</td>
+      <td>QCOM</td>
+      <td>US7475251036</td>
+      <td>United States</td>
+      <td>NASDAQ</td>
+      <td>USD</td>
+      <td>Buy, Hold and Sell</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+      <td>0.53</td>
+      <td>0.0</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>Samsung Electronics Co Ltd DRC Pref</td>
+      <td>Stocks</td>
+      <td>SAME_pq</td>
+      <td>US7960502018</td>
+      <td>Germany</td>
+      <td>Frankfurt</td>
+      <td>EUR</td>
+      <td>Buy, Hold and Sell</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+      <td>0.47</td>
+      <td>0.0</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td>Seagate Technology PLC</td>
+      <td>Stocks</td>
+      <td>STX</td>
+      <td>IE00B58JVZ52</td>
+      <td>United States</td>
+      <td>NASDAQ</td>
+      <td>USD</td>
+      <td>Buy on EMA 50 days LT EMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 50, 200]</td>
+      <td>0.31</td>
+      <td>0.33</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>nan</td>
+      <td>NaT</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td>Siemens AG Class N</td>
+      <td>Stocks</td>
+      <td>SIEGn</td>
+      <td>DE0007236101</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>EUR</td>
+      <td>Buy on SMA 50 days LT SMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 50, 200]</td>
+      <td>0.81</td>
+      <td>0.67</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>Siemens Energy AG</td>
+      <td>Stocks</td>
+      <td>ENR1n</td>
+      <td>DE000ENER6Y0</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>EUR</td>
+      <td>Buy, Hold and Sell</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+      <td>0.32</td>
+      <td>0.0</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-28</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>Telefonaktiebolaget LM Ericsson B ADR</td>
+      <td>Stocks</td>
+      <td>ERIC</td>
+      <td>US2948216088</td>
+      <td>United States</td>
+      <td>NASDAQ</td>
+      <td>USD</td>
+      <td>Buy on SMA 100 days LT SMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 100, 200]</td>
+      <td>0.6</td>
+      <td>0.39</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>nan</td>
+      <td>NaT</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>Texas Instruments Incorporated</td>
+      <td>Stocks</td>
+      <td>TXN</td>
+      <td>US8825081040</td>
+      <td>United States</td>
+      <td>NASDAQ</td>
+      <td>USD</td>
+      <td>Buy on EMA 50 days LT EMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 50, 200]</td>
+      <td>0.36</td>
+      <td>0.21</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>36</th>
+      <td>Thermo Fisher Scientific Inc</td>
+      <td>Stocks</td>
+      <td>TMO</td>
+      <td>US8835561023</td>
+      <td>United States</td>
+      <td>NYSE</td>
+      <td>USD</td>
+      <td>Buy, Hold and Sell</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+      <td>0.28</td>
+      <td>0.0</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-28</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>37</th>
+      <td>Toyota Motor Corporation ADR</td>
+      <td>Stocks</td>
+      <td>TM</td>
+      <td>US8923313071</td>
+      <td>United States</td>
+      <td>NYSE</td>
+      <td>USD</td>
+      <td>Buy on SMA 20 days LT SMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 20, 200]</td>
+      <td>0.2</td>
+      <td>0.22</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>38</th>
+      <td>VanEck Vectors Global Real Estate UCITS ETF</td>
+      <td>Etfs</td>
+      <td>TRET</td>
+      <td>NL0009690239</td>
+      <td>Netherlands</td>
+      <td>Amsterdam</td>
+      <td>EUR</td>
+      <td>Buy on SMA 100 days LT SMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 100, 200]</td>
+      <td>0.19</td>
+      <td>0.4</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Not interested</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>39</th>
+      <td>Vanguard FTSE 100 UCITS GBP Acc</td>
+      <td>Etfs</td>
+      <td>VUKG</td>
+      <td>IE00BFMXYP42</td>
+      <td>United Kingdom</td>
+      <td>London</td>
+      <td>GBP</td>
+      <td>Buy on EMA 100 days LT EMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 100, 200]</td>
+      <td>0.29</td>
+      <td>0.47</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Strategy</td>
+      <td>nan</td>
+      <td>NaT</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>40</th>
+      <td>Vanguard FTSE 250 UCITS ETF GBP Accumulation</td>
+      <td>Etfs</td>
+      <td>VMIG</td>
+      <td>IE00BFMXVQ44</td>
+      <td>United Kingdom</td>
+      <td>London</td>
+      <td>GBP</td>
+      <td>Buy on EMA 100 days LT EMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 100, 200]</td>
+      <td>0.56</td>
+      <td>0.68</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>Trading212</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>41</th>
+      <td>Vanguard FTSE All-World UCITS ETF USD Accumula...</td>
+      <td>Etfs</td>
+      <td>VWCE</td>
+      <td>IE00BK5BQT80</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>USD</td>
+      <td>Buy on EMA 50 days LT EMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 50, 200]</td>
+      <td>0.26</td>
+      <td>0.32</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>42</th>
+      <td>Walt Disney Company</td>
+      <td>Stocks</td>
+      <td>DIS</td>
+      <td>US2546871060</td>
+      <td>United States</td>
+      <td>NYSE</td>
+      <td>USD</td>
+      <td>Buy on EMA 100 days LT EMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 100, 200]</td>
+      <td>0.37</td>
+      <td>0.26</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>nan</td>
+      <td>NaT</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>43</th>
+      <td>Xtrackers Future Mobility UCITS ETF1C</td>
+      <td>Etfs</td>
+      <td>XMOV</td>
+      <td>IE00BGV5VR99</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>EUR</td>
+      <td>Buy on SMA 50 days LT SMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 50, 200]</td>
+      <td>0.36</td>
+      <td>0.08</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Not interested</td>
+      <td>nan</td>
+      <td>NaT</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>44</th>
+      <td>Xtrackers LevDAX Daily Swap UCITS ETF 1C</td>
+      <td>Etfs</td>
+      <td>DBPE</td>
+      <td>LU0411075376</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>EUR</td>
+      <td>Buy on EMA 100 days LT EMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 100, 200]</td>
+      <td>1.29</td>
+      <td>1.35</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>nan</td>
+      <td>NaT</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>45</th>
+      <td>Xtrackers MSCI Emerging Markets Swap UCITS ETF 1C</td>
+      <td>Etfs</td>
+      <td>XMEM</td>
+      <td>LU0292107645</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>USD</td>
+      <td>Buy on SMA 50 days LT SMA 100 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 50, 100]</td>
+      <td>0.27</td>
+      <td>0.34</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>46</th>
+      <td>Xtrackers ShortDAX Daily Swap UCITS ETF 1C</td>
+      <td>Etfs</td>
+      <td>XSDX</td>
+      <td>LU0292106241</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>EUR</td>
+      <td>Buy on EMA 100 days LT EMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 100, 200]</td>
+      <td>0.23</td>
+      <td>0.4</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Strategy</td>
+      <td>DeGiro</td>
+      <td>2020-12-30</td>
+      <td>nan</td>
+    </tr>
+    <tr>
+      <th>47</th>
+      <td>Yum! Brands Inc</td>
+      <td>Stocks</td>
+      <td>YUM</td>
+      <td>US9884981013</td>
+      <td>United States</td>
+      <td>NYSE</td>
+      <td>USD</td>
+      <td>Buy on EMA 100 days LT EMA 200 days</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 100, 200]</td>
+      <td>0.11</td>
+      <td>0.12</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Not interested</td>
+      <td>nan</td>
+      <td>NaT</td>
+      <td>nan</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<p>Any column after currency is not required in the first run. Those columns are the results of running the simulation with the best perfoming strategy.</p>
+<p>Now we can perform the simulation in several scenarios. Please ignore any warnings regarding some currency exchange or data missing. The program will make the best assumption taking previous data and interpolating. Also in some securities, no dividends are available &mdash; which is expected.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>final_dataframe <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>DataFrame()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>YEARS <span style="color:#f92672">=</span> [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">3</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p_bar <span style="color:#f92672">=</span> tqdm()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> years <span style="color:#f92672">in</span> tqdm(YEARS, desc<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;Processing scenarios&#39;</span>):
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#39;Processing Simulation for period of </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> year(s)&#39;</span><span style="color:#f92672">.</span>format(years))
+</span></span><span style="display:flex;"><span>    dataframe_result <span style="color:#f92672">=</span> simulate(<span style="color:#e6db74">&#39;./excel/portfolio.xlsx&#39;</span>, years, p_bar)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    dataframe_result[<span style="color:#e6db74">&#39;Simulation Period&#39;</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;</span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> year(s)&#39;</span><span style="color:#f92672">.</span>format(years)
+</span></span><span style="display:flex;"><span>    dataframe_result[<span style="color:#e6db74">&#39;Yield per Year&#39;</span>] <span style="color:#f92672">=</span> round(dataframe_result[<span style="color:#e6db74">&#39;Yield&#39;</span>]<span style="color:#f92672">/</span>years,<span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>    dataframe_result[<span style="color:#e6db74">&#39;Strategy Yield Increment Per Year&#39;</span>] <span style="color:#f92672">=</span> round(dataframe_result[<span style="color:#e6db74">&#39;Strategy Yield Increment&#39;</span>]<span style="color:#f92672">/</span>years,<span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>    dataframe_result <span style="color:#f92672">=</span> dataframe_result[[<span style="color:#e6db74">&#39;Security Name&#39;</span>, <span style="color:#e6db74">&#39;Security Type&#39;</span>, <span style="color:#e6db74">&#39;Country&#39;</span>, <span style="color:#e6db74">&#39;Exchange&#39;</span>, <span style="color:#e6db74">&#39;Strategy&#39;</span>, <span style="color:#e6db74">&#39;Simulation Period&#39;</span>, \
+</span></span><span style="display:flex;"><span>                                         <span style="color:#e6db74">&#39;Yield per Year&#39;</span>, <span style="color:#e6db74">&#39;Strategy Yield Increment Per Year&#39;</span>, <span style="color:#e6db74">&#39;Strategy Class Name&#39;</span>, <span style="color:#e6db74">&#39;Strategy Config&#39;</span>]]
+</span></span><span style="display:flex;"><span>    final_dataframe <span style="color:#f92672">=</span> final_dataframe<span style="color:#f92672">.</span>append(dataframe_result)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>p_bar<span style="color:#f92672">.</span>close()
+</span></span></code></pre></div><p>Now we can see the best strategy and save the results:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>final_dataframe<span style="color:#f92672">.</span>to_csv(<span style="color:#e6db74">&#39;./excel/_simulations.csv&#39;</span>,index<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)
+</span></span><span style="display:flex;"><span>display<span style="color:#f92672">.</span>display(final_dataframe)
+</span></span></code></pre></div>
+
+<table border="1">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Security Name</th>
+      <th>Security Type</th>
+      <th>Country</th>
+      <th>Exchange</th>
+      <th>Strategy</th>
+      <th>Simulation Period</th>
+      <th>Yield per Year</th>
+      <th>Strategy Yield Increment Per Year</th>
+      <th>Strategy Class Name</th>
+      <th>Strategy Config</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>Xtrackers ShortDAX Daily Swap UCITS ETF 1C</td>
+      <td>Etfs</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>Buy on dSMA20 &gt; 0.5</td>
+      <td>1 year(s)</td>
+      <td>0.00</td>
+      <td>0.47</td>
+      <td>Strategy_Buy_dSMA20</td>
+      <td>0.5</td>
+    </tr>
+    <tr>
+      <th>53</th>
+      <td>Xtrackers LevDAX Daily Swap UCITS ETF 1C</td>
+      <td>Etfs</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>Buy, Hold and Sell</td>
+      <td>1 year(s)</td>
+      <td>1.56</td>
+      <td>0.00</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+    </tr>
+    <tr>
+      <th>81</th>
+      <td>Xtrackers (IE) Plc - Xtrackers Future Mobility...</td>
+      <td>Etfs</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>Buy, Hold and Sell</td>
+      <td>1 year(s)</td>
+      <td>1.00</td>
+      <td>0.00</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+    </tr>
+    <tr>
+      <th>110</th>
+      <td>VanEck Vectors Global Real Estate UCITS ETF</td>
+      <td>Etfs</td>
+      <td>Netherlands</td>
+      <td>Amsterdam</td>
+      <td>Buy on EMA 20 days LT EMA 50 days</td>
+      <td>1 year(s)</td>
+      <td>0.42</td>
+      <td>0.05</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 20, 50]</td>
+    </tr>
+    <tr>
+      <th>138</th>
+      <td>Siemens Energy AG</td>
+      <td>Stocks</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>Buy, Hold and Sell</td>
+      <td>1 year(s)</td>
+      <td>0.32</td>
+      <td>0.00</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+    </tr>
+    <tr>
+      <th>165</th>
+      <td>Siemens AG Class N</td>
+      <td>Stocks</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>Buy, Hold and Sell</td>
+      <td>1 year(s)</td>
+      <td>1.22</td>
+      <td>0.00</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+    </tr>
+    <tr>
+      <th>194</th>
+      <td>Samsung Electronics Co Ltd DRC Pref</td>
+      <td>Stocks</td>
+      <td>Germany</td>
+      <td>Frankfurt</td>
+      <td>Buy, Hold and Sell</td>
+      <td>1 year(s)</td>
+      <td>0.95</td>
+      <td>0.00</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+    </tr>
+    <tr>
+      <th>213</th>
+      <td>Nokia Oyj</td>
+      <td>Stocks</td>
+      <td>Finland</td>
+      <td>Helsinki</td>
+      <td>Buy on EMA 50 days LT EMA 100 days</td>
+      <td>1 year(s)</td>
+      <td>0.90</td>
+      <td>0.54</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 50, 100]</td>
+    </tr>
+    <tr>
+      <th>251</th>
+      <td>NH Hoteles</td>
+      <td>Stocks</td>
+      <td>Spain</td>
+      <td>Madrid</td>
+      <td>Buy on SMA 20 days LT SMA 50 days</td>
+      <td>1 year(s)</td>
+      <td>1.54</td>
+      <td>0.90</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 20, 50]</td>
+    </tr>
+    <tr>
+      <th>277</th>
+      <td>Melia Hotels</td>
+      <td>Stocks</td>
+      <td>Spain</td>
+      <td>Madrid</td>
+      <td>Buy, Hold and Sell</td>
+      <td>1 year(s)</td>
+      <td>1.03</td>
+      <td>0.00</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+    </tr>
+    <tr>
+      <th>306</th>
+      <td>iShares European Property Yield UCITS ETF EUR ...</td>
+      <td>Etfs</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>Buy on EMA 20 days LT EMA 50 days</td>
+      <td>1 year(s)</td>
+      <td>0.37</td>
+      <td>0.11</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 20, 50]</td>
+    </tr>
+    <tr>
+      <th>320</th>
+      <td>Invesco Physical Gold ETC</td>
+      <td>Etfs</td>
+      <td>Netherlands</td>
+      <td>Amsterdam</td>
+      <td>Buy on SMA 100 days LT SMA 50 days</td>
+      <td>1 year(s)</td>
+      <td>0.11</td>
+      <td>0.12</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 100, 50]</td>
+    </tr>
+    <tr>
+      <th>363</th>
+      <td>International Consolidated Airlines Group S.A.</td>
+      <td>Stocks</td>
+      <td>Spain</td>
+      <td>Madrid</td>
+      <td>Buy on SMA 20 days LT SMA 50 days</td>
+      <td>1 year(s)</td>
+      <td>1.11</td>
+      <td>1.08</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 20, 50]</td>
+    </tr>
+    <tr>
+      <th>387</th>
+      <td>International Business Machines</td>
+      <td>Stocks</td>
+      <td>United States</td>
+      <td>NYSE</td>
+      <td>Buy on EMA 20 days LT EMA 100 days</td>
+      <td>1 year(s)</td>
+      <td>0.59</td>
+      <td>0.21</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 20, 100]</td>
+    </tr>
+    <tr>
+      <th>417</th>
+      <td>Hyundai Motor Co DRC</td>
+      <td>Stocks</td>
+      <td>Germany</td>
+      <td>Frankfurt</td>
+      <td>Buy, Hold and Sell</td>
+      <td>1 year(s)</td>
+      <td>1.30</td>
+      <td>0.00</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+    </tr>
+    <tr>
+      <th>447</th>
+      <td>Airbus Group SE</td>
+      <td>Stocks</td>
+      <td>France</td>
+      <td>Paris</td>
+      <td>Buy on SMA 20 days LT SMA 50 days</td>
+      <td>1 year(s)</td>
+      <td>1.27</td>
+      <td>0.52</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 20, 50]</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>Xtrackers ShortDAX Daily Swap UCITS ETF 1C</td>
+      <td>Etfs</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>Buy on EMA 100 days LT EMA 200 days</td>
+      <td>3 year(s)</td>
+      <td>0.01</td>
+      <td>0.12</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 100, 200]</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>Xtrackers ShortDAX Daily Swap UCITS ETF 1C</td>
+      <td>Etfs</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>Buy on SMA 50 days LT SMA 200 days</td>
+      <td>3 year(s)</td>
+      <td>0.01</td>
+      <td>0.12</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 50, 200]</td>
+    </tr>
+    <tr>
+      <th>43</th>
+      <td>Xtrackers LevDAX Daily Swap UCITS ETF 1C</td>
+      <td>Etfs</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>Buy on EMA 50 days LT EMA 200 days</td>
+      <td>3 year(s)</td>
+      <td>0.57</td>
+      <td>0.48</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 50, 200]</td>
+    </tr>
+    <tr>
+      <th>81</th>
+      <td>Xtrackers (IE) Plc - Xtrackers Future Mobility...</td>
+      <td>Etfs</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>Buy, Hold and Sell</td>
+      <td>3 year(s)</td>
+      <td>0.15</td>
+      <td>0.00</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+    </tr>
+    <tr>
+      <th>93</th>
+      <td>VanEck Vectors Global Real Estate UCITS ETF</td>
+      <td>Etfs</td>
+      <td>Netherlands</td>
+      <td>Amsterdam</td>
+      <td>Buy on EMA 100 days LT EMA 200 days</td>
+      <td>3 year(s)</td>
+      <td>0.13</td>
+      <td>0.10</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 100, 200]</td>
+    </tr>
+    <tr>
+      <th>138</th>
+      <td>Siemens Energy AG</td>
+      <td>Stocks</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>Buy, Hold and Sell</td>
+      <td>3 year(s)</td>
+      <td>0.11</td>
+      <td>0.00</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+    </tr>
+    <tr>
+      <th>156</th>
+      <td>Siemens AG Class N</td>
+      <td>Stocks</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>Buy on SMA 50 days LT SMA 200 days</td>
+      <td>3 year(s)</td>
+      <td>0.51</td>
+      <td>0.37</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 50, 200]</td>
+    </tr>
+    <tr>
+      <th>193</th>
+      <td>Samsung Electronics Co Ltd DRC Pref</td>
+      <td>Stocks</td>
+      <td>Germany</td>
+      <td>Frankfurt</td>
+      <td>Buy, Hold and Sell</td>
+      <td>3 year(s)</td>
+      <td>0.25</td>
+      <td>0.00</td>
+      <td>Strategy_Hold_And_Sell</td>
+      <td>[]</td>
+    </tr>
+    <tr>
+      <th>220</th>
+      <td>Nokia Oyj</td>
+      <td>Stocks</td>
+      <td>Finland</td>
+      <td>Helsinki</td>
+      <td>Buy on SMA 20 days LT SMA 100 days</td>
+      <td>3 year(s)</td>
+      <td>0.27</td>
+      <td>0.32</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 20, 100]</td>
+    </tr>
+    <tr>
+      <th>233</th>
+      <td>NH Hoteles</td>
+      <td>Stocks</td>
+      <td>Spain</td>
+      <td>Madrid</td>
+      <td>Buy on EMA 100 days LT EMA 200 days</td>
+      <td>3 year(s)</td>
+      <td>0.19</td>
+      <td>0.32</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 100, 200]</td>
+    </tr>
+    <tr>
+      <th>265</th>
+      <td>Melia Hotels</td>
+      <td>Stocks</td>
+      <td>Spain</td>
+      <td>Madrid</td>
+      <td>Buy on EMA 100 days LT EMA 20 days</td>
+      <td>3 year(s)</td>
+      <td>0.05</td>
+      <td>0.19</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 100, 20]</td>
+    </tr>
+    <tr>
+      <th>295</th>
+      <td>iShares European Property Yield UCITS ETF EUR ...</td>
+      <td>Etfs</td>
+      <td>Germany</td>
+      <td>Xetra</td>
+      <td>Buy on EMA 50 days LT EMA 200 days</td>
+      <td>3 year(s)</td>
+      <td>0.10</td>
+      <td>0.08</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 50, 200]</td>
+    </tr>
+    <tr>
+      <th>321</th>
+      <td>Invesco Physical Gold ETC</td>
+      <td>Etfs</td>
+      <td>Netherlands</td>
+      <td>Amsterdam</td>
+      <td>Buy on EMA 100 days LT EMA 20 days</td>
+      <td>3 year(s)</td>
+      <td>0.13</td>
+      <td>0.03</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 100, 20]</td>
+    </tr>
+    <tr>
+      <th>345</th>
+      <td>International Consolidated Airlines Group S.A.</td>
+      <td>Stocks</td>
+      <td>Spain</td>
+      <td>Madrid</td>
+      <td>Buy on EMA 100 days LT EMA 200 days</td>
+      <td>3 year(s)</td>
+      <td>0.02</td>
+      <td>0.25</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["EMA", 100, 200]</td>
+    </tr>
+    <tr>
+      <th>382</th>
+      <td>International Business Machines</td>
+      <td>Stocks</td>
+      <td>United States</td>
+      <td>NYSE</td>
+      <td>Buy on SMA 50 days LT SMA 100 days</td>
+      <td>3 year(s)</td>
+      <td>0.24</td>
+      <td>0.27</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 50, 100]</td>
+    </tr>
+    <tr>
+      <th>414</th>
+      <td>Hyundai Motor Co DRC</td>
+      <td>Stocks</td>
+      <td>Germany</td>
+      <td>Frankfurt</td>
+      <td>Buy on SMA 20 days LT SMA 200 days</td>
+      <td>3 year(s)</td>
+      <td>0.16</td>
+      <td>0.11</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 20, 200]</td>
+    </tr>
+    <tr>
+      <th>430</th>
+      <td>Airbus Group SE</td>
+      <td>Stocks</td>
+      <td>France</td>
+      <td>Paris</td>
+      <td>Buy on SMA 100 days LT SMA 200 days</td>
+      <td>3 year(s)</td>
+      <td>0.45</td>
+      <td>0.43</td>
+      <td>Strategy_Buy_Value0_LT_Value1</td>
+      <td>["SMA", 100, 200]</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<p>In the future, I will focus on investing with python. From the results, I am not convinced that trading is the best approach. I will focus my efforts about selection of securities and balancing a portfolio.</p>
+<p>Until next time</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/trading/">trading</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/investing/">investing</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/python/">python</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/finance/">finance</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/business/">business</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        3003 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2020-12-15
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-2%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-2%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Trading%20in%20Python%3a%20Part%202&amp;caption=Trading%20in%20Python%3a%20Part%202&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-2%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Trading%20in%20Python%3a%20Part%202&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-2%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-2%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-2%2f;description=Trading%20in%20Python%3a%20Part%202" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-2%2f&amp;title=Trading%20in%20Python%3a%20Part%202&amp;summary=Trading%20in%20Python%3a%20Part%202&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-2%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-2%2f&amp;resubmit=true&amp;title=Trading%20in%20Python%3a%20Part%202" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-2%2f;title=Trading%20in%20Python%3a%20Part%202" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Trading%20in%20Python%3a%20Part%202%20https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-2%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-2%2f&amp;t=Trading%20in%20Python%3a%20Part%202" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Trading%20in%20Python%3a%20Part%202&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-2%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2021/01/investing-with-python-part-1-etfs/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">Investing with Python: Part 1 - ETFs</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2020/12/trading-in-python-part-1/">
+                    <span class="button__text">Trading in Python: Part 1</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

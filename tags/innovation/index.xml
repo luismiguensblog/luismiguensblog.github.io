@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Innovation on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/innovation/</link>
+    <description>Recent content in Innovation on Luis Miguens Blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 30 Jan 2018 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://blog.miguens.one/tags/innovation/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Challenges of fully autonomous driving</title>
+      <link>https://blog.miguens.one/posts/2018/01/challenges-of-fully-autonomous-driving/</link>
+      <pubDate>Tue, 30 Jan 2018 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2018/01/challenges-of-fully-autonomous-driving/</guid>
+      <description>&lt;p&gt;From Level 4 and onwards, we can face challenges in the adoption of autonomous driving technology. These can be classified into (1) Legal challenges, (2) Certification and intellectual property, (3) Ethical challenges, (4) Social challenges.&lt;/p&gt;&#xA;&lt;h2 id=&#34;legal-challenges&#34;&gt;Legal challenges&lt;/h2&gt;&#xA;&lt;p&gt;We can note two cases in which society should adapt to this innovation. In the first case, if we apply autonomous driving to trucks to make the transportation of goods more cost-efficient, it will be natural to cross the country&amp;rsquo;s borders.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Roadmap: Technology Innovation for fully autonomous car</title>
+      <link>https://blog.miguens.one/posts/2018/01/roadmap-technology-innovation-for-fully-autonomous-car/</link>
+      <pubDate>Sun, 28 Jan 2018 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2018/01/roadmap-technology-innovation-for-fully-autonomous-car/</guid>
+      <description>&lt;p&gt;Many cars sold today are capable of some level of automated operation.&lt;/p&gt;&#xA;&lt;p&gt;This roadmap&amp;rsquo;s objective is to show the relevant events in technology innovation that have allowed current day features, and we will try to draw the future designs required for a fully autonomous car.&lt;/p&gt;&#xA;&lt;p&gt;The automation of driving has several steps. We can range between the autonomous system&amp;rsquo;s levels of operation from no control (human driver has to remain in control all the time) to fully autonomous driving (the occupant is only required to set the destination).&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Flight Simulators as Product Innovation</title>
+      <link>https://blog.miguens.one/posts/2018/01/flight-simulators-as-product-innovation/</link>
+      <pubDate>Mon, 15 Jan 2018 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2018/01/flight-simulators-as-product-innovation/</guid>
+      <description>&lt;p&gt;Boeing anticipates that, only in the Asian region, the aviation industry will require almost half million of pilots and qualified technicians to meet the demand for air travel in the next 20 years.&lt;/p&gt;&#xA;&lt;p&gt;Due to the high cost of buying and maintaining an airplane, the investment in a real aircraft for only training purposes is out of the question, therefore the training centres should rely on simulations to provide the education that future pilots and technicians demand.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

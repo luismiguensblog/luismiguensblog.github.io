@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="In modern C&#43;&#43; development, managing files and directories is a common requirement – from reading configuration files to generating logs or processing batches of data files. Until C&#43;&#43;17, the language lacked a standard, platform-neutral way to perform filesystem operations. C&#43;&#43; developers either resorted to operating system APIs or relied on third-party libraries, leading to non-portable code or extra dependencies. With C&#43;&#43;17, the new &lt;filesystem&gt; library (in namespace std::filesystem) filled this gap by providing a rich set of tools for files and directories. In this post, I will introduce the C&#43;&#43;17 filesystem library, examine its historical background, detail its components, and demonstrate how to use it with code examples. Along the way, I will offer a critical perspective on its design decisions, impact, and limitations, using British English spelling and an analytical tone targeted at experienced C&#43;&#43; developers.
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2025/06/the-filesystem-library-in-c-17-a-comprehensive-introduction/" />
+
+
+    <title>
+        
+            The Filesystem Library in C&#43;&#43;17: A Comprehensive Introduction :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="The Filesystem Library in C&#43;&#43;17: A Comprehensive Introduction">
+  <meta itemprop="description" content="In modern C&#43;&#43; development, managing files and directories is a common requirement – from reading configuration files to generating logs or processing batches of data files. Until C&#43;&#43;17, the language lacked a standard, platform-neutral way to perform filesystem operations. C&#43;&#43; developers either resorted to operating system APIs or relied on third-party libraries, leading to non-portable code or extra dependencies. With C&#43;&#43;17, the new &lt;filesystem&gt; library (in namespace std::filesystem) filled this gap by providing a rich set of tools for files and directories. In this post, I will introduce the C&#43;&#43;17 filesystem library, examine its historical background, detail its components, and demonstrate how to use it with code examples. Along the way, I will offer a critical perspective on its design decisions, impact, and limitations, using British English spelling and an analytical tone targeted at experienced C&#43;&#43; developers.">
+  <meta itemprop="datePublished" content="2025-06-30T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2025-06-30T00:00:00+00:00">
+  <meta itemprop="wordCount" content="4443">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="C_cpp,Programming">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="The Filesystem Library in C&#43;&#43;17: A Comprehensive Introduction">
+  <meta name="twitter:description" content="In modern C&#43;&#43; development, managing files and directories is a common requirement – from reading configuration files to generating logs or processing batches of data files. Until C&#43;&#43;17, the language lacked a standard, platform-neutral way to perform filesystem operations. C&#43;&#43; developers either resorted to operating system APIs or relied on third-party libraries, leading to non-portable code or extra dependencies. With C&#43;&#43;17, the new &lt;filesystem&gt; library (in namespace std::filesystem) filled this gap by providing a rich set of tools for files and directories. In this post, I will introduce the C&#43;&#43;17 filesystem library, examine its historical background, detail its components, and demonstrate how to use it with code examples. Along the way, I will offer a critical perspective on its design decisions, impact, and limitations, using British English spelling and an analytical tone targeted at experienced C&#43;&#43; developers.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2025/06/the-filesystem-library-in-c-17-a-comprehensive-introduction/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="The Filesystem Library in C&#43;&#43;17: A Comprehensive Introduction">
+  <meta property="og:description" content="In modern C&#43;&#43; development, managing files and directories is a common requirement – from reading configuration files to generating logs or processing batches of data files. Until C&#43;&#43;17, the language lacked a standard, platform-neutral way to perform filesystem operations. C&#43;&#43; developers either resorted to operating system APIs or relied on third-party libraries, leading to non-portable code or extra dependencies. With C&#43;&#43;17, the new &lt;filesystem&gt; library (in namespace std::filesystem) filled this gap by providing a rich set of tools for files and directories. In this post, I will introduce the C&#43;&#43;17 filesystem library, examine its historical background, detail its components, and demonstrate how to use it with code examples. Along the way, I will offer a critical perspective on its design decisions, impact, and limitations, using British English spelling and an analytical tone targeted at experienced C&#43;&#43; developers.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-30T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-06-30T00:00:00+00:00">
+    <meta property="article:tag" content="C_cpp">
+    <meta property="article:tag" content="Programming">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2025-06-30 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        21 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2025/06/the-filesystem-library-in-c-17-a-comprehensive-introduction/">The Filesystem Library in C++17: A Comprehensive Introduction</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <p>In modern C++ development, managing files and directories is a common requirement – from reading configuration files to generating logs or processing batches of data files. Until C++17, the language lacked a standard, platform-neutral way to perform filesystem operations. C++ developers either resorted to operating system APIs or relied on third-party libraries, leading to non-portable code or extra dependencies. With C++17, the new <strong><code>&lt;filesystem&gt;</code></strong> library (in namespace <code>std::filesystem</code>) filled this gap by providing a rich set of tools for files and directories. In this post, I will introduce the C++17 filesystem library, examine its historical background, detail its components, and demonstrate how to use it with code examples. Along the way, I will offer a critical perspective on its design decisions, impact, and limitations, using British English spelling and an analytical tone targeted at experienced C++ developers.</p>
+<h2 id="historical-background-from-os-apis-to-boost-and-c17">Historical Background: From OS APIs to Boost and C++17</h2>
+<p>Before C++17, there was no standard way to handle filesystem tasks in C++. Programmers managed files and directories either by calling C library functions or using OS-specific system calls. For example, on POSIX systems one might use <code>opendir()</code>/<code>readdir()</code> (from <code>&lt;dirent.h&gt;</code>) to iterate through directory contents, or <code>mkdir()</code> and <code>stat()</code> for creating directories and retrieving file info. On Windows, developers often called the Win32 API (such as <code>FindFirstFile</code>/<code>FindNextFile</code> for directory iteration, <code>CreateDirectory</code> for directories, etc.). This meant writing conditional code for each platform or limiting an application to a single operating system. Such approaches were error-prone and hindered code portability and maintainability.</p>
+<p>A significant improvement came with the Boost C++ Libraries. The Boost project introduced <strong>Boost.Filesystem</strong> in 2003 as a portable C++ library for filesystem manipulation. Boost.Filesystem provided a C++ interface for paths, file status queries, and operations like directory traversal, abstracting away the differences between OS APIs. It quickly became popular, effectively serving as the <em>de facto</em> standard for C++ filesystem work. In fact, the C++17 filesystem library is directly based on Boost.Filesystem – the standards committee adopted Boost’s design almost verbatim. Prior to official standardization, these facilities were available as a Technical Specification (ISO/IEC TS 18822:2015) and even in an experimental form (e.g. <code>&lt;experimental/filesystem&gt;</code> in some C++14 implementations). By the time C++17 was released, the Filesystem Technical Specification had proven itself, and the committee merged it into the standard library. This historical context means that many C++ developers were already familiar with the library’s API (thanks to Boost), easing the transition. It also underscores that the C++17 filesystem library was not invented from scratch but rather <strong>standardised</strong> a well-tested solution.</p>
+<h2 id="overview-of-the-c17-filesystem-library">Overview of the C++17 Filesystem Library</h2>
+<p>The C++17 filesystem library (accessible via <code>#include &lt;filesystem&gt;</code>) provides a comprehensive set of types and functions to interact with the file system in a platform-agnostic manner. All functionality resides in the <code>std::filesystem</code> namespace (for older compilers implementing the Technical Specification it was in <code>std::experimental::filesystem</code>). In this post’s code examples, I will use an alias <code>fs</code> for <code>std::filesystem</code> to keep code concise. The library covers everything from path manipulation to iterating directories and performing file operations. At a high level, the key components of <code>std::filesystem</code> include:</p>
+<ul>
+<li><strong><code>std::filesystem::path</code></strong> – a class representing file or directory paths in a way that abstracts platform differences (e.g. directory separators, character encoding).</li>
+<li><strong>Directory iterators</strong> – the types <code>std::filesystem::directory_iterator</code> and <code>std::filesystem::recursive_directory_iterator</code> for enumerating directory contents (yielding <code>directory_entry</code> objects for each file or subdirectory).</li>
+<li><strong><code>std::filesystem::directory_entry</code></strong> – an object representing an entry in a directory (file or subdirectory) along with potentially cached file attributes for efficiency.</li>
+<li><strong>File operations functions</strong> – a collection of free functions in <code>std::filesystem</code> for common tasks: creating and removing directories, copying and moving files, checking existence and file properties, querying or modifying permissions, etc.</li>
+</ul>
+<p>This design provides a <strong>cross-platform abstraction</strong>: code written with <code>&lt;filesystem&gt;</code> will work on Windows, Linux, or macOS without modification, as the library internally translates calls to the appropriate native system calls. Crucially, the library deals purely with the filesystem&rsquo;s <em>structure</em> (paths, directories, metadata) and does not perform I/O on file contents – you still use streams or OS APIs for reading/writing file data. In the following sections, we will delve into each major area of the filesystem library with examples.</p>
+<h2 id="stdfilesystempath--path-representation-and-manipulation"><code>std::filesystem::path</code> – Path Representation and Manipulation</h2>
+<p>At the core of the filesystem library is the <code>std::filesystem::path</code> class, which encapsulates a filesystem path (such as <code>&quot;C:\Users\Alice\file.txt&quot;</code> on Windows or <code>&quot;/home/alice/file.txt&quot;</code> on Linux). A <code>path</code> object handles the <strong>syntactic aspects</strong> of paths: it knows about different directory separators (<code>/</code> vs <code>\\</code>), root names (<code>C:</code> drive vs Unix root <code>/</code>), file extensions, etc., and provides convenient operations to manipulate these without string-handling errors. This abstraction spares developers from ad-hoc string concatenation and platform-specific quirks.</p>
+<p>Key features of <code>std::filesystem::path</code> include the ability to <strong>construct</strong> paths from various string types (narrow, wide, or even UTF-8 strings on Windows), to <strong>combine</strong> paths using the <code>/</code> operator or the <code>append()</code> method, and to <strong>decompose</strong> paths into components (filename, extension, parent directory, etc.). For example, one can easily extract the filename or change the extension of a path using this class. Below is a demonstration of some common <code>path</code> operations:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;filesystem&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">namespace</span> fs <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>filesystem;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    fs<span style="color:#f92672">::</span>path p(<span style="color:#e6db74">&#34;/home/user/docs/report.txt&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Path: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> p.string() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Filename: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> p.filename().string() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Extension: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> p.extension().string() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Parent directory: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> p.parent_path().string() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Combining paths using operator/
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    fs<span style="color:#f92672">::</span>path dir <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/home/user/docs&#34;</span>;
+</span></span><span style="display:flex;"><span>    fs<span style="color:#f92672">::</span>path file <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;report.txt&#34;</span>;
+</span></span><span style="display:flex;"><span>    fs<span style="color:#f92672">::</span>path combined <span style="color:#f92672">=</span> dir <span style="color:#f92672">/</span> file;
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Combined path: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> combined.string() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In this code, we first construct a path <code>p</code> for <code>&quot;/home/user/docs/report.txt&quot;</code>. Using <code>p.filename()</code> yields the last component (<code>&quot;report.txt&quot;</code>), <code>p.extension()</code> gives the suffix (<code>&quot;.txt&quot;</code>), and <code>p.parent_path()</code> produces the directory path (<code>&quot;/home/user/docs&quot;</code>). We then show how to concatenate paths: using the <code>/</code> operator, <code>dir / file</code> automatically inserts the appropriate separator and produces <code>&quot;/home/user/docs/report.txt&quot;</code> as the combined path. All these operations respect the <strong>native format</strong> for the current platform – on Windows, for instance, constructing a path with forward slashes will still work, and printing it via <code>string()</code> will use backslashes. The <code>std::filesystem::path</code> class takes care of normalizing or converting separators as needed (without changing the meaning of the path). It also provides functions like <code>replace_filename</code> or <code>replace_extension</code> to modify parts of the path, and methods to obtain a string in a generic format (using <code>'/'</code> as separators) if needed.</p>
+<p>Under the hood, <code>std::filesystem::path</code> stores the path in an implementation-defined way (typically as a sequence of characters or <code>wstring</code> on Windows), and supports comparison, hashing, and even lexical normalization. For example, you can compare two paths with <code>==</code> to check if they refer to the same location textually (note this does not check the filesystem content, just the path strings). Overall, <code>path</code> abstracts away a lot of tedious string handling, making code more readable and less error-prone when dealing with file paths.</p>
+<h2 id="directory-iteration-with-directory_iterator">Directory Iteration with <code>directory_iterator</code></h2>
+<p>Navigating through directory contents is a breeze with the <code>&lt;filesystem&gt;</code> library. The <code>std::filesystem::directory_iterator</code> provides an easy way to iterate over the files and subdirectories within a given directory. Similarly, <code>std::filesystem::recursive_directory_iterator</code> goes a step further by traversing subdirectories recursively (depth-first). These iterators present a uniform interface for directory traversal across platforms, replacing older approaches like platform-specific APIs or manual recursion with <code>opendir()</code>/<code>readdir()</code> on POSIX.</p>
+<p>Using a directory iterator is straightforward. You create a <code>directory_iterator</code> object with a target path (the directory you want to list), and then you can use it in a range-based for loop. Each iteration gives you a <code>std::filesystem::directory_entry</code>, which represents one element in the directory (either a file or a subdirectory). The <code>directory_entry</code> can be queried for its path and file status information. Here’s an example that lists the contents of a directory:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">namespace</span> fs <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>filesystem;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// List all entries (files/directories) in the given directory
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>fs<span style="color:#f92672">::</span>path target <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;/home/user/docs&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> fs<span style="color:#f92672">::</span>directory_entry<span style="color:#f92672">&amp;</span> entry : fs<span style="color:#f92672">::</span>directory_iterator(target)) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> entry.path().string() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">catch</span> (<span style="color:#66d9ef">const</span> fs<span style="color:#f92672">::</span>filesystem_error<span style="color:#f92672">&amp;</span> ex) {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cerr <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Error accessing directory: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> ex.what() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In this snippet, we iterate through <code>/home/user/docs</code> and print each entry’s full path. We enclose the loop in a try/catch block because <code>directory_iterator</code> will throw a <code>filesystem_error</code> exception if, for instance, the directory cannot be opened (perhaps due to permission issues or if the path doesn’t exist). By catching <code>fs::filesystem_error</code>, we can handle such failures gracefully (for example, by logging an error message). The <code>directory_entry</code> we get in the loop has a member function <code>path()</code> that returns the <code>fs::path</code> of the entry. We call <code>.string()</code> on it to output it as a human-readable string.</p>
+<p>If we needed to filter or inspect entries further, we could use additional functions from <code>&lt;filesystem&gt;</code>. For example, <code>fs::is_directory(entry.path())</code> will tell us if the current entry is itself a directory, and <code>fs::file_size(entry.path())</code> would give the size of a file (if it is a regular file). In fact, <code>directory_entry</code> has convenience methods like <code>is_directory()</code>, <code>is_regular_file()</code>, etc., that internally use cached metadata from the iteration (to avoid repeatedly querying the OS for the same info). This caching is a result of a C++17 refinement to improve performance when iterating. For recursive traversal, one can use <code>fs::recursive_directory_iterator</code> in a similar loop – it will iterate into subfolders automatically. If some subdirectories should be skipped (e.g., symbolic links to avoid infinite loops), options can be provided, but by default it will follow normal files and directories. The ability to traverse directories with a simple loop greatly simplifies tasks like searching for files with certain extensions, computing directory sizes, etc., in a portable manner.</p>
+<h2 id="file-operations-creating-copying-moving-and-deleting">File Operations: Creating, Copying, Moving, and Deleting</h2>
+<p>Beyond representing paths and iterating directories, the filesystem library provides a set of functions to perform common file and directory operations. These allow you to create or remove directories, copy or move files, and query properties like existence or file size – all through a consistent API. The functions are found in the <code>std::filesystem</code> namespace and typically take one or more <code>fs::path</code> arguments. Let’s highlight some of the most commonly used operations:</p>
+<ul>
+<li><strong>Creating directories</strong>: <code>fs::create_directory(path)</code> will create a single directory, and <code>fs::create_directories(path)</code> will create an entire directory hierarchy (any intermediate non-existent directories in the given path) in one call. Both return a boolean indicating whether a directory was created (they return <code>false</code> if the directory already existed).</li>
+<li><strong>Checking existence</strong>: <code>fs::exists(path)</code> returns a boolean indicating whether the given file or directory exists in the filesystem. Similarly, <code>fs::is_regular_file(path)</code>, <code>fs::is_directory(path)</code>, <code>fs::is_symlink(path)</code>, etc., can be used to test the type of an existing filesystem object.</li>
+<li><strong>Copying files or directories</strong>: <code>fs::copy(source, destination)</code> can copy a file or directory. By default, <code>copy</code> will copy a single file (overwriting the destination if it exists, unless you specify copy options), or it will error out if you try to copy a directory without specifying what to do. For copying directories with all their contents, you can pass a third argument such as <code>fs::copy_options::recursive</code> to copy everything recursively. The library also provides more fine-grained functions like <code>fs::copy_file</code> for copying files specifically.</li>
+<li><strong>Moving/renaming</strong>: <code>fs::rename(old_path, new_path)</code> will rename a file or directory to a new name or move it to a new location (if on the same filesystem). This function is equivalent to the POSIX <code>rename</code> or Windows <code>MoveFile</code> – it’s an atomic rename if possible. Note that <code>rename</code> cannot move files across different drives or mount points on many systems; attempting to do so will throw an error, in which case you’d need to manually copy and then remove the original.</li>
+<li><strong>Removing files or directories</strong>: <code>fs::remove(path)</code> deletes a file or an empty directory. It returns <code>true</code> if a file/directory was removed, <code>false</code> if nothing was done (e.g., the path didn’t exist). To delete a directory and all of its contents (files and subdirectories), there is <code>fs::remove_all(path)</code>, which recursively deletes everything under the given path. It returns a <code>uintmax_t</code> count of how many files and directories were removed, which is useful for logging or verification.</li>
+</ul>
+<p>Here’s a code example that ties a few of these operations together in a realistic sequence:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;filesystem&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;fstream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">namespace</span> fs <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>filesystem;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Create a directory
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    fs<span style="color:#f92672">::</span>create_directory(<span style="color:#e6db74">&#34;demo_dir&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Create a file inside the directory (using fstream)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    std<span style="color:#f92672">::</span>ofstream(<span style="color:#e6db74">&#34;demo_dir/hello.txt&#34;</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Hello Filesystem</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Copy the file within the directory
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    fs<span style="color:#f92672">::</span>copy(<span style="color:#e6db74">&#34;demo_dir/hello.txt&#34;</span>, <span style="color:#e6db74">&#34;demo_dir/hello_copy.txt&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Rename (move) the copied file
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    fs<span style="color:#f92672">::</span>rename(<span style="color:#e6db74">&#34;demo_dir/hello_copy.txt&#34;</span>, <span style="color:#e6db74">&#34;demo_dir/hello_renamed.txt&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Remove the directory and all its content
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    std<span style="color:#f92672">::</span>uintmax_t removed_count <span style="color:#f92672">=</span> fs<span style="color:#f92672">::</span>remove_all(<span style="color:#e6db74">&#34;demo_dir&#34;</span>);
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Removed &#34;</span> <span style="color:#f92672">&lt;&lt;</span> removed_count <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; files or directories</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Let’s break down what happens here. We start by creating a new directory called <strong><code>demo_dir</code></strong> using <code>create_directory</code>. Next, we use an <code>&lt;fstream&gt;</code> to create and write to a file <code>hello.txt</code> inside that directory (strictly speaking, this step isn’t done by the filesystem library – we’re just using it to set up a file to demonstrate copying). Then we call <code>fs::copy</code> to duplicate <code>hello.txt</code> to a new file <code>hello_copy.txt</code> in the same directory. After that, <code>fs::rename</code> is used to rename (or move) <code>hello_copy.txt</code> to <code>hello_renamed.txt</code>. Finally, we remove the entire directory tree starting at <code>demo_dir</code> with <code>fs::remove_all</code>; this deletes <code>hello.txt</code>, <code>hello_renamed.txt</code>, and the directory <code>demo_dir</code> itself. The call returns the number of items removed (in this case, it should be 3: two files and one directory), which we print out.</p>
+<p>All these operations will throw a <code>std::filesystem::filesystem_error</code> if they fail (for example, if the program lacks permission to write or if a file is open and cannot be removed). We can see how succinct and expressive this code is compared to what one might have to do using system-specific calls or older methods. For instance, copying a file portably in the past might require opening input and output file streams and manually looping to copy bytes, whereas <code>fs::copy</code> handles it (and even has options for copying metadata or handling symlinks). Likewise, removing a directory with contents would require recursive code without <code>remove_all</code>. The <code>&lt;filesystem&gt;</code> library thus significantly reduces the amount of code needed for common tasks and lowers the barrier to writing cross-platform code that manipulates files and directories. It’s worth noting that these functions map to operating system calls under the hood – for example, <code>create_directory</code> likely calls <code>mkdir</code> or <code>_mkdir</code>, <code>remove</code> calls <code>remove()</code>/<code>DeleteFile</code>, and so on. They are designed to be efficient and make use of the OS’s capabilities.</p>
+<h2 id="file-status-and-attributes">File Status and Attributes</h2>
+<p>In addition to creating or modifying files, programs often need to query <strong>metadata</strong> about files: Does a file exist? Is it a regular file or a directory or a symlink? How large is it? When was it last modified? The filesystem library provides functions to obtain this information easily. We’ve already used some of them above: <code>fs::exists</code>, <code>fs::is_directory</code>, <code>fs::is_regular_file</code>, and <code>fs::file_size</code>. There are a few more worth mentioning:</p>
+<ul>
+<li>
+<p><strong><code>fs::status(path)</code></strong> and <strong><code>fs::symlink_status(path)</code></strong>: These return a <code>fs::file_status</code> object that holds the file type and permission bits for the given path. The difference is that <code>status</code> follows symlinks (so it gives info about the target of the link), whereas <code>symlink_status</code> gives info about the link itself if the path is a symlink. In practice, you often don’t need to call these explicitly if you use the convenience predicates (<code>is_directory</code> etc.), which internally call <code>status</code> or use cached info.</p>
+</li>
+<li>
+<p><strong>Type checking functions</strong>: As noted, <code>fs::is_regular_file(p)</code>, <code>fs::is_directory(p)</code>, <code>fs::is_symlink(p)</code>, <code>fs::is_empty(p)</code> (checks if file is empty or directory has no contents), etc., allow quick inquiry of what a path represents. These are boolean functions that internally use <code>status(p).type()</code> to compare against <code>fs::file_type::regular</code> or <code>directory</code> and so on.</p>
+</li>
+<li>
+<p><strong>File size and time</strong>: <code>fs::file_size(p)</code> returns the size of a regular file in bytes (as a <code>uintmax_t</code>). It will throw if used on a directory or non-regular file (you might want to check <code>is_regular_file</code> first). <code>fs::last_write_time(p)</code> returns a time point (<code>fs::file_time_type</code>) representing the last modification timestamp of the file or directory. You can convert this to a calendar time (e.g., <code>std::time_t</code>) if you need to display it, though the process is a bit clunky due to <code>file_time_type</code> possibly using a different clock. For example, one can do:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> ftime <span style="color:#f92672">=</span> fs<span style="color:#f92672">::</span>last_write_time(p);
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>time_t cftime <span style="color:#f92672">=</span> <span style="color:#66d9ef">decltype</span>(ftime)<span style="color:#f92672">::</span>clock<span style="color:#f92672">::</span>to_time_t(ftime);
+</span></span></code></pre></div><p>(C++20 provides <code>file_time_type::clock::to_time_t</code> for conversions; on C++17, you might need an alternative approach if <code>file_time_type</code> isn’t system_clock.)</p>
+</li>
+<li>
+<p><strong>Permissions</strong>: The library also supports querying and modifying file permissions. Every <code>fs::file_status</code> contains a <code>fs::perms</code> (an enumeration of permission bits similar to POSIX file permissions). You can call <code>fs::status(p).permissions()</code> to get the current permissions, and use <code>fs::permissions(p, newPerms)</code> to change them (with options to add/remove bits or replace them). This is a more advanced feature and is subject to platform support (e.g., Windows has a more complex ACL model, so <code>&lt;filesystem&gt;</code> maps the basic read/write/exec flags in a limited way).</p>
+</li>
+</ul>
+<p>Below is a brief example showing how some of these queries might be used in practice:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>fs<span style="color:#f92672">::</span>path f <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;demo_dir/hello.txt&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (fs<span style="color:#f92672">::</span>exists(f)) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (fs<span style="color:#f92672">::</span>is_directory(f)) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> f.filename().string() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; is a directory</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">else</span> <span style="color:#a6e22e">if</span> (fs<span style="color:#f92672">::</span>is_regular_file(f)) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> f.filename().string() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; is a file of &#34;</span>
+</span></span><span style="display:flex;"><span>                  <span style="color:#f92672">&lt;&lt;</span> fs<span style="color:#f92672">::</span>file_size(f) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; bytes</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> f.string() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; does not exist</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Assuming <code>demo_dir/hello.txt</code> exists (from the earlier example), this code will detect that it’s a regular file and print its size. We first check <code>fs::exists</code> to avoid handling exceptions in case the path is not present. Then <code>fs::is_directory</code> vs <code>is_regular_file</code> tells us what kind of object it is. We used <code>f.filename()</code> purely to print just the leaf name instead of the whole path. If the file were not present, it would print that information. In a real program, you might use these functions to decide how to handle a path (for example, traverse into it if it’s a directory, or open it if it’s a file).</p>
+<p>All these querying functions throw <code>filesystem_error</code> on errors (for example, if you don’t have permission to access the path). You can also use overloads that take a <code>std::error_code&amp;</code> reference to get an error without exceptions. For instance, <code>fs::exists(p, ec)</code> will set <code>ec</code> to an error code instead of throwing, which can be useful in certain situations (like not wanting to use exceptions for control flow).</p>
+<h2 id="error-handling-in-filesystem">Error Handling in <code>&lt;filesystem&gt;</code></h2>
+<p>The filesystem library follows the convention used by many C++ standard library components: functions will throw exceptions to indicate errors, unless you use an overload that accepts a <code>std::error_code</code>. Specifically, most operations throw the exception type <code>std::filesystem::filesystem_error</code> on failure. This exception (a subclass of <code>std::system_error</code>) carries information about the error condition and the paths involved. For example, if you attempt to copy a file but the source doesn’t exist or the destination is not writable, a <code>filesystem_error</code> will be thrown describing the situation. As a developer, you can catch this exception to handle the error gracefully. For instance:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">try</span> {
+</span></span><span style="display:flex;"><span>    fs<span style="color:#f92672">::</span>rename(<span style="color:#e6db74">&#34;nonexistent.txt&#34;</span>, <span style="color:#e6db74">&#34;newname.txt&#34;</span>);
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">catch</span> (<span style="color:#66d9ef">const</span> fs<span style="color:#f92672">::</span>filesystem_error<span style="color:#f92672">&amp;</span> e) {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cerr <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Filesystem error: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> e.what() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// e.code() contains the std::error_code
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span></code></pre></div><p>In the catch block, <code>e.what()</code> gives a message string and <code>e.code()</code> provides a platform-specific error code (e.g., POSIX <code>errno</code> wrapped in <code>std::error_code</code>). If you prefer to avoid exceptions, each operation typically has an alternative. For example, <code>fs::rename(old, new, error_code_var)</code> will set <code>error_code_var</code> to indicate success or failure instead of throwing. It’s then up to you to check that code. The dual approach (exceptions or error codes) is nice for flexibility: in scripts or small tools, you might use exceptions for brevity, whereas in large applications or performance-sensitive code, you might choose <code>std::error_code</code> to avoid the overhead of exceptions.</p>
+<p>It’s important to note that certain conditions are not considered errors by these functions but still need attention – for instance, <code>fs::remove(path)</code> returning <code>false</code> simply means the file didn’t exist, which isn’t an exception case. So you should interpret the return values accordingly. The documentation and references (such as cppreference and the ISO C++ standard) detail which functions throw and what their return values signify. In summary, the <code>&lt;filesystem&gt;</code> library provides robust error handling mechanisms: <strong>exceptions by default and error codes on request</strong>, enabling you to write safe code that properly handles failure cases.</p>
+<h2 id="impact-limitations-and-future-developments">Impact, Limitations, and Future Developments</h2>
+<p>The adoption of the filesystem library into C++17 has had a notable impact on the way C++ code interacts with the operating system. In my experience, having <code>std::filesystem</code> readily available has significantly streamlined tasks that used to require either verbose C APIs or adding Boost as a dependency. The <strong>impact</strong> can be summarised as follows:</p>
+<ul>
+<li><strong>Productivity and clarity:</strong> Developers can accomplish common file operations with intuitive standard calls, leading to clearer and more self-documenting code. This encourages more direct handling of filesystem tasks (for example, writing a quick utility to organise files is now straightforward in pure C++). It also reduces the likelihood of bugs since the library functions handle edge cases (like platform-specific path syntax) that one might overlook in custom code.</li>
+<li><strong>Portability:</strong> Code that uses <code>std::filesystem</code> is inherently portable across operating systems. This has lowered the barrier to writing cross-platform C++ tools and applications. Teams no longer need to write separate code paths or use preprocessor directives for different OSes when dealing with files. The library abstracts those differences (path separators, maximum path lengths, etc.) under a unified interface.</li>
+<li><strong>Reduced dependencies:</strong> Projects that previously required Boost.Filesystem or other third-party libraries can now rely on the standard library alone. This simplifies build systems and is especially beneficial in environments where adding dependencies is undesirable. It’s also a boon for safety-conscious or constrained projects (like some embedded systems) that avoid external libraries.</li>
+</ul>
+<p>However, no addition to the language is without its <strong>limitations</strong> and criticisms. It&rsquo;s important to critically assess a few issues and constraints associated with <code>&lt;filesystem&gt;</code>:</p>
+<ul>
+<li><strong>Concurrent access and consistency:</strong> The filesystem library does not inherently manage concurrent modifications. If multiple threads or processes attempt to manipulate the same files or directories interleaved in time, race conditions can occur, potentially leading to undefined behavior. For example, iterating a directory while another thread deletes files in it may result in exceptions or missing entries. The standard notes that such scenarios are not safe – it is the programmer’s responsibility to synchronise filesystem operations at a higher level if needed. In practice, this is similar to using OS APIs: the library won’t prevent you from shooting yourself in the foot if you concurrently mutate the filesystem in unsynchronised ways.</li>
+<li><strong>Platform-dependent behavior and support:</strong> While <code>std::filesystem</code> strives to be portable, it can only be as comprehensive as the underlying OS allows. Some features are not available on all filesystems. For instance, if you query or attempt to create a symbolic link on a filesystem that doesn’t support symlinks (like FAT32), you will get an error. The library functions report errors in these cases but cannot emulate unsupported features. Another example is path length limits on Windows – historically, Windows paths were limited to 260 characters (MAX_PATH). Early implementations of <code>&lt;filesystem&gt;</code> on Windows inherited this limitation (using fixed-size buffers of MAX_PATH length). Newer Windows 10 releases and updates to Visual C++ have addressed this by supporting long paths if enabled, and the library will utilize that support, but developers need to be aware that extremely long paths could still pose issues or require special prefixes (<code>&quot;\\\\?\\&quot;</code> syntax) to handle.</li>
+<li><strong>Performance considerations:</strong> The convenience of <code>&lt;filesystem&gt;</code> may introduce some overhead. For example, constructing <code>fs::path</code> objects and using them is generally efficient, but there is some cost to the abstraction (memory allocation for path strings, etc.). In tight loops where millions of file operations are done, those costs accumulate. Similarly, <code>fs::recursive_directory_iterator</code> performing a deep traversal will call into the OS for each file; this is I/O-bound by nature, but developers should still be mindful of not doing more work than necessary (e.g., using <code>directory_options::skip_permission_denied</code> if appropriate, to avoid exceptions slowing down a large traversal when hitting protected files). That said, in most applications the bottleneck is the actual filesystem I/O, not the C++ abstraction overhead.</li>
+<li><strong>Missing high-level features:</strong> The C++17 filesystem library focuses on fundamental operations. It does not provide higher-level utilities like file watching (monitoring changes to files/directories), nor does it include functions for reading/writing file contents – those remain the domain of <code>&lt;fstream&gt;</code> or third-party libraries. Some tasks still require platform-specific extensions or libraries (for example, getting detailed file metadata beyond basic attributes, or performing asynchronous file I/O). The current library is a lowest common denominator of what modern OSes offer, which is appropriate for the standard, but developers with special requirements might need to go beyond <code>std::filesystem</code>.</li>
+</ul>
+<p>Looking to the <strong>future</strong>, the filesystem library is expected to evolve only modestly, as it already covers the essentials. Potential future developments include improvements and extensions driven by real-world usage and performance needs. One area of interest is a concept called <strong><code>path_view</code></strong> (analogous to <code>string_view</code> but for file paths). A proposal for <code>std::filesystem::path_view</code> is under discussion, which would provide a lightweight, non-owning reference to a path string and could avoid some allocations when manipulating paths. This could address performance issues when code frequently converts between <code>std::string</code> and <code>fs::path</code>. Another possible improvement is making more of the filesystem library usable in constant expressions (i.e., <code>constexpr</code>), though interacting with an actual filesystem at compile-time is largely out of scope – still, things like constructing a <code>path</code> from a literal could become <code>constexpr</code> if the committee finds it useful and feasible.</p>
+<p>We might also see better integration with other modern C++ features: for example, formatting library support (printing paths nicely with <code>std::format</code>), which is already partly addressed in C++20 and beyond. As operating systems evolve, the C++ standard may update <code>&lt;filesystem&gt;</code> to accommodate new types of filesystems or metadata (for instance, additional file attributes or new permission models). However, major leaps such as network filesystem abstractions or high-level file manipulation algorithms are likely to be left to external libraries or platform APIs for the foreseeable future.</p>
+<p>In conclusion, the C++17 filesystem library represents a significant step forward in the language’s ability to interact with the operating system in a portable and programmer-friendly way. It has <strong>standardised</strong> decades-old practices and borrowed a well-vetted library (Boost.Filesystem) into the official toolkit of C++ developers. My assessment is that <code>&lt;filesystem&gt;</code> greatly improves the expressiveness and ease of writing C++ code that deals with files and directories. By eliminating a dependency on non-standard libraries and providing a first-class, uniform API, it has likely saved countless hours of developer time and reduced bugs. There are some caveats – especially regarding concurrency and platform quirks – and it’s not a one-size-fits-all solution for every low-level need. Yet, for the vast majority of applications, <code>std::filesystem</code> strikes an excellent balance between power and simplicity. As with any part of the standard, it will continue to be refined, but it has already become an indispensable component of modern C++ development. The inclusion of the filesystem library in C++17 can be seen as the language finally catching up with a long-standing practical need, and doing so in a manner that is elegant, robust, and aligned with the principles of C++ design. </p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        4443 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2025-06-30
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fthe-filesystem-library-in-c-17-a-comprehensive-introduction%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fthe-filesystem-library-in-c-17-a-comprehensive-introduction%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=The%20Filesystem%20Library%20in%20C%2b%2b17%3a%20A%20Comprehensive%20Introduction&amp;caption=The%20Filesystem%20Library%20in%20C%2b%2b17%3a%20A%20Comprehensive%20Introduction&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fthe-filesystem-library-in-c-17-a-comprehensive-introduction%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=The%20Filesystem%20Library%20in%20C%2b%2b17%3a%20A%20Comprehensive%20Introduction&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fthe-filesystem-library-in-c-17-a-comprehensive-introduction%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fthe-filesystem-library-in-c-17-a-comprehensive-introduction%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fthe-filesystem-library-in-c-17-a-comprehensive-introduction%2f;description=The%20Filesystem%20Library%20in%20C%2b%2b17%3a%20A%20Comprehensive%20Introduction" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fthe-filesystem-library-in-c-17-a-comprehensive-introduction%2f&amp;title=The%20Filesystem%20Library%20in%20C%2b%2b17%3a%20A%20Comprehensive%20Introduction&amp;summary=The%20Filesystem%20Library%20in%20C%2b%2b17%3a%20A%20Comprehensive%20Introduction&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fthe-filesystem-library-in-c-17-a-comprehensive-introduction%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fthe-filesystem-library-in-c-17-a-comprehensive-introduction%2f&amp;resubmit=true&amp;title=The%20Filesystem%20Library%20in%20C%2b%2b17%3a%20A%20Comprehensive%20Introduction" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fthe-filesystem-library-in-c-17-a-comprehensive-introduction%2f;title=The%20Filesystem%20Library%20in%20C%2b%2b17%3a%20A%20Comprehensive%20Introduction" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=The%20Filesystem%20Library%20in%20C%2b%2b17%3a%20A%20Comprehensive%20Introduction%20https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fthe-filesystem-library-in-c-17-a-comprehensive-introduction%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fthe-filesystem-library-in-c-17-a-comprehensive-introduction%2f&amp;t=The%20Filesystem%20Library%20in%20C%2b%2b17%3a%20A%20Comprehensive%20Introduction" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=The%20Filesystem%20Library%20in%20C%2b%2b17%3a%20A%20Comprehensive%20Introduction&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fthe-filesystem-library-in-c-17-a-comprehensive-introduction%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2025/07/embracing-type-safety-in-c-17-stdoptional-stdvariant-and-stdany/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">Embracing Type Safety in C&#43;&#43;17: std::optional, std::variant, and std::any</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2025/06/template-argument-deduction-for-class-templates-in-c-17/">
+                    <span class="button__text">Template Argument Deduction for Class Templates in C&#43;&#43;17</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

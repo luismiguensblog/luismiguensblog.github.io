@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Embracing Lambda Expressions in C&#43;&#43;17: A Step Towards More Functional Programming** Lambda expressions (anonymous functions) have long been a critical element of functional programming languages, and with the introduction of lambdas in C&#43;&#43;11—subsequently refined in C&#43;&#43;14 and C&#43;&#43;17—this paradigmatic approach has firmly rooted itself in the modern C&#43;&#43; ecosystem. In my experience, embracing lambda expressions can profoundly simplify complex code structures, encourage more declarative patterns, and pave the way towards a more functional style of programming. In this blog post, I will critically examine the syntax and semantics of lambda expressions, discuss their capturing mechanisms, and demonstrate how they can be effectively leveraged in conjunction with the Standard Template Library (STL) algorithms to produce cleaner, more concise, and maintainable code. Throughout, I will reference authoritative sources and cite industry best practices, while offering my personal perspective on the benefits and potential pitfalls of this feature.
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2024/12/lambda-expressions-and-functional-programming-in-c-17/" />
+
+
+    <title>
+        
+            Lambda Expressions and Functional Programming in C&#43;&#43;17 :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="Lambda Expressions and Functional Programming in C&#43;&#43;17">
+  <meta itemprop="description" content="Embracing Lambda Expressions in C&#43;&#43;17: A Step Towards More Functional Programming** Lambda expressions (anonymous functions) have long been a critical element of functional programming languages, and with the introduction of lambdas in C&#43;&#43;11—subsequently refined in C&#43;&#43;14 and C&#43;&#43;17—this paradigmatic approach has firmly rooted itself in the modern C&#43;&#43; ecosystem. In my experience, embracing lambda expressions can profoundly simplify complex code structures, encourage more declarative patterns, and pave the way towards a more functional style of programming. In this blog post, I will critically examine the syntax and semantics of lambda expressions, discuss their capturing mechanisms, and demonstrate how they can be effectively leveraged in conjunction with the Standard Template Library (STL) algorithms to produce cleaner, more concise, and maintainable code. Throughout, I will reference authoritative sources and cite industry best practices, while offering my personal perspective on the benefits and potential pitfalls of this feature.">
+  <meta itemprop="datePublished" content="2024-12-09T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2024-12-09T00:00:00+00:00">
+  <meta itemprop="wordCount" content="1304">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="C_cpp,Programming">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="Lambda Expressions and Functional Programming in C&#43;&#43;17">
+  <meta name="twitter:description" content="Embracing Lambda Expressions in C&#43;&#43;17: A Step Towards More Functional Programming** Lambda expressions (anonymous functions) have long been a critical element of functional programming languages, and with the introduction of lambdas in C&#43;&#43;11—subsequently refined in C&#43;&#43;14 and C&#43;&#43;17—this paradigmatic approach has firmly rooted itself in the modern C&#43;&#43; ecosystem. In my experience, embracing lambda expressions can profoundly simplify complex code structures, encourage more declarative patterns, and pave the way towards a more functional style of programming. In this blog post, I will critically examine the syntax and semantics of lambda expressions, discuss their capturing mechanisms, and demonstrate how they can be effectively leveraged in conjunction with the Standard Template Library (STL) algorithms to produce cleaner, more concise, and maintainable code. Throughout, I will reference authoritative sources and cite industry best practices, while offering my personal perspective on the benefits and potential pitfalls of this feature.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2024/12/lambda-expressions-and-functional-programming-in-c-17/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="Lambda Expressions and Functional Programming in C&#43;&#43;17">
+  <meta property="og:description" content="Embracing Lambda Expressions in C&#43;&#43;17: A Step Towards More Functional Programming** Lambda expressions (anonymous functions) have long been a critical element of functional programming languages, and with the introduction of lambdas in C&#43;&#43;11—subsequently refined in C&#43;&#43;14 and C&#43;&#43;17—this paradigmatic approach has firmly rooted itself in the modern C&#43;&#43; ecosystem. In my experience, embracing lambda expressions can profoundly simplify complex code structures, encourage more declarative patterns, and pave the way towards a more functional style of programming. In this blog post, I will critically examine the syntax and semantics of lambda expressions, discuss their capturing mechanisms, and demonstrate how they can be effectively leveraged in conjunction with the Standard Template Library (STL) algorithms to produce cleaner, more concise, and maintainable code. Throughout, I will reference authoritative sources and cite industry best practices, while offering my personal perspective on the benefits and potential pitfalls of this feature.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2024-12-09T00:00:00+00:00">
+    <meta property="article:modified_time" content="2024-12-09T00:00:00+00:00">
+    <meta property="article:tag" content="C_cpp">
+    <meta property="article:tag" content="Programming">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2024-12-09 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        7 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2024/12/lambda-expressions-and-functional-programming-in-c-17/">Lambda Expressions and Functional Programming in C++17</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="embracing-lambda-expressions-in-c17-a-step-towards-more-functional-programming">Embracing Lambda Expressions in C++17: A Step Towards More Functional Programming**</h2>
+<p>Lambda expressions (anonymous functions) have long been a critical element of functional programming languages, and with the introduction of lambdas in C++11—subsequently refined in C++14 and C++17—this paradigmatic approach has firmly rooted itself in the modern C++ ecosystem. In my experience, embracing lambda expressions can profoundly simplify complex code structures, encourage more declarative patterns, and pave the way towards a more functional style of programming. In this blog post, I will critically examine the syntax and semantics of lambda expressions, discuss their capturing mechanisms, and demonstrate how they can be effectively leveraged in conjunction with the Standard Template Library (STL) algorithms to produce cleaner, more concise, and maintainable code. Throughout, I will reference authoritative sources and cite industry best practices, while offering my personal perspective on the benefits and potential pitfalls of this feature.</p>
+<hr>
+<h3 id="introduction-to-lambda-expressions">Introduction to Lambda Expressions</h3>
+<p>Lambda expressions, often referred to simply as &ldquo;lambdas,&rdquo; are compact function objects defined directly within expressions. Unlike traditional function objects (functors) or function pointers, lambdas allow developers to write code that more closely aligns with the functional programming model. Rather than explicitly defining a separate function or creating named functor classes, I can define a lambda in-line, capturing local variables if necessary and returning results based on the local context.</p>
+<p>At their core, lambdas foster a more expressive and declarative programming style. When I leverage lambdas appropriately, I notice that my code tends to have fewer lines, reduced boilerplate, and a more direct mapping between intent and implementation (see Stroustrup, 2013).</p>
+<hr>
+<h3 id="syntax-and-structure-of-c17-lambda-expressions">Syntax and Structure of C++17 Lambda Expressions</h3>
+<p>The syntax of a lambda expression in C++17 follows this general pattern:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>[captures](parameters) <span style="color:#66d9ef">noexcept</span>(optional) <span style="color:#f92672">-&gt;</span> return_type {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// function body
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span></code></pre></div><ul>
+<li><strong>Captures:</strong> The capture list (an element unique to lambdas) indicates which variables from the enclosing scope are accessible inside the lambda.</li>
+<li><strong>Parameters:</strong> Similar to ordinary functions, parameters define the input interface.</li>
+<li><strong>Return Type:</strong> The return type may be deduced automatically (a common practice) or specified explicitly using the <code>-&gt; return_type</code> syntax.</li>
+<li><strong>Function Body:</strong> The executable statements that implement the logic.</li>
+</ul>
+<p>A minimal lambda might look like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> print_hello <span style="color:#f92672">=</span> []() {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Hello from a lambda!&#34;</span> <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>In this simple example, no variables are captured, no parameters are declared, and the return type is <code>void</code>, deduced automatically. Although trivial, such a lambda already illustrates how lambdas can inline functionality directly where it is needed, reducing the cognitive load and overhead of navigating to separate function definitions.</p>
+<hr>
+<h3 id="captures-referencing-the-outer-scope">Captures: Referencing the Outer Scope</h3>
+<p>Captures allow lambdas to access variables from their enclosing scope. In my view, understanding capture semantics is crucial for using lambdas effectively. C++17 provides several methods of capturing:</p>
+<ol>
+<li>
+<p><strong>By Value:</strong> Enclosing variables are copied into the lambda’s closure. This is indicated by <code>[=]</code> (capture all by value) or explicitly listing variables, e.g. <code>[x]</code>.</p>
+</li>
+<li>
+<p><strong>By Reference:</strong> Enclosing variables are referenced by the lambda, allowing the lambda to modify them. Indicated by <code>[&amp;]</code> (capture all by reference) or explicitly listing variables, e.g. <code>[&amp;x]</code>.</p>
+</li>
+<li>
+<p><strong>Mixed Captures:</strong> Some variables can be captured by value and others by reference. For instance, <code>[=, &amp;y]</code> means capture all enclosing variables by value, except <code>y</code>, which should be captured by reference.</p>
+</li>
+<li>
+<p><strong>Init Captures (C++14 and later):</strong> You can initialise variables within the capture list. For example, <code>[value = some_function()]</code> captures the result of <code>some_function()</code> by value.</p>
+</li>
+</ol>
+<p>Here is an illustrative example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> factor <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> numbers <span style="color:#f92672">=</span> {<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Capturing &#39;factor&#39; by reference, meaning changes will affect &#39;factor&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>std<span style="color:#f92672">::</span>for_each(numbers.begin(), numbers.end(), [<span style="color:#f92672">&amp;</span>](<span style="color:#66d9ef">int</span> <span style="color:#f92672">&amp;</span>n) {
+</span></span><span style="display:flex;"><span>    n <span style="color:#f92672">*=</span> factor;  <span style="color:#75715e">// modifies &#39;n&#39; in-place using the captured &#39;factor&#39;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>});
+</span></span></code></pre></div><p>After execution, <code>numbers</code> becomes <code>{2, 4, 6, 8, 10}</code>, confirming that <code>factor</code> was accessible within the lambda’s body. Crucially, I must be mindful of object lifetimes and potential dangling references when capturing by reference, as improper captures could lead to undefined behaviour. Authoritative sources such as cppreference.com highlight these considerations in detail (cppreference, n.d.).</p>
+<hr>
+<h3 id="lambdas-and-functional-programming">Lambdas and Functional Programming</h3>
+<p>While C++ is not a purely functional language, lambdas facilitate a style more reminiscent of functional programming. Traditional imperative code often emphasises how a problem should be solved, focusing on step-by-step instructions. In contrast, a functional style encourages developers to focus on what is being computed, emphasising transformations, mapping, filtering, and reducing data sets.</p>
+<p>For example, rather than using <code>for</code> loops and manual indexing, I often rely on higher-order functions—functions that take other functions (lambdas) as parameters—to define transformations on containers. This enables a more declarative approach, reducing side effects and making the code feel more compositional and modular.</p>
+<hr>
+<h3 id="using-lambdas-with-stl-algorithms">Using Lambdas with STL Algorithms</h3>
+<p>The synergy between lambdas and the STL algorithms library (e.g., <code>&lt;algorithm&gt;</code>) is one of the most compelling reasons to embrace these expressions. With lambdas, I can write expressive one-liners that transform ranges, filter elements, and execute operations without the overhead of separate, named functor classes.</p>
+<p>Consider the following example, where I filter a vector of integers:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;algorithm&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;vector&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> data <span style="color:#f92672">=</span> {<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">5</span>, <span style="color:#ae81ff">6</span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Remove all even numbers using remove_if and a lambda
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">auto</span> it <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>remove_if(data.begin(), data.end(), [](<span style="color:#66d9ef">int</span> x) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> x <span style="color:#f92672">%</span> <span style="color:#ae81ff">2</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    });
+</span></span><span style="display:flex;"><span>    data.erase(it, data.end()); <span style="color:#75715e">// Erase the &#34;removed&#34; elements
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Print the updated vector
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> val : data) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> val <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; &#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In this snippet, the lambda <code>[](int x) { return x % 2 == 0; }</code> acts as a predicate to identify which elements should be removed. By embedding the logic directly at the call site, I reduce mental context-switching and enhance code clarity.</p>
+<p>Moreover, I can compose more complex transformations using <code>std::transform</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> doubled;
+</span></span><span style="display:flex;"><span>doubled.resize(data.size());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>transform(data.begin(), data.end(), doubled.begin(), [](<span style="color:#66d9ef">int</span> x) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> x <span style="color:#f92672">*</span> <span style="color:#ae81ff">2</span>;
+</span></span><span style="display:flex;"><span>});
+</span></span></code></pre></div><p>This use of lambdas aligns closely with a functional style: data flows from one transformation to the next, and the focus is on the nature of the computation rather than the mechanics of iteration.</p>
+<hr>
+<h3 id="multiple-perspectives-and-critical-analysis">Multiple Perspectives and Critical Analysis</h3>
+<p>While I personally find lambdas extremely beneficial for expressiveness and maintainability, it is prudent to consider potential downsides. One could argue that overuse of lambdas may lead to overly nested or convoluted inline code, obscuring rather than clarifying intent. Indeed, I have encountered codebases where extensive nesting of lambdas made the logic more difficult to follow.</p>
+<p>Another consideration involves performance. Although in many cases, lambdas are optimised as effectively as manually crafted functors (Meyers, 2014), edge cases may arise, especially when capturing large objects by value. Careful attention to capturing policies and awareness of compiler optimisation opportunities is advisable.</p>
+<p>Nonetheless, when used judiciously, lambdas can significantly reduce boilerplate, promote reuse of generic algorithms, and encourage developers to think more abstractly, thus guiding them towards a more functional style of programming in C++.</p>
+<hr>
+<h3 id="future-considerations">Future Considerations</h3>
+<p>As the C++ language continues to evolve, I expect lambda expressions to become even more powerful and integral to modern C++ coding practices. Features introduced in C++20 and beyond (such as ranges and coroutines) further reinforce the functional style, making lambdas indispensable tools for writing expressive, maintainable, and efficient code.</p>
+<hr>
+<h3 id="conclusion">Conclusion</h3>
+<p>C++17 lambda expressions offer a concise and powerful mechanism for integrating functional programming concepts into a traditionally imperative language. Their syntax, capturing mechanisms, and seamless integration with STL algorithms make them a natural choice for developers seeking cleaner, more modular, and more declarative code. While I remain aware of the potential pitfalls associated with overly complex lambda usage, I find that their benefits generally outweigh their drawbacks. Used judiciously, lambda expressions can transform the way we approach problem-solving, empowering us to write code that is both elegant and robust.</p>
+<hr>
+<p><strong>References</strong></p>
+<ul>
+<li>Stroustrup, B. (2013) <em>The C++ Programming Language</em>, 4th edn, Addison-Wesley.</li>
+<li>cppreference (n.d.) ‘Lambda expressions’, cppreference.com. Available at: <a href="https://en.cppreference.com/w/cpp/language/lambda">https://en.cppreference.com/w/cpp/language/lambda</a> (Accessed: 09 December 2024).</li>
+<li>Meyers, S. (2014) <em>Effective Modern C++</em>, O’Reilly Media.</li>
+</ul>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        1304 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2024-12-09
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2024%2f12%2flambda-expressions-and-functional-programming-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2024%2f12%2flambda-expressions-and-functional-programming-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Lambda%20Expressions%20and%20Functional%20Programming%20in%20C%2b%2b17&amp;caption=Lambda%20Expressions%20and%20Functional%20Programming%20in%20C%2b%2b17&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2024%2f12%2flambda-expressions-and-functional-programming-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Lambda%20Expressions%20and%20Functional%20Programming%20in%20C%2b%2b17&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2024%2f12%2flambda-expressions-and-functional-programming-in-c-17%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2024%2f12%2flambda-expressions-and-functional-programming-in-c-17%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2024%2f12%2flambda-expressions-and-functional-programming-in-c-17%2f;description=Lambda%20Expressions%20and%20Functional%20Programming%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2024%2f12%2flambda-expressions-and-functional-programming-in-c-17%2f&amp;title=Lambda%20Expressions%20and%20Functional%20Programming%20in%20C%2b%2b17&amp;summary=Lambda%20Expressions%20and%20Functional%20Programming%20in%20C%2b%2b17&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2024%2f12%2flambda-expressions-and-functional-programming-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2024%2f12%2flambda-expressions-and-functional-programming-in-c-17%2f&amp;resubmit=true&amp;title=Lambda%20Expressions%20and%20Functional%20Programming%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2024%2f12%2flambda-expressions-and-functional-programming-in-c-17%2f;title=Lambda%20Expressions%20and%20Functional%20Programming%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Lambda%20Expressions%20and%20Functional%20Programming%20in%20C%2b%2b17%20https%3a%2f%2fblog.miguens.one%2fposts%2f2024%2f12%2flambda-expressions-and-functional-programming-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2024%2f12%2flambda-expressions-and-functional-programming-in-c-17%2f&amp;t=Lambda%20Expressions%20and%20Functional%20Programming%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Lambda%20Expressions%20and%20Functional%20Programming%20in%20C%2b%2b17&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2024%2f12%2flambda-expressions-and-functional-programming-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2025/02/a-comprehensive-examination-of-exception-handling-in-c-17/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">A Comprehensive Examination of Exception Handling in C&#43;&#43;17</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2024/11/an-in-depth-exploration-of-the-standard-template-library-stl-in-c-17/">
+                    <span class="button__text">An In-Depth Exploration of the Standard Template Library (STL) in C&#43;&#43;17</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

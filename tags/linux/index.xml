@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Linux on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/linux/</link>
+    <description>Recent content in Linux on Luis Miguens Blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 16 May 2023 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://blog.miguens.one/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Creating a Virtual File System with FUSE and Python</title>
+      <link>https://blog.miguens.one/posts/2023/05/creating-a-virtual-file-system-with-fuse-and-python/</link>
+      <pubDate>Tue, 16 May 2023 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2023/05/creating-a-virtual-file-system-with-fuse-and-python/</guid>
+      <description>&lt;p&gt;&lt;strong&gt;This is a continuation of my previous article:&lt;/strong&gt; &lt;em&gt;Save Snippets of Python code as single XML file&lt;/em&gt;&lt;/p&gt;&#xA;&lt;h1 id=&#34;creating-a-virtual-file-system-with-fuse-and-python&#34;&gt;Creating a Virtual File System with FUSE and Python&lt;/h1&gt;&#xA;&lt;p&gt;FUSE (Filesystem in Userspace) is a software interface that allows user-level programs to create and manage file systems without requiring root privileges. This makes it possible to create custom file systems that can be mounted and accessed like regular file systems.&lt;/p&gt;&#xA;&lt;p&gt;In this article, we will create a virtual file system using FUSE and Python. The file system will expose a set of Python code snippets as files, allowing users to read and execute the snippets as if they were regular Python scripts.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Save Snippets of Python code as single XML file</title>
+      <link>https://blog.miguens.one/posts/2023/04/save-snippets-of-python-code-as-single-xml-file/</link>
+      <pubDate>Sat, 29 Apr 2023 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2023/04/save-snippets-of-python-code-as-single-xml-file/</guid>
+      <description>&lt;h1 id=&#34;how-to-use-an-xml-file-to-store-multiple-portions-of-python-code&#34;&gt;How to Use an XML File to Store Multiple Portions of Python Code&lt;/h1&gt;&#xA;&lt;p&gt;Have you ever needed to run several Python code snippets in the cloud and wished for an easy way to organize and package them? One way to accomplish this is by using an XML file to store your Python code snippets. An XML file is a file format that is used to store and transport data, and can be easily read and written by machines. By creating an XML file to store your code snippets, you can easily package them together and upload them to the cloud to run as a single package.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Speed Up I/O Performance with RAMDisk and LVM Cache</title>
+      <link>https://blog.miguens.one/posts/2023/04/speed-up-i/o-performance-with-ramdisk-and-lvm-cache/</link>
+      <pubDate>Fri, 14 Apr 2023 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2023/04/speed-up-i/o-performance-with-ramdisk-and-lvm-cache/</guid>
+      <description>&lt;p&gt;In this blog article, we will discuss various methods to speed up I/O performance and ultimately settle on using LVM to mount a fast I/O device with a RAMDisk as cache. This approach is beneficial when you don&amp;rsquo;t care about retaining data in the location between reboots.&lt;/p&gt;&#xA;&lt;h2 id=&#34;options-considered&#34;&gt;Options Considered&lt;/h2&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;&lt;strong&gt;Only use RAM (i.e., tmpfs of 20 or 30GB)&lt;/strong&gt;: This option has the problem that if RAM is not enough, the build will fail.&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Use larger tmps (double the amounts above) and use the fast I/O location as a swap&lt;/strong&gt;: The issue with this option is that if the system needs to use the swap, the complete OS could become laggy and unresponsive, affecting the build times.&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Concatenate RAM with Fast I/O using LVM&lt;/strong&gt;: This approach does not guarantee that the filesystem will write first on RAM.&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Use LVM to mount the Fast I/O with RAMDisk as cache&lt;/strong&gt;: This is the best approach among the options considered, but further research on the options of LVM is needed.&lt;/li&gt;&#xA;&lt;/ol&gt;&#xA;&lt;p&gt;We will focus on option 4 for the rest of this article.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ratios on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/ratios/</link>
+    <description>Recent content in Ratios on Luis Miguens Blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 02 Jul 2019 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://blog.miguens.one/tags/ratios/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Introduction to Ratio Analysis</title>
+      <link>https://blog.miguens.one/posts/2019/07/introduction-to-ratio-analysis/</link>
+      <pubDate>Tue, 02 Jul 2019 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2019/07/introduction-to-ratio-analysis/</guid>
+      <description>&lt;h1 id=&#34;ratio-analysis&#34;&gt;Ratio Analysis&lt;/h1&gt;&#xA;&lt;p&gt;An investor or interested stakeholder, can use the financial statements to assess an organisation. But in most cases we would like to answer the question: Is organisation A better or not than B?.&lt;/p&gt;&#xA;&lt;p&gt;In this case, we should rely on a method to analyse and compare financial statements. One of the tools devised to analyse and asses the financial situation of an organisation is the ratio analysis.&lt;/p&gt;&#xA;&lt;p&gt;The definition of ratio (Oxford Dictionaries, 2019), states that is the quantitative relation between two amounts, showing the number of times one value contains or is contained within the other.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

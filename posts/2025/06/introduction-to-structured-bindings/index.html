@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Introduction Structured bindings, introduced in C&#43;&#43;17, allow developers to bind multiple variables to the elements of a tuple-like object in a single, declarative statement. This feature was proposed by Herb Sutter, Bjarne Stroustrup, and Gabriel Dos Reis as part of the C&#43;&#43;17 standardisation process. In essence, structured bindings enable decomposing an object (such as an std::tuple, std::pair, or a struct) into separate named variables without explicit getters or std::tie. As Herb Sutter described, it’s “much like std::tie, except without having to have variables of the correct type already available”. This simplification enhances both readability and safety, especially when handling multiple return values or complex data structures.
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2025/06/introduction-to-structured-bindings/" />
+
+
+    <title>
+        
+            Introduction to Structured Bindings :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="Introduction to Structured Bindings">
+  <meta itemprop="description" content="Introduction Structured bindings, introduced in C&#43;&#43;17, allow developers to bind multiple variables to the elements of a tuple-like object in a single, declarative statement. This feature was proposed by Herb Sutter, Bjarne Stroustrup, and Gabriel Dos Reis as part of the C&#43;&#43;17 standardisation process. In essence, structured bindings enable decomposing an object (such as an std::tuple, std::pair, or a struct) into separate named variables without explicit getters or std::tie. As Herb Sutter described, it’s “much like std::tie, except without having to have variables of the correct type already available”. This simplification enhances both readability and safety, especially when handling multiple return values or complex data structures.">
+  <meta itemprop="datePublished" content="2025-06-03T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2025-06-03T00:00:00+00:00">
+  <meta itemprop="wordCount" content="4351">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="C_cpp,Programming">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="Introduction to Structured Bindings">
+  <meta name="twitter:description" content="Introduction Structured bindings, introduced in C&#43;&#43;17, allow developers to bind multiple variables to the elements of a tuple-like object in a single, declarative statement. This feature was proposed by Herb Sutter, Bjarne Stroustrup, and Gabriel Dos Reis as part of the C&#43;&#43;17 standardisation process. In essence, structured bindings enable decomposing an object (such as an std::tuple, std::pair, or a struct) into separate named variables without explicit getters or std::tie. As Herb Sutter described, it’s “much like std::tie, except without having to have variables of the correct type already available”. This simplification enhances both readability and safety, especially when handling multiple return values or complex data structures.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2025/06/introduction-to-structured-bindings/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="Introduction to Structured Bindings">
+  <meta property="og:description" content="Introduction Structured bindings, introduced in C&#43;&#43;17, allow developers to bind multiple variables to the elements of a tuple-like object in a single, declarative statement. This feature was proposed by Herb Sutter, Bjarne Stroustrup, and Gabriel Dos Reis as part of the C&#43;&#43;17 standardisation process. In essence, structured bindings enable decomposing an object (such as an std::tuple, std::pair, or a struct) into separate named variables without explicit getters or std::tie. As Herb Sutter described, it’s “much like std::tie, except without having to have variables of the correct type already available”. This simplification enhances both readability and safety, especially when handling multiple return values or complex data structures.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-06-03T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-06-03T00:00:00+00:00">
+    <meta property="article:tag" content="C_cpp">
+    <meta property="article:tag" content="Programming">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2025-06-03 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        21 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2025/06/introduction-to-structured-bindings/">Introduction to Structured Bindings</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="introduction">Introduction</h2>
+<p>Structured bindings, introduced in <strong>C++17</strong>, allow developers to bind <strong>multiple variables</strong> to the elements of a tuple-like object in a single, declarative statement. This feature was proposed by Herb Sutter, Bjarne Stroustrup, and Gabriel Dos Reis as part of the C++17 standardisation process. In essence, structured bindings enable <strong>decomposing</strong> an object (such as an <code>std::tuple</code>, <code>std::pair</code>, or a struct) into separate named variables without explicit getters or <code>std::tie</code>. As Herb Sutter described, it’s <em>“much like <code>std::tie</code>, except without having to have variables of the correct type already available”</em>. This simplification enhances both <strong>readability</strong> and <strong>safety</strong>, especially when handling multiple return values or complex data structures.</p>
+<p>Before C++17, extracting multiple values from a function or container often required extra boilerplate. For example, retrieving elements from an <code>std::tuple</code> or <code>std::pair</code> typically involved calling <code>std::get&lt;N&gt;</code> or using <code>std::tie</code> with pre-declared variables. Structured bindings eliminate this verbosity by introducing a concise syntax:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> [name1, name2, ..., nameN] <span style="color:#f92672">=</span> expression;
+</span></span></code></pre></div><p>This single line creates <code>name1, name2, ..., nameN</code> as new variables bound to the respective elements of <code>expression</code>. In the following sections, we will compare traditional unpacking approaches with structured bindings, discuss how the feature works under the hood, and analyse its benefits and limitations for modern C++ development.</p>
+<h2 id="traditional-unpacking-vs-structured-bindings">Traditional Unpacking vs. Structured Bindings</h2>
+<p>To appreciate structured bindings, let us first consider how developers used to unpack multiple values before C++17. Common techniques included using <code>std::tie</code> or manually accessing members. Below is a typical example with <code>std::pair</code> (such as the result of inserting into an STL container):</p>
+<p><strong>Pre-C++17 approach (without structured bindings):</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#f92672">::</span>set<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> mySet;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> result <span style="color:#f92672">=</span> mySet.insert(<span style="color:#ae81ff">42</span>);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// `result` is a std::pair&lt;iterator, bool&gt;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>std<span style="color:#f92672">::</span>set<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;::</span>iterator it <span style="color:#f92672">=</span> result.first;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> inserted <span style="color:#f92672">=</span> result.second;
+</span></span></code></pre></div><p>In this C++14 snippet, we manually extract the <code>first</code> and <code>second</code> from the <code>pair</code>. Alternatively, one might use <code>std::tie</code> to avoid explicitly naming the <code>std::pair</code> type:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#f92672">::</span>set<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> mySet;
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>set<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;::</span>iterator it;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> inserted;
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>tie(it, inserted) <span style="color:#f92672">=</span> mySet.insert(<span style="color:#ae81ff">42</span>);
+</span></span></code></pre></div><p>However, <code>std::tie</code> still requires <code>it</code> and <code>inserted</code> to be declared beforehand, and it relies on the <code>std::tuple</code> assignment protocol. Both of these approaches, while functional, are somewhat <strong>verbose</strong> and error-prone (e.g., it&rsquo;s easy to mismatch types or forget to handle one of the elements).</p>
+<p><strong>With C++17 structured bindings, the same logic becomes simpler and clearer:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#f92672">::</span>set<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> mySet;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> [it, inserted] <span style="color:#f92672">=</span> mySet.insert(<span style="color:#ae81ff">42</span>);
+</span></span></code></pre></div><p>Here, <code>it</code> and <code>inserted</code> are automatically deduced to the correct types (an <code>iterator</code> and a <code>bool</code> respectively) and bound to the elements of the returned <code>std::pair</code>. The code is not only shorter (one line instead of three or more) but also <strong>self-documenting</strong> – the reader immediately sees that <code>it</code> and <code>inserted</code> come from the result of <code>mySet.insert(42)</code>.</p>
+<p>Let&rsquo;s look at another scenario: a function returning an <code>std::tuple</code>. Traditionally, one might retrieve each tuple element with <code>std::get</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#f92672">::</span>tuple<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span>, std<span style="color:#f92672">::</span>string, <span style="color:#66d9ef">double</span><span style="color:#f92672">&gt;</span> getData();
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> data <span style="color:#f92672">=</span> getData();
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> id           <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>get<span style="color:#f92672">&lt;</span><span style="color:#ae81ff">0</span><span style="color:#f92672">&gt;</span>(data);
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>string name <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>get<span style="color:#f92672">&lt;</span><span style="color:#ae81ff">1</span><span style="color:#f92672">&gt;</span>(data);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">double</span> value     <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>get<span style="color:#f92672">&lt;</span><span style="color:#ae81ff">2</span><span style="color:#f92672">&gt;</span>(data);
+</span></span></code></pre></div><p>Or using <code>std::tie</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">int</span> id;
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>string name;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">double</span> value;
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>tie(id, name, value) <span style="color:#f92672">=</span> getData();
+</span></span></code></pre></div><p>Both approaches work but add ceremony. With structured bindings, we can decompose the tuple in one go:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> [id, name, value] <span style="color:#f92672">=</span> getData();  <span style="color:#75715e">// id:int, name:std::string, value:double
+</span></span></span></code></pre></div><p>This single declaration unpacks the <code>int</code>, <code>std::string</code>, and <code>double</code> from the tuple returned by <code>getData()</code>, again letting the compiler deduce types. The <strong>difference in clarity</strong> is striking — the structured binding version emphasises what is being extracted without distraction.</p>
+<p>Similarly, for user-defined structs with multiple fields, we used to manually assign each field:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Person</span> { std<span style="color:#f92672">::</span>string name; <span style="color:#66d9ef">int</span> age; };
+</span></span><span style="display:flex;"><span>Person p{<span style="color:#e6db74">&#34;Alice&#34;</span>, <span style="color:#ae81ff">30</span>};
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>string personName <span style="color:#f92672">=</span> p.name;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> personAge <span style="color:#f92672">=</span> p.age;
+</span></span></code></pre></div><p>Using structured bindings, we can decompose <code>Person</code> elegantly:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>Person p{<span style="color:#e6db74">&#34;Alice&#34;</span>, <span style="color:#ae81ff">30</span>};
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> [personName, personAge] <span style="color:#f92672">=</span> p;
+</span></span></code></pre></div><p>This automatically binds <code>personName</code> to <code>p.name</code> and <code>personAge</code> to <code>p.age</code> (assuming <code>Person</code>&rsquo;s members are public). The code is both succinct and expressive.</p>
+<p>In summary, structured bindings replace clunkier idioms with a straightforward syntax, enhancing code clarity. Next, we&rsquo;ll delve into <strong>how structured bindings work</strong> and what constraints they have.</p>
+<h2 id="how-structured-bindings-work">How Structured Bindings Work</h2>
+<p>Under the hood, a structured binding declaration introduces <strong>new variable names</strong> and binds each to a component of an object or array. Formally, <em>“a structured binding declaration introduces all identifiers in the identifier-list as names in the surrounding scope and binds them to subobjects or elements of the object”</em>. The C++17 standard defines structured bindings to operate in three major cases (<a href="https://isocpp.org/files/papers/p0636r0.html#:~:text=P0217R3%2C%20P0615R0%20Structured%20bindings%20,tuple">Changes between C++14 and C++17</a>):</p>
+<ol>
+<li>
+<p><strong>Arrays</strong> – If the initializer expression is an array (including C-style arrays or <code>std::array</code>), the structured binding names are bound to each element of the array.</p>
+</li>
+<li>
+<p><strong>Tuple-like types</strong> – If the type of the initializer supports the <em>tuple protocol</em> (i.e., has a <code>std::tuple_size</code> specialization and accessible <code>get&lt;N&gt;</code> functions), then the object is decomposed via those. This covers standard tuple types (<code>std::tuple</code>, <code>std::pair</code>, <code>std::array</code>) and any custom type for which you provide the appropriate traits. <strong>Example:</strong> <code>auto [first, second] = myPair;</code> will call <code>get&lt;0&gt;(myPair)</code> for <code>first</code> and <code>get&lt;1&gt;(myPair)</code> for <code>second</code>.</p>
+</li>
+<li>
+<p><strong>Structs and classes with public data members</strong> – If neither of the above applies, but the initializer is an object of a non-union class/struct type, <em>and</em> all its non-static data members are <strong>public</strong> (with no base class ambiguities), then each name is bound directly to each data member (<a href="https://isocpp.org/files/papers/p0636r0.html#:~:text=P0217R3%2C%20P0615R0%20Structured%20bindings%20,tuple">Changes between C++14 and C++17</a>). This works essentially for aggregates or simple structs. <strong>Example:</strong> given <code>struct S { int x; double y; };</code>, one can do <code>auto [a, b] = S{42, 3.14};</code> where <code>a</code> binds to <code>x</code> and <code>b</code> to <code>y</code>.</p>
+</li>
+</ol>
+<p>These rules ensure that structured bindings cover a wide range of scenarios: arrays, tuples/pairs, and plain-old-data structs. Notably, if a type is <strong>tuple-like</strong> (case 2), that takes precedence over the public members (case 3). For instance, <code>std::array&lt;int,3&gt;</code> is both an array and has tuple interface; the standard says arrays (case 1) are handled separately, and <code>std::tuple</code> or <code>std::pair</code> go through tuple protocol (case 2). A user-defined struct can also opt into tuple-like behaviour by providing <code>tuple_size</code> and <code>get</code> – more on that shortly.</p>
+<p><strong>How the compiler handles it:</strong> When you write <code>auto [x, y, z] = expr;</code>, the compiler essentially does the following behind the scenes:</p>
+<ul>
+<li>
+<p><strong>Introduces a temporary</strong> (with a unique name, often called <code>e</code> in explanations) to hold the value of <code>expr</code>. This ensures that if <code>expr</code> is an rvalue (temporary), it is stored and won’t evaporate immediately. The proposal P0217R3 clarifies that the <em>“introduced variables are, in all cases, references to the value of the initializer”</em>, meaning no unnecessary copies of individual elements are made. If <code>expr</code> is an lvalue, <code>e</code> will be a reference to it; if <code>expr</code> is an rvalue, <code>e</code> will be a new object (typically using move or copy construction from the temporary).</p>
+</li>
+<li>
+<p><strong>Determines the binding method</strong> based on <code>e</code>’s type <code>E</code>:</p>
+<ul>
+<li>If <code>E</code> is an array type, bind <code>x, y, ...</code> to each array element (by index).</li>
+<li>Otherwise, if <code>std::tuple_size&lt;E&gt;</code> is defined (and accessible), use the tuple-like protocol: <code>x</code> is bound to <code>get&lt;0&gt;(e)</code>, <code>y</code> to <code>get&lt;1&gt;(e)</code>, etc..</li>
+<li>Otherwise, <code>E</code> must be a class type with public members; then <code>x</code> is bound to the first member, <code>y</code> to the second, and so on, in declaration order.</li>
+</ul>
+</li>
+<li>
+<p><strong>Deduces the types</strong> of <code>x, y, z</code> from the type of the components. Because we write <code>auto</code> (possibly qualified with const or reference), the types are deduced automatically. For example, in <code>auto [it, flag] = myMap.insert(value);</code>, if <code>myMap.insert</code> returns a <code>std::pair&lt;iterator,bool&gt;</code>, then <code>it</code> is deduced as <code>iterator</code> and <code>flag</code> as <code>bool</code>.</p>
+</li>
+</ul>
+<p>One subtle detail is that the <code>auto</code> in structured bindings can be qualified. We may write <code>const auto [x, y] = expr;</code> to make the newly introduced variables <code>x</code> and <code>y</code> const, or <code>auto&amp; [x, y] = expr;</code> to have them bind as references. Notably, writing <code>auto&amp;</code> (or <code>const auto&amp;</code>) before the bracket forces the compiler to treat the hidden <code>e</code> as a reference to the initializer. This distinction affects whether the elements are copied or referenced:</p>
+<ul>
+<li>Using <strong><code>auto [..]</code></strong> will usually copy the elements if <code>expr</code> is an lvalue. (The hidden <code>e</code> becomes a reference to the original, but then each named element is conceptually a copy by value. For many types, compilers can optimise this, and if the object is a temporary, the copy might be elided or occur as part of returning.)</li>
+<li>Using <strong><code>auto&amp; [..]</code></strong> (or adding <code>&amp;</code> to specific names in C++20) ensures you truly refer to the original elements without copying. For example, <code>auto&amp; [nameRef, ageRef] = p;</code> will bind <code>nameRef</code> directly to <code>p.name</code> (as a reference) and <code>ageRef</code> to <code>p.age</code>. If <code>p</code> were a temporary, <code>auto&amp;</code> would not be allowed (non-const reference cannot bind to rvalue), so you’d use <code>const auto&amp; [x,y]</code> to bind to a temporary struct or tuple.</li>
+</ul>
+<p>It’s worth emphasising that structured bindings are purely a compile-time <strong>binding mechanism</strong>; there is no new runtime cost. They leverage existing tuple and struct interfaces. In fact, the C++ committee ensured that implementing structured bindings didn’t require introducing new core language concepts beyond a clever combination of template traits (<code>std::tuple_size</code> and <code>std::tuple_element</code>) and reference binding rules.</p>
+<h2 id="examples-of-structured-bindings-in-action">Examples of Structured Bindings in Action</h2>
+<p>Let&rsquo;s explore a few code examples to solidify the concept:</p>
+<ul>
+<li>
+<p><strong>Decomposing an <code>std::pair</code>:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#f92672">::</span>map<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span>, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> myMap;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// ... (myMap is populated or used)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">auto</span> [iter, success] <span style="color:#f92672">=</span> myMap.insert({<span style="color:#ae81ff">42</span>, <span style="color:#e6db74">&#34;Meaning&#34;</span>});
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (success) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// `iter` is an iterator to the new element.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Inserted: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> iter<span style="color:#f92672">-&gt;</span>first <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; =&gt; &#34;</span> <span style="color:#f92672">&lt;&lt;</span> iter<span style="color:#f92672">-&gt;</span>second <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In the insertion result, <code>iter</code> gets the map iterator and <code>success</code> the boolean. Compare this to pre-C++17 code which might use <code>auto pr = myMap.insert(...); auto iter = pr.first; bool success = pr.second;</code> – the structured binding is clearer and less repetitive. It also works seamlessly in an <code>if</code> statement as shown: C++17 allows an <strong>initializer in <code>if</code></strong>, so we can do <code>if (auto [it, ok] = func(); ok) { ... }</code> to both unpack and check a condition in one statement (here checking <code>ok</code>).</p>
+</li>
+<li>
+<p><strong>Iterating through a map with structured bindings:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#f92672">::</span>map<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string, <span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> wordCounts <span style="color:#f92672">=</span> { {<span style="color:#e6db74">&#34;hello&#34;</span>, <span style="color:#ae81ff">5</span>}, {<span style="color:#e6db74">&#34;world&#34;</span>, <span style="color:#ae81ff">3</span>} };
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> [word, count] <span style="color:#f92672">:</span> wordCounts) {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> word <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; appears &#34;</span> <span style="color:#f92672">&lt;&lt;</span> count <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; times</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This range-based for loop uses <code>const auto&amp; [word, count]</code> to unpack each <code>std::pair&lt;const std::string, int&gt;</code> in the map into two variables. This is <strong>much cleaner</strong> than manually accessing <code>pair.first</code> and <code>pair.second</code> inside the loop. Structured bindings integrate perfectly with range-based loops, making code involving associative containers or other pair-like ranges more readable.</p>
+</li>
+<li>
+<p><strong>Decomposing a struct with public members:</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Result</span> { <span style="color:#66d9ef">double</span> min; <span style="color:#66d9ef">double</span> max; };
+</span></span><span style="display:flex;"><span>Result <span style="color:#a6e22e">computeRange</span>(<span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">double</span><span style="color:#f92672">&gt;&amp;</span> data);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">auto</span> [minVal, maxVal] <span style="color:#f92672">=</span> computeRange(values); minVal <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Negative values present, range = &#34;</span> 
+</span></span><span style="display:flex;"><span>              <span style="color:#f92672">&lt;&lt;</span> minVal <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; to &#34;</span> <span style="color:#f92672">&lt;&lt;</span> maxVal <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Here, <code>computeRange</code> returns a <code>Result</code> struct with two public members. The structured binding <code>const auto [minVal, maxVal] = ...</code> extracts them. We even combined it with an <code>if</code> initializer to immediately use <code>minVal</code> in the condition, illustrating a <strong>concise usage pattern</strong> (introduced in C++17) where the scope of <code>minVal</code> and <code>maxVal</code> is limited to the <code>if</code> statement.</p>
+</li>
+<li>
+<p><strong>Custom types with tuple protocol:</strong></p>
+<p>Suppose you have a class <code>Point</code> with private coordinates but you want to allow structured binding for it. By providing <code>std::tuple_size</code>, <code>std::tuple_element</code>, and a free function <code>get&lt;&gt;()</code> overload, you can make <code>Point</code> behave like a tuple of three elements:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Point</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> x_, y_, z_;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    Point(<span style="color:#66d9ef">int</span> x, <span style="color:#66d9ef">int</span> y, <span style="color:#66d9ef">int</span> z) <span style="color:#f92672">:</span> x_(x), y_(y), z_(z) {}
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... other members ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">namespace</span> std {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;&gt;</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">tuple_size</span><span style="color:#f92672">&lt;</span>Point<span style="color:#f92672">&gt;</span> <span style="color:#f92672">:</span> std<span style="color:#f92672">::</span>integral_constant<span style="color:#f92672">&lt;</span>size_t, <span style="color:#ae81ff">3</span><span style="color:#f92672">&gt;</span> {};
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;&gt;</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">tuple_element</span><span style="color:#f92672">&lt;</span><span style="color:#ae81ff">0</span>, Point<span style="color:#f92672">&gt;</span> { <span style="color:#66d9ef">using</span> type <span style="color:#f92672">=</span> <span style="color:#66d9ef">int</span>; };
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;&gt;</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">tuple_element</span><span style="color:#f92672">&lt;</span><span style="color:#ae81ff">1</span>, Point<span style="color:#f92672">&gt;</span> { <span style="color:#66d9ef">using</span> type <span style="color:#f92672">=</span> <span style="color:#66d9ef">int</span>; };
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;&gt;</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">tuple_element</span><span style="color:#f92672">&lt;</span><span style="color:#ae81ff">2</span>, Point<span style="color:#f92672">&gt;</span> { <span style="color:#66d9ef">using</span> type <span style="color:#f92672">=</span> <span style="color:#66d9ef">int</span>; };
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Define get&lt;N&gt; for Point:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>size_t I<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> get(<span style="color:#66d9ef">const</span> Point<span style="color:#f92672">&amp;</span> p) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">constexpr</span> (I <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) <span style="color:#66d9ef">return</span> p.x_; 
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">constexpr</span> (I <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>) <span style="color:#66d9ef">return</span> p.y_;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">constexpr</span> (I <span style="color:#f92672">==</span> <span style="color:#ae81ff">2</span>) <span style="color:#66d9ef">return</span> p.z_;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Point <span style="color:#a6e22e">pt</span>(<span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">8</span>, <span style="color:#ae81ff">9</span>);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> [px, py, pz] <span style="color:#f92672">=</span> pt;
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> px <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;,&#34;</span> <span style="color:#f92672">&lt;&lt;</span> py <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;,&#34;</span> <span style="color:#f92672">&lt;&lt;</span> pz <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;  <span style="color:#75715e">// Outputs: 7,8,9
+</span></span></span></code></pre></div><p>In this example, <code>Point</code> itself didn’t have public members, but by adding the necessary traits and <code>get</code> function, we enabled structured bindings. This technique was demonstrated by Herb Sutter in his trip report for Oulu 2016, where he transformed a class to bind <code>char[]</code> as a <code>string_view</code> for convenience. It shows that <strong>structured bindings are extensible</strong>: you can integrate your own types to work with the structured binding syntax by providing the same interface that <code>std::tuple</code> and <code>std::pair</code> use.</p>
+</li>
+</ul>
+<h2 id="benefits-of-structured-bindings">Benefits of Structured Bindings</h2>
+<p>Structured bindings bring several <strong>tangible benefits</strong> to C++ code:</p>
+<ul>
+<li>
+<p><strong>Improved Clarity and Maintainability:</strong> The intent of the code becomes clearer. By giving meaningful names to the elements of a tuple or struct right at the unpacking site, you make the code self-documenting. For example, <code>auto [minVal, maxVal] = range;</code> is immediately understandable, whereas <code>std::get&lt;0&gt;(range)</code> is less obvious without context. This clarity is especially helpful when dealing with multiple return values or key-value pairs. As an added benefit, you cannot accidentally ignore a value without noticing – the structured binding requires you to explicitly provide a name for each element (or use a dummy name if you truly intend to ignore one).</p>
+</li>
+<li>
+<p><strong>Less Boilerplate:</strong> Without structured bindings, you often needed multiple lines of code to extract values. Structured bindings compress that into one declarative line, reducing boilerplate. Fewer lines means fewer opportunities for mistakes. You also avoid repetition of types or function calls. For instance, calling <code>myPair.first</code> and <code>myPair.second</code> repeats the <code>myPair.</code> qualifier; structured binding calls <code>get&lt;0&gt;</code>/<code>get&lt;1&gt;</code> behind the scenes just once and directly gives you the results.</p>
+</li>
+<li>
+<p><strong>Type Safety and Inference:</strong> Because structured bindings work with <code>auto</code>, the compiler deduces the exact types of the new variables. This prevents mismatches that might happen if you manually declared the types. It also naturally handles references and const-correctness when you use <code>auto&amp;</code> or <code>const auto&amp;</code>. In other words, you get the benefit of structured binding <em>and</em> <code>auto</code> type deduction simultaneously, which leads to correct and often optimised code (no unnecessary conversions or copies beyond what’s needed to bind the values).</p>
+</li>
+<li>
+<p><strong>Consistency with Modern C++ Patterns:</strong> Structured bindings align with the trend in modern C++ towards more <strong>declarative code</strong>. They complement other C++17 features like <code>if</code> initializers and integrate well with range-based for loops, as shown earlier. The result is idiomatic and clean C++17 code. Many standard library functions that return multiple values (like <code>map.insert</code>, <code>std::filesystem::path::decompose</code>, etc.) become easier to work with using this feature. Code that was previously cluttered with <code>std::tie</code> or manual structure assignments can be modernised, often leading to more concise algorithms or clearer loop constructs.</p>
+</li>
+<li>
+<p><strong>No Runtime Overhead:</strong> Structured bindings are a compile-time construct. The compiler essentially translates the binding into the equivalent of accessing tuple elements or struct members directly. Thus, there is no performance penalty for using them. In fact, by eliminating unnecessary temporaries or enabling direct reference binding, structured bindings can be as efficient as the manual approach. For example, writing <code>auto&amp; [a, b] = somePair;</code> will bind references to the original pair’s elements without copying, just as if you wrote <code>auto&amp; a = somePair.first; auto&amp; b = somePair.second;</code>. The design choices in the standard (like introduced variables being references to the initializer’s value) ensure that we don&rsquo;t pay for convenience with extra copies.</p>
+</li>
+<li>
+<p><strong>Extensibility:</strong> As we saw with the <code>Point</code> example, developers can extend structured binding support to custom types by providing the right interface (specializing <code>tuple_size</code> and <code>tuple_element</code>, plus a <code>get</code> function). This means you can design your own data types to <em>feel</em> like tuples when unpacked. This could be used, for example, in a geometry library where you want to unpack a <code>Triangle</code> into three <code>Point</code> vertices, or any case where a logical grouping of values can be decomposed. By following the tuple protocol, your types can seamlessly support structured binding syntax, which can make user code more natural.</p>
+</li>
+</ul>
+<h2 id="limitations-and-considerations">Limitations and Considerations</h2>
+<p>Despite their usefulness, structured bindings come with certain <strong>limitations and gotchas</strong> that advanced C++ developers should be aware of:</p>
+<ul>
+<li>
+<p><strong>Requires exact matches and specific conditions:</strong> When decomposing, the number of variables in the brackets must exactly equal the number of elements in the object. If you put fewer or more names than elements, the code simply won’t compile. Unlike some scripting languages, C++17 doesn’t provide a built-in mechanism to ignore values (there is no direct equivalent of a &ldquo;wildcard&rdquo;). The common workaround is to name an unused variable (e.g. <code>_</code> or <code>ignore</code>) and simply not use it, possibly marking it <code>[[maybe_unused]]</code> to silence warnings. For example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> [id, <span style="color:#75715e">/*unused*/</span> , value] <span style="color:#f92672">=</span> getData(); <span style="color:#75715e">// This is NOT valid C\++ syntax
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// Instead:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">auto</span> [id, ignore, value] <span style="color:#f92672">=</span> getData();
+</span></span><span style="display:flex;"><span>(<span style="color:#66d9ef">void</span>)ignore; <span style="color:#75715e">// or [[maybe_unused]] on ignore&#39;s declaration
+</span></span></span></code></pre></div><p>Every element must be accounted for. This strictness is usually beneficial (preventing accidental data drop), but it means that if you only care about some of the values, you still need to provide dummy names for the rest. In contrast, <code>std::tie</code> allowed using <code>std::ignore</code> to skip elements, but structured bindings currently have no native skip symbol.</p>
+</li>
+<li>
+<p><strong>Only works in specific contexts:</strong> Structured binding declarations are allowed in block scopes, <code>if</code>/<code>switch</code> initialisers, range-based <code>for</code> loops, and as <code>static</code> local variables. However, you <strong>cannot use structured bindings as function parameters or in lambda captures</strong> (as of C++17/20). For instance, you cannot write <code>void foo(auto [x,y]);</code> to accept a pair as two parameters – the language does not support that form. Similarly, a lambda like <code>[a,b]{ return a+b; }</code> is not a valid capture list to decompose a tuple captured by the lambda. There were proposals (e.g., P0931 in 2018) to extend structured bindings to such contexts, but they were not adopted. The recommended approach is to capture the tuple/pair by value or reference and then perform a structured binding inside the function or lambda body. This limitation might be revisited in future C++ standards, but in the meantime it slightly reduces where you can directly apply the syntax.</p>
+</li>
+<li>
+<p><strong>Works only for certain types without specialisation:</strong> As outlined earlier, structured bindings natively support <em>arrays</em>, <em>tuple-like types</em>, and <em>classes with all-public data members</em>. If you have a type that doesn’t meet these criteria (for example, a class with private members and no <code>get</code> function), structured binding won’t work out-of-the-box. In those cases, you either need to change the type (make members public or provide a custom tuple interface) or avoid structured bindings for that type. The language requires that for the struct binding (case 3), <em>“all of <code>E</code>’s non-static data members shall be public direct members of <code>E</code> or of the same unambiguous public base class of <code>E</code>”</em> and the number of binding variables must match the number of members. Essentially, the class cannot have hidden members or multiple inheritance layers for this to work. This is usually fine for simple structs, but for complex classes (especially those enforcing encapsulation), you’ll have to opt into the tuple protocol to use structured bindings.</p>
+</li>
+<li>
+<p><strong>Potential for code brittleness:</strong> By decomposing an object, your code becomes dependent on the exact <em>structure</em> of that object. If you use structured bindings on a struct and later someone changes that struct (adds or removes a member, or changes access control), all the decomposition declarations might break. For example, if you rely on <code>auto [x,y,z] = someStruct;</code> and a fourth field is added to <code>someStruct</code>, that code will no longer compile until updated. While this is a compile-time failure (which is good, as it won’t silently misbehave), it means refactoring data structures can have wider impact. Similarly, if you structured-bind a <code>std::tuple</code> with a certain arity, you assume that exact arity. This is something to be mindful of in library code or public APIs: exposing a type in a way that people decompose it means you’re subtly committing to its composition (field count and order) as part of the interface. In a sense, structured bindings can <strong>tighten coupling</strong> to the layout of a type. This isn’t necessarily a problem for stable structures (like a pair of clearly distinct concepts, e.g., a coordinate <code>(x,y)</code>), but for more fluid data structures it’s a consideration.</p>
+</li>
+<li>
+<p><strong>No direct customisation point for user-defined binding without std namespace</strong>: To make a user type decomposable via the tuple protocol, you must either add methods <code>get&lt;N&gt;</code> and specializations of <code>tuple_size</code>/<code>tuple_element</code> in the <code>std</code> namespace (as non-intrusively shown above, which technically involves injecting into <code>std</code>), or provide free <code>get&lt;N&gt;</code> functions found via ADL plus those specializations. This is a bit <strong>cumbersome</strong> and touches the <code>std</code> namespace which some projects avoid for customisations. The standard mandated this approach for consistency, but it’s not as simple as, say, adding an interface to your own class directly. There have been discussions about making structured bindings more flexible in this regard (e.g., a <code>tuple_get</code> function or an easier opt-in mechanism), but as of C++20/23, the procedure remains to provide the tuple traits. The good news is that you only need to do this once for a type, and then any code can use structured bindings with it.</p>
+</li>
+<li>
+<p><strong>Lifetime considerations:</strong> A nuanced point is the lifetime of the hidden temporary (the <code>e</code> that holds the initializer). In most cases this is straightforward: if you decompose an rvalue, the lifetime of that rvalue is extended to the lifetime of <code>e</code> (which is the scope of the structured binding). This means it’s safe to use those bound variables within that scope. However, one must be careful not to return references to those variables outside their scope or otherwise assume they outlive the scope. This is no different from normal local variables, but the presence of <code>auto [a,b] = function();</code> might deceive some into thinking <code>a</code> and <code>b</code> came from nowhere, while in reality they are part of a local object. In short, structured bindings do not extend lifetimes beyond what normal variables would. If you need a longer lifetime for the decomposed parts, ensure the original object (or a copy of it) lives as long as needed.</p>
+</li>
+<li>
+<p><strong>Compiler support and feature testing:</strong> All major C++ compilers (GCC, Clang, MSVC, ICC) implemented structured bindings relatively quickly after C++17 was finalised. For instance, GCC 7, Clang 4, and MSVC 2017 (15.3) all support structured bindings. If writing code intended for a range of compiler versions, you might want to check for the feature using the feature test macro <code>__cpp_structured_bindings</code> (introduced with value 201606). By 2025, it&rsquo;s safe to assume any modern compiler is C++17-capable, but it’s a consideration if your code needs to be portable to older systems or strictly freestanding environments (the latter might lack <code>&lt;tuple&gt;</code>, though structured bindings require some support for the tuple interface even in freestanding mode).</p>
+</li>
+</ul>
+<h2 id="conclusion-and-reflections">Conclusion and Reflections</h2>
+<p>Structured bindings in C++17 represent a significant step towards more expressive and succinct C++ code. In this post, we explored how they <strong>simplify variable declarations</strong> when unpacking tuples, pairs, and structs, and we examined multiple examples comparing the old and new ways of doing things. From a developer’s standpoint, adopting structured bindings can make code more readable — I personally find that my functions returning multiple values become cleaner to work with, and loops over maps and other structures are easier to write and reason about. These improvements come without runtime cost and with the strong type safety that C++ guarantees.</p>
+<p>However, as we have analysed, it’s important to use structured bindings judiciously. They shine in scenarios where the meaning of each element is clear from context (especially when you can name the variables meaningfully), or when interfacing with APIs that naturally return multiple values. In contrast, if overused or used in less obvious cases, they could potentially <strong>obscure</strong> the origin of variables or make future code changes more involved (due to the position-dependent nature of decomposition). Good coding practice involves striking a balance: use structured bindings to replace noisy boilerplate, but continue to encapsulate and abstract where appropriate. For instance, decomposing an object with many fields might not be as maintainable as providing a proper abstraction or named getters for that object.</p>
+<p>In terms of <strong>compatibility</strong>, teams moving a codebase from an older standard to C++17 can incrementally refactor certain pieces to use structured bindings. It’s usually straightforward to replace a <code>std::tie</code> or multiple <code>.first/.second</code> accesses with the new syntax. One must just ensure that all team members are comfortable with the feature and that it’s properly documented – a comment like “Using C++17 structured bindings to unpack the result” can help at points of introduction for code readers who might not have seen it before (though by now, structured bindings are well-known in the C++ community). Tools like clang-tidy even have modernisation checks that automatically refactor code to use structured bindings where applicable, which can help in large projects.</p>
+<p>Looking ahead, the concept of structured bindings might evolve. There have been proposals to allow them in more places (such as function parameters) and to introduce features like unpacking into parameter packs or ignoring elements more gracefully. These ideas underscore the usefulness of the feature — developers want to use it even more broadly. Whether or not such extensions make it into the language, structured bindings as defined in C++17 have proven to be a powerful tool. They encourage a programming style that cleanly handles composite return types and structured data, which is increasingly common in modern C++ (consider the popularity of returning <code>std::tuple</code> or using structs for multiple returns instead of output parameters).</p>
+<p>In conclusion, structured bindings are a welcomed addition to the C++ toolkit, <strong>modernising the way we assign and work with multiple values</strong>. By understanding their mechanics, advantages, and limitations, we can apply them effectively in intermediate and advanced C++ code. Embracing features like this is part of writing idiomatic C++17 and beyond – it leads to code that is both elegant and robust, aligning with the direction of modern C++ development.</p>
+<p><strong>Sources:</strong></p>
+<ul>
+<li>C++17 Standard Papers – Structured Bindings (J. Maurer, H. Sutter et al.): <em>WG21 P0217R3</em> and <em>P0144R2</em>.</li>
+<li><em>cppreference.com:</em> Structured Bindings (C++17) – definition and semantics.</li>
+<li>Herb Sutter’s blog (2016) – Trip report with structured binding examples.</li>
+<li><em>C++ Stories:</em> “C++17 in Details: Code Simplification” by Bartłomiej Filipek – covers structured binding use cases.</li>
+<li>Stack Overflow – discussion on struct requirements for structured bindings (user Kerrek SB).</li>
+</ul>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        4351 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2025-06-03
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fintroduction-to-structured-bindings%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fintroduction-to-structured-bindings%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Introduction%20to%20Structured%20Bindings&amp;caption=Introduction%20to%20Structured%20Bindings&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fintroduction-to-structured-bindings%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Introduction%20to%20Structured%20Bindings&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fintroduction-to-structured-bindings%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fintroduction-to-structured-bindings%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fintroduction-to-structured-bindings%2f;description=Introduction%20to%20Structured%20Bindings" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fintroduction-to-structured-bindings%2f&amp;title=Introduction%20to%20Structured%20Bindings&amp;summary=Introduction%20to%20Structured%20Bindings&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fintroduction-to-structured-bindings%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fintroduction-to-structured-bindings%2f&amp;resubmit=true&amp;title=Introduction%20to%20Structured%20Bindings" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fintroduction-to-structured-bindings%2f;title=Introduction%20to%20Structured%20Bindings" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Introduction%20to%20Structured%20Bindings%20https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fintroduction-to-structured-bindings%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fintroduction-to-structured-bindings%2f&amp;t=Introduction%20to%20Structured%20Bindings" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Introduction%20to%20Structured%20Bindings&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f06%2fintroduction-to-structured-bindings%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2025/06/fold-expressions-in-c-17-simplifying-variadic-template-code/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">Fold Expressions in C&#43;&#43;17: Simplifying Variadic Template Code</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2025/05/if-constexpr-in-c-17-enabling-compile-time-conditionals/">
+                    <span class="button__text">if constexpr in C&#43;&#43;17 – Enabling Compile-Time Conditionals</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

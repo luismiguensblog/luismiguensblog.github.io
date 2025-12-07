@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="What is the difference between Trading and Investing? Trading and investing both involve seeking profit in the stock market, but they pursue that goal in different ways.
+Traders jump in and out of stocks within weeks, days, even minutes, with the aim of short-term profits. They often focus on a stock’s technical factors rather than a company’s long-term prospects. What matters to traders is which direction the stock will move next and how the trader can profit from that move.
+" />
+<meta name="keywords" content=", trading, investing, python, finance" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2020/12/trading-in-python-part-1/" />
+
+
+    <title>
+        
+            Trading in Python: Part 1 :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="Trading in Python: Part 1">
+  <meta itemprop="description" content="What is the difference between Trading and Investing? Trading and investing both involve seeking profit in the stock market, but they pursue that goal in different ways.
+Traders jump in and out of stocks within weeks, days, even minutes, with the aim of short-term profits. They often focus on a stock’s technical factors rather than a company’s long-term prospects. What matters to traders is which direction the stock will move next and how the trader can profit from that move.">
+  <meta itemprop="datePublished" content="2020-12-13T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2020-12-13T00:00:00+00:00">
+  <meta itemprop="wordCount" content="1508">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="Trading,Investing,Python,Finance">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="Trading in Python: Part 1">
+  <meta name="twitter:description" content="What is the difference between Trading and Investing? Trading and investing both involve seeking profit in the stock market, but they pursue that goal in different ways.
+Traders jump in and out of stocks within weeks, days, even minutes, with the aim of short-term profits. They often focus on a stock’s technical factors rather than a company’s long-term prospects. What matters to traders is which direction the stock will move next and how the trader can profit from that move.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2020/12/trading-in-python-part-1/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="Trading in Python: Part 1">
+  <meta property="og:description" content="What is the difference between Trading and Investing? Trading and investing both involve seeking profit in the stock market, but they pursue that goal in different ways.
+Traders jump in and out of stocks within weeks, days, even minutes, with the aim of short-term profits. They often focus on a stock’s technical factors rather than a company’s long-term prospects. What matters to traders is which direction the stock will move next and how the trader can profit from that move.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2020-12-13T00:00:00+00:00">
+    <meta property="article:modified_time" content="2020-12-13T00:00:00+00:00">
+    <meta property="article:tag" content="Trading">
+    <meta property="article:tag" content="Investing">
+    <meta property="article:tag" content="Python">
+    <meta property="article:tag" content="Finance">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="business" />
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2020-12-13 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        8 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2020/12/trading-in-python-part-1/">Trading in Python: Part 1</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="what-is-the-difference-between-trading-and-investing">What is the difference between Trading and Investing?</h2>
+<p>Trading and investing both involve seeking profit in the stock market, but they pursue that goal in different ways.</p>
+<p>Traders jump in and out of stocks within weeks, days, even minutes, with the aim of short-term profits. They often focus on a stock’s technical factors rather than a company’s long-term prospects. What matters to traders is which direction the stock will move next and how the trader can profit from that move.</p>
+<p>Investors have a longer-term outlook. They think in terms of years and often hold stocks through the market’s ups and downs.</p>
+<p>For this activity, I will be using <a href="https://jupyter.org/">Jupyter Lab</a>, and this article is a Markdown version of my notebook.</p>
+<p>In the first place, we need to install the <code>investpy</code> library (you can find it <a href="https://investpy.readthedocs.io/">here</a>). The library is a API to connect to <a href="https://www.investing.com">investing.com</a> and retrieve information about an ETF or a stock security.</p>
+<p>After that, we can make our own wrapper to facilitate the treatment of data, and convert the data to EUR, as it will be the currency we will use in this example.</p>
+<p>Save the code in the file <code>Security.py</code> in the same location of your Jupyter Notebook</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">from</span> datetime <span style="color:#f92672">import</span> datetime, timedelta
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># import sys</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e"># sys.path.append(&#39;/home/luis/projects/TradingMachine/lib/investpy&#39;)</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">import</span> investpy
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">from</span> currency_converter <span style="color:#f92672">import</span> CurrencyConverter, RateNotFoundError
+</span></span><span style="display:flex;"><span>    cc <span style="color:#f92672">=</span> CurrencyConverter(<span style="color:#e6db74">&#39;http://www.ecb.int/stats/eurofxref/eurofxref-hist.zip&#39;</span>,
+</span></span><span style="display:flex;"><span>                          fallback_on_missing_rate<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>,
+</span></span><span style="display:flex;"><span>                          fallback_on_missing_rate_method<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;linear_interpolation&#39;</span>)
+</span></span><span style="display:flex;"><span>         
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Security</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">@staticmethod</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_investingcom_instrument</span>(search_code, country<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>, exchange<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>            results <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>            countries <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> country <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>                countries <span style="color:#f92672">=</span> [country]
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> investpy<span style="color:#f92672">.</span>search_quotes(text<span style="color:#f92672">=</span>search_code, countries<span style="color:#f92672">=</span>countries):
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">if</span> exchange <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">if</span> exchange<span style="color:#f92672">.</span>lower() <span style="color:#f92672">==</span> i<span style="color:#f92672">.</span>exchange<span style="color:#f92672">.</span>lower():
+</span></span><span style="display:flex;"><span>                            results<span style="color:#f92672">.</span>append(i)
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                        results<span style="color:#f92672">.</span>append(i)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">except</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">pass</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> len(results) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">Exception</span>(<span style="color:#e6db74">&#39;No results found on investing.com for </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> / </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> / </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(search_code, country, exchange))
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> len(results) <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">1</span>:
+</span></span><span style="display:flex;"><span>                print_results <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">for</span> result <span style="color:#f92672">in</span> results:
+</span></span><span style="display:flex;"><span>                    print_results<span style="color:#f92672">.</span>append((result<span style="color:#f92672">.</span>country, result<span style="color:#f92672">.</span>exchange))
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">Exception</span>(<span style="color:#e6db74">&#39;Several results found for </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> / </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> / </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> </span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(search_code, country, exchange) <span style="color:#f92672">+</span>
+</span></span><span style="display:flex;"><span>                                <span style="color:#e6db74">&#39;</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(print_results))
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> results[<span style="color:#ae81ff">0</span>]
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_get_data</span>(self):
+</span></span><span style="display:flex;"><span>            date_format<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">/%m/%Y&#39;</span>
+</span></span><span style="display:flex;"><span>            today <span style="color:#f92672">=</span> datetime<span style="color:#f92672">.</span>today()
+</span></span><span style="display:flex;"><span>            time_ago <span style="color:#f92672">=</span> datetime<span style="color:#f92672">.</span>today() <span style="color:#f92672">-</span> timedelta(days<span style="color:#f92672">=</span><span style="color:#ae81ff">2000</span>)
+</span></span><span style="display:flex;"><span>            today_str <span style="color:#f92672">=</span> today<span style="color:#f92672">.</span>strftime(date_format)
+</span></span><span style="display:flex;"><span>            time_ago_str <span style="color:#f92672">=</span> time_ago<span style="color:#f92672">.</span>strftime(date_format)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            data <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>investingapi<span style="color:#f92672">.</span>retrieve_historical_data(from_date<span style="color:#f92672">=</span>time_ago_str, to_date<span style="color:#f92672">=</span>today_str)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>            exchange <span style="color:#f92672">=</span> list()
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> element <span style="color:#f92672">in</span> data<span style="color:#f92672">.</span>index:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>                    exchange<span style="color:#f92672">.</span>append(cc<span style="color:#f92672">.</span>convert(<span style="color:#ae81ff">1</span>, self<span style="color:#f92672">.</span>currency, <span style="color:#e6db74">&#39;EUR&#39;</span>, element<span style="color:#f92672">.</span>to_pydatetime()))
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">except</span> RateNotFoundError <span style="color:#66d9ef">as</span> e:
+</span></span><span style="display:flex;"><span>                    print(<span style="color:#e6db74">&#39;INFO: </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">. Taking yesterday value&#39;</span><span style="color:#f92672">.</span>format(e))
+</span></span><span style="display:flex;"><span>                    exchange<span style="color:#f92672">.</span>append(cc<span style="color:#f92672">.</span>convert(<span style="color:#ae81ff">1</span>, self<span style="color:#f92672">.</span>currency, <span style="color:#e6db74">&#39;EUR&#39;</span>, element<span style="color:#f92672">.</span>to_pydatetime() <span style="color:#f92672">-</span> timedelta(days<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)))
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>            data[<span style="color:#e6db74">&#39;Exchange Rate&#39;</span>] <span style="color:#f92672">=</span> exchange
+</span></span><span style="display:flex;"><span>            data[<span style="color:#e6db74">&#39;EUR Value&#39;</span>] <span style="color:#f92672">=</span> data[<span style="color:#e6db74">&#39;Close&#39;</span>] <span style="color:#f92672">*</span> data[<span style="color:#e6db74">&#39;Exchange Rate&#39;</span>]
+</span></span><span style="display:flex;"><span>           
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> data
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_moving_averages_holder</span>(self):
+</span></span><span style="display:flex;"><span>            data <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>DataFrame(index<span style="color:#f92672">=</span>self<span style="color:#f92672">.</span>quotes<span style="color:#f92672">.</span>index<span style="color:#f92672">.</span>copy())
+</span></span><span style="display:flex;"><span>            data[<span style="color:#e6db74">&#39;Current Value&#39;</span>] <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>quotes[<span style="color:#e6db74">&#39;EUR Value&#39;</span>]<span style="color:#f92672">.</span>copy()
+</span></span><span style="display:flex;"><span>            moving_avg <span style="color:#f92672">=</span> [<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">10</span>, <span style="color:#ae81ff">50</span>, <span style="color:#ae81ff">100</span>, <span style="color:#ae81ff">200</span>, <span style="color:#ae81ff">400</span>]
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> data 
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_get_dividends</span>(self):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>                data <span style="color:#f92672">=</span> investpy<span style="color:#f92672">.</span>stocks<span style="color:#f92672">.</span>get_stock_dividends(self<span style="color:#f92672">.</span>ticker, self<span style="color:#f92672">.</span>country)
+</span></span><span style="display:flex;"><span>                data <span style="color:#f92672">=</span> data<span style="color:#f92672">.</span>set_index([<span style="color:#e6db74">&#39;Date&#39;</span>])
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">RuntimeError</span>:
+</span></span><span style="display:flex;"><span>                print(<span style="color:#e6db74">&#39;INFO: No dividends for </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> (</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">/</span><span style="color:#e6db74">{}</span><span style="color:#e6db74">)&#39;</span><span style="color:#f92672">.</span>format(self<span style="color:#f92672">.</span>name, self<span style="color:#f92672">.</span>ticker, self<span style="color:#f92672">.</span>country))
+</span></span><span style="display:flex;"><span>                data <span style="color:#f92672">=</span> <span style="color:#66d9ef">None</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">finally</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> data
+</span></span><span style="display:flex;"><span>     
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, isin, currency<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;EUR&#39;</span>, country<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>, exchange<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>investingapi <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>get_investingcom_instrument(search_code<span style="color:#f92672">=</span>isin, country<span style="color:#f92672">=</span>country, exchange<span style="color:#f92672">=</span>exchange)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>currency <span style="color:#f92672">=</span> currency 
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>isin <span style="color:#f92672">=</span> isin
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>security_type <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>investingapi<span style="color:#f92672">.</span>pair_type
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>name <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>investingapi<span style="color:#f92672">.</span>name
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>country <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>investingapi<span style="color:#f92672">.</span>country
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>exchange <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>investingapi<span style="color:#f92672">.</span>exchange
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>ticker <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>investingapi<span style="color:#f92672">.</span>symbol
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>quotes <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_get_data()
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>_averages <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_moving_averages_holder()
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>dividends <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_get_dividends()
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>last_performance <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;dSMA_200/dt&#39;</span>: round(self<span style="color:#f92672">.</span>moving_average(<span style="color:#e6db74">&#39;SMA&#39;</span>, <span style="color:#ae81ff">200</span>)<span style="color:#f92672">.</span>diff()[<span style="color:#f92672">-</span><span style="color:#ae81ff">5</span>:]<span style="color:#f92672">.</span>mean(), <span style="color:#ae81ff">2</span>),
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;dSMA_20/dt&#39;</span>: round(self<span style="color:#f92672">.</span>moving_average(<span style="color:#e6db74">&#39;SMA&#39;</span>, <span style="color:#ae81ff">20</span>)<span style="color:#f92672">.</span>diff()[<span style="color:#f92672">-</span><span style="color:#ae81ff">5</span>:]<span style="color:#f92672">.</span>mean(), <span style="color:#ae81ff">2</span>)
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">moving_average</span>(self, avg_type, days):
+</span></span><span style="display:flex;"><span>            name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;</span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(avg_type, days)
+</span></span><span style="display:flex;"><span>            data <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_averages
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> <span style="color:#f92672">not</span> name <span style="color:#f92672">in</span> data<span style="color:#f92672">.</span>columns:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> avg_type <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;SMA&#39;</span>:
+</span></span><span style="display:flex;"><span>                    data[name] <span style="color:#f92672">=</span> data[<span style="color:#e6db74">&#39;Current Value&#39;</span>]<span style="color:#f92672">.</span>rolling(window<span style="color:#f92672">=</span>days)<span style="color:#f92672">.</span>mean()
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">elif</span> avg_type <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;EMA&#39;</span>:
+</span></span><span style="display:flex;"><span>                    data[name] <span style="color:#f92672">=</span> data[<span style="color:#e6db74">&#39;Current Value&#39;</span>]<span style="color:#f92672">.</span>ewm(span<span style="color:#f92672">=</span>days, adjust<span style="color:#f92672">=</span><span style="color:#66d9ef">False</span>)<span style="color:#f92672">.</span>mean()
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">else</span>:
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">raise</span> <span style="color:#a6e22e">Exception</span>(<span style="color:#e6db74">&#39;Moving Average </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> not recognised&#39;</span><span style="color:#f92672">.</span>format(avg_type))
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> data[name]
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_last_quote</span>(self):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>quotes<span style="color:#f92672">.</span>iloc[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_last_date</span>(self):
+</span></span><span style="display:flex;"><span>            result <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>quotes<span style="color:#f92672">.</span>iloc[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> result<span style="color:#f92672">.</span>name<span style="color:#f92672">.</span>to_pydatetime()<span style="color:#f92672">.</span>strftime(<span style="color:#e6db74">&#39;%Y-%m-</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test</span>():
+</span></span><span style="display:flex;"><span>        stock1 <span style="color:#f92672">=</span> Security(<span style="color:#e6db74">&#39;IBM&#39;</span>, <span style="color:#e6db74">&#39;United States&#39;</span>)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#39;Quotes:&#39;</span>)
+</span></span><span style="display:flex;"><span>        print(stock1<span style="color:#f92672">.</span>quotes)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#39;----------------&#39;</span>)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#39;Averages:&#39;</span>)
+</span></span><span style="display:flex;"><span>        print(stock1<span style="color:#f92672">.</span>moving_average(<span style="color:#e6db74">&#39;SMA&#39;</span>, <span style="color:#ae81ff">10</span>))
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#39;----------------&#39;</span>)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#39;Dividends:&#39;</span>)
+</span></span><span style="display:flex;"><span>        print(stock1<span style="color:#f92672">.</span>dividends)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#39;----------------&#39;</span>)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>        test()
+</span></span></code></pre></div><p>We can try now the Security Class, creating an object called <code>melia</code> with the data of a popular hotel chain in Spain</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">from</span> Security <span style="color:#f92672">import</span> Security
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>melia <span style="color:#f92672">=</span> Security(<span style="color:#e6db74">&#39;Melia&#39;</span>, country<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;Spain&#39;</span>, exchange<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;Madrid&#39;</span>)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>print(melia<span style="color:#f92672">.</span>ticker)
+</span></span><span style="display:flex;"><span>print(melia<span style="color:#f92672">.</span>get_last_quote())
+</span></span></code></pre></div><pre><code>MEL
+Open             6.777
+High             6.777
+Low              6.565
+Close            6.615
+Volume           0.000
+Exchange Rate    1.000
+EUR Value        6.615
+Name: 2021-03-22 00:00:00, dtype: float64
+</code></pre>
+<p>We can see that we can retrieve the <code>ticker</code> of the security and the last quotation avaliable in <code>investing.com</code></p>
+<p>Our objective is to simulate buying and sharing securities, for that, we need a place to store the transactions. We can create therefore a <code>wallet</code> to record the date, concept and amount of the transaction.</p>
+<p>We, therefore, create a new file <code>Wallet.py</code> with the following class:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">import</span> pandas <span style="color:#66d9ef">as</span> pd
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Wallet</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self):
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>_wallet <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>DataFrame(pd<span style="color:#f92672">.</span>DataFrame(columns<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;Date&#39;</span>, <span style="color:#e6db74">&#39;Concept&#39;</span>, <span style="color:#e6db74">&#39;Total&#39;</span>]))
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>_counter<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add</span>(self, date, concept, value):
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>_wallet<span style="color:#f92672">.</span>loc[self<span style="color:#f92672">.</span>_counter] <span style="color:#f92672">=</span> [date, concept, value]
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>_counter <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_counter <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">balance</span>(self):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>_wallet[<span style="color:#e6db74">&#39;Total&#39;</span>]<span style="color:#f92672">.</span>sum()
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">transactions</span>(self):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>_wallet<span style="color:#f92672">.</span>copy()
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">test</span>():
+</span></span><span style="display:flex;"><span>        wallet <span style="color:#f92672">=</span> Wallet()
+</span></span><span style="display:flex;"><span>        wallet<span style="color:#f92672">.</span>add(<span style="color:#e6db74">&#39;2020-12-24&#39;</span>, <span style="color:#e6db74">&#39;Gifts given&#39;</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">100</span>)
+</span></span><span style="display:flex;"><span>        wallet<span style="color:#f92672">.</span>add(<span style="color:#e6db74">&#39;2020-12-25&#39;</span>, <span style="color:#e6db74">&#39;Gifts received&#39;</span>, <span style="color:#ae81ff">50</span>)
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#39;Balance: </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(wallet<span style="color:#f92672">.</span>balance()))
+</span></span><span style="display:flex;"><span>        print(<span style="color:#e6db74">&#39;Transactions:&#39;</span>)
+</span></span><span style="display:flex;"><span>        print(wallet<span style="color:#f92672">.</span>transactions())
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span>        test()
+</span></span><span style="display:flex;"><span>    
+</span></span></code></pre></div><p>Last, we need some trading strategies. I have implemented the strategy to buy/sell when the price crosses a moving averages (configurable by number of days) and when the simple moving average of the month crosses the moving average of the week.</p>
+<p>Here is the code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">from</span> Security <span style="color:#f92672">import</span> Security
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">from</span> Wallet <span style="color:#f92672">import</span> Wallet
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">from</span> Global <span style="color:#f92672">import</span> <span style="color:#f92672">*</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">import</span> json
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Strategy_Common</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_get_date_or_next_index</span>(self, date):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>quotes<span style="color:#f92672">.</span>index<span style="color:#f92672">.</span>get_loc(date, method<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;backfill&#39;</span>)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_get_date_or_previous_index</span>(self, date):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>quotes<span style="color:#f92672">.</span>index<span style="color:#f92672">.</span>get_loc(date, method<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;pad&#39;</span>)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">_get_start_stop_index</span>(self, start_date, stop_date):
+</span></span><span style="display:flex;"><span>            start <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_get_date_or_next_index(start_date)
+</span></span><span style="display:flex;"><span>            stop <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_get_date_or_previous_index(stop_date)
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> start, stop
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, security, config):
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>security <span style="color:#f92672">=</span> security
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>wallet <span style="color:#f92672">=</span> Wallet()
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>keep_always <span style="color:#f92672">=</span> <span style="color:#66d9ef">False</span>
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>config <span style="color:#f92672">=</span> config
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>cash_funds <span style="color:#f92672">=</span> <span style="color:#ae81ff">10000</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">return_results</span>(self, results):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> results <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>                result <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;Security Type&#39;</span>: self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>security_type<span style="color:#f92672">.</span>title(), 
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;Security Name&#39;</span>: self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>name<span style="color:#f92672">.</span>encode(<span style="color:#e6db74">&#39;ascii&#39;</span>,errors<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;ignore&#39;</span>)<span style="color:#f92672">.</span>decode(<span style="color:#e6db74">&#34;utf-8&#34;</span>),
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;ISIN&#39;</span>: self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>isin,
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;Country&#39;</span>: self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>country<span style="color:#f92672">.</span>title(),
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;Exchange&#39;</span>: self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>exchange,
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;Strategy&#39;</span>: self<span style="color:#f92672">.</span>description,
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;Simulated Balance&#39;</span>: round(self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>balance(), <span style="color:#ae81ff">4</span>),
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;Yield&#39;</span>: round((self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>balance() <span style="color:#f92672">-</span> self<span style="color:#f92672">.</span>cash_funds)<span style="color:#f92672">/</span>self<span style="color:#f92672">.</span>cash_funds, <span style="color:#ae81ff">2</span>),
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;Strategy Class Name&#39;</span>: self<span style="color:#f92672">.</span>__class__<span style="color:#f92672">.</span>__name__, 
+</span></span><span style="display:flex;"><span>                    <span style="color:#e6db74">&#39;Strategy Config&#39;</span>: json<span style="color:#f92672">.</span>dumps(self<span style="color:#f92672">.</span>config),
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>                results<span style="color:#f92672">.</span>append(result)
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">calculate_dividends</span>(self, date, amount_shares):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>dividends <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">try</span>:
+</span></span><span style="display:flex;"><span>                    dividend <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>dividends<span style="color:#f92672">.</span>loc[date][<span style="color:#e6db74">&#39;Dividend&#39;</span>]<span style="color:#f92672">.</span>sum()
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">except</span> <span style="color:#a6e22e">KeyError</span>:
+</span></span><span style="display:flex;"><span>                    dividend <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> dividend <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;DIVIDEND </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> SHARES&#39;</span><span style="color:#f92672">.</span>format(amount_shares), dividend <span style="color:#f92672">*</span> amount_shares)
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;DIVIDEND TAX </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> SHARES&#39;</span><span style="color:#f92672">.</span>format(amount_shares), <span style="color:#f92672">-</span> dividend <span style="color:#f92672">*</span> amount_shares <span style="color:#f92672">*</span> TAX_RATE)
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Strategy_Hold_And_Sell</span>(Strategy_Common):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Buy at date_0 and Sell at date_1</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, security, config<span style="color:#f92672">=</span>()):
+</span></span><span style="display:flex;"><span>            super()<span style="color:#f92672">.</span><span style="color:#a6e22e">__init__</span>(security, config)
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>description <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Buy, Hold and Sell&#39;</span>
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>keep_always <span style="color:#f92672">=</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">should_buy</span>(self, date<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> date <span style="color:#f92672">is</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>                date <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>get_last_date()
+</span></span><span style="display:flex;"><span>                print(<span style="color:#e6db74">&#39;INFO No date specified, using: </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(date))
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">should_sell</span>(self, date<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> date <span style="color:#f92672">is</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>                date <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>get_last_date()
+</span></span><span style="display:flex;"><span>                print(<span style="color:#e6db74">&#39;INFO No date specified, using: </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(date))
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">False</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">simulate</span>(self, start_date, stop_date, commission, results<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>            cash_funds <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>cash_funds
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(start_date, <span style="color:#e6db74">&#39;CASH DEPOSIT&#39;</span>, cash_funds)
+</span></span><span style="display:flex;"><span>           
+</span></span><span style="display:flex;"><span>            start_index, stop_index <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_get_start_stop_index(start_date, stop_date)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            purchased <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> index, rows <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>quotes<span style="color:#f92672">.</span>iloc[start_index:stop_index]<span style="color:#f92672">.</span>iterrows():
+</span></span><span style="display:flex;"><span>                date <span style="color:#f92672">=</span> rows<span style="color:#f92672">.</span>name<span style="color:#f92672">.</span>to_pydatetime()<span style="color:#f92672">.</span>strftime(<span style="color:#e6db74">&#39;%Y-%m-</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> purchased <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">and</span> self<span style="color:#f92672">.</span>should_buy(date):
+</span></span><span style="display:flex;"><span>                    amount_shares <span style="color:#f92672">=</span> int(self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>balance()<span style="color:#f92672">/</span>self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>quotes<span style="color:#f92672">.</span>loc[date][<span style="color:#e6db74">&#39;EUR Value&#39;</span>])
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;BUY </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> SHARES&#39;</span><span style="color:#f92672">.</span>format(amount_shares), 
+</span></span><span style="display:flex;"><span>                                    <span style="color:#f92672">-</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>quotes<span style="color:#f92672">.</span>loc[date][<span style="color:#e6db74">&#39;EUR Value&#39;</span>] <span style="color:#f92672">*</span> amount_shares <span style="color:#f92672">*</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> MARKET_FLUCTUATION))
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;COMMISSION&#39;</span>, <span style="color:#f92672">-</span> commission)
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;ANALYSIS WAGE&#39;</span>, <span style="color:#f92672">-</span> WAGE)
+</span></span><span style="display:flex;"><span>                    purchased <span style="color:#f92672">=</span> amount_shares
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                self<span style="color:#f92672">.</span>calculate_dividends(date, purchased)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;SELL </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> SHARES&#39;</span><span style="color:#f92672">.</span>format(amount_shares), 
+</span></span><span style="display:flex;"><span>                            self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>quotes<span style="color:#f92672">.</span>loc[date][<span style="color:#e6db74">&#39;EUR Value&#39;</span>] <span style="color:#f92672">*</span> amount_shares <span style="color:#f92672">*</span> (<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> MARKET_FLUCTUATION))
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;COMMISSION&#39;</span>, <span style="color:#f92672">-</span> commission)
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;ANALYSIS WAGE&#39;</span>, <span style="color:#f92672">-</span> WAGE)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>return_results(results)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Strategy_Buy_Value0_LT_Value1</span>(Strategy_Common):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Buy and sell between periods start_date and stop_date. Actual buy/sell order given by cross of rolling averages</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">should_buy</span>(self, date<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> date <span style="color:#f92672">is</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>                date <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>get_last_date()
+</span></span><span style="display:flex;"><span>                print(<span style="color:#e6db74">&#39;INFO No date specified, using: </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(date))
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            value0 <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>moving_average(self<span style="color:#f92672">.</span>_type_avg, self<span style="color:#f92672">.</span>_value0)<span style="color:#f92672">.</span>loc[date]
+</span></span><span style="display:flex;"><span>            value1 <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>moving_average(self<span style="color:#f92672">.</span>_type_avg, self<span style="color:#f92672">.</span>_value1)<span style="color:#f92672">.</span>loc[date]
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> value0 <span style="color:#f92672">&lt;</span> value1:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">False</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">should_sell</span>(self, date<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> date <span style="color:#f92672">is</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>                date <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>get_last_date()
+</span></span><span style="display:flex;"><span>                print(<span style="color:#e6db74">&#39;INFO No date specified, using: </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(date))
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#f92672">not</span> self<span style="color:#f92672">.</span>should_buy(date)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, security, config):
+</span></span><span style="display:flex;"><span>            super()<span style="color:#f92672">.</span><span style="color:#a6e22e">__init__</span>(security, config)
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>_type_avg <span style="color:#f92672">=</span> config[<span style="color:#ae81ff">0</span>]
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>_value0 <span style="color:#f92672">=</span> int(config[<span style="color:#ae81ff">1</span>])
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>_value1 <span style="color:#f92672">=</span> int(config[<span style="color:#ae81ff">2</span>])
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>description <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Buy on </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> days LT </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> days&#39;</span><span style="color:#f92672">.</span>format(self<span style="color:#f92672">.</span>_type_avg <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39; &#39;</span> <span style="color:#f92672">+</span> str(self<span style="color:#f92672">.</span>_value0),
+</span></span><span style="display:flex;"><span>                                                                  self<span style="color:#f92672">.</span>_type_avg <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39; &#39;</span> <span style="color:#f92672">+</span> str(self<span style="color:#f92672">.</span>_value1))
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">simulate</span>(self, start_date, stop_date, commission, results<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>            cash_funds <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>cash_funds
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(start_date, <span style="color:#e6db74">&#39;CASH DEPOSIT&#39;</span>, cash_funds)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            start_index, stop_index <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_get_start_stop_index(start_date, stop_date)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>            purchased <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> index, rows <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>quotes<span style="color:#f92672">.</span>iloc[start_index:stop_index]<span style="color:#f92672">.</span>iterrows():
+</span></span><span style="display:flex;"><span>                date <span style="color:#f92672">=</span> rows<span style="color:#f92672">.</span>name<span style="color:#f92672">.</span>to_pydatetime()<span style="color:#f92672">.</span>strftime(<span style="color:#e6db74">&#39;%Y-%m-</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>                value <span style="color:#f92672">=</span> rows[<span style="color:#e6db74">&#39;EUR Value&#39;</span>]
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> purchased <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">and</span> self<span style="color:#f92672">.</span>should_buy(date):
+</span></span><span style="display:flex;"><span>                    amount_shares <span style="color:#f92672">=</span> int(self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>balance()<span style="color:#f92672">/</span>value)
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;BUY </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> SHARES&#39;</span><span style="color:#f92672">.</span>format(amount_shares), 
+</span></span><span style="display:flex;"><span>                                    <span style="color:#f92672">-</span> value<span style="color:#f92672">*</span>amount_shares<span style="color:#f92672">*</span>(<span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> MARKET_FLUCTUATION))
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;COMMISSION&#39;</span>, <span style="color:#f92672">-</span> commission)
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;ANALYSIS WAGE&#39;</span>, <span style="color:#f92672">-</span> WAGE)
+</span></span><span style="display:flex;"><span>                    
+</span></span><span style="display:flex;"><span>                    purchased <span style="color:#f92672">=</span> amount_shares
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">elif</span> purchased <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">and</span> self<span style="color:#f92672">.</span>should_sell(date):
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;SELL </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> SHARES&#39;</span><span style="color:#f92672">.</span>format(purchased), 
+</span></span><span style="display:flex;"><span>                                    value<span style="color:#f92672">*</span>purchased<span style="color:#f92672">*</span>(<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> MARKET_FLUCTUATION))
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;COMMISSION&#39;</span>, <span style="color:#f92672">-</span> commission)
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;ANALYSIS WAGE&#39;</span>, <span style="color:#f92672">-</span> WAGE)
+</span></span><span style="display:flex;"><span>                    purchased <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                self<span style="color:#f92672">.</span>calculate_dividends(date, purchased)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> purchased<span style="color:#f92672">&gt;</span><span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>                self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;SELL </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> SHARES&#39;</span><span style="color:#f92672">.</span>format(purchased), 
+</span></span><span style="display:flex;"><span>                                value<span style="color:#f92672">*</span>purchased<span style="color:#f92672">*</span>(<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> MARKET_FLUCTUATION))
+</span></span><span style="display:flex;"><span>                self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;COMMISSION&#39;</span>, <span style="color:#f92672">-</span> commission)
+</span></span><span style="display:flex;"><span>                self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;ANALYSIS WAGE&#39;</span>, <span style="color:#f92672">-</span> WAGE)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>return_results(results)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Strategy_Buy_dSMA20</span>(Strategy_Common):
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e"># Buy and sell between periods start_date and stop_date. Actual buy/sell order given by cross of rolling averages</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">should_buy</span>(self, date<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> date <span style="color:#f92672">is</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>                date <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>get_last_date()
+</span></span><span style="display:flex;"><span>                print(<span style="color:#e6db74">&#39;INFO No date specified, using: </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(date))
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>            index <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_get_date_or_previous_index(date)
+</span></span><span style="display:flex;"><span>            dSMA_20 <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>moving_average(<span style="color:#e6db74">&#39;SMA&#39;</span>, <span style="color:#ae81ff">20</span>)<span style="color:#f92672">.</span>diff()[index<span style="color:#f92672">-</span><span style="color:#ae81ff">5</span>:index]<span style="color:#f92672">.</span>mean()
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> dSMA_20 <span style="color:#f92672">&gt;</span> self<span style="color:#f92672">.</span>_trigger:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">False</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">should_sell</span>(self, date<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> date <span style="color:#f92672">is</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span>                date <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>get_last_date()
+</span></span><span style="display:flex;"><span>                print(<span style="color:#e6db74">&#39;INFO No date specified, using: </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(date))
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>            index <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_get_date_or_previous_index(date)
+</span></span><span style="display:flex;"><span>            dSMA_20 <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>moving_average(<span style="color:#e6db74">&#39;SMA&#39;</span>, <span style="color:#ae81ff">20</span>)<span style="color:#f92672">.</span>diff()[index<span style="color:#f92672">-</span><span style="color:#ae81ff">5</span>:index]<span style="color:#f92672">.</span>mean() 
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> dSMA_20 <span style="color:#f92672">&lt;</span> self<span style="color:#f92672">.</span>_trigger:
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">False</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">__init__</span>(self, security, config<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>):
+</span></span><span style="display:flex;"><span>            super()<span style="color:#f92672">.</span><span style="color:#a6e22e">__init__</span>(security, config)
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>_trigger <span style="color:#f92672">=</span> float(config)
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>description <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Buy on dSMA20 &gt; </span><span style="color:#e6db74">{}</span><span style="color:#e6db74">&#39;</span><span style="color:#f92672">.</span>format(str(self<span style="color:#f92672">.</span>_trigger))
+</span></span><span style="display:flex;"><span>                                                           
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">simulate</span>(self, start_date, stop_date, commission, results<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span>            cash_funds <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>cash_funds
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(start_date, <span style="color:#e6db74">&#39;CASH DEPOSIT&#39;</span>, cash_funds)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            start_index, stop_index <span style="color:#f92672">=</span> self<span style="color:#f92672">.</span>_get_start_stop_index(start_date, stop_date)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>            purchased <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">for</span> index, rows <span style="color:#f92672">in</span> self<span style="color:#f92672">.</span>security<span style="color:#f92672">.</span>quotes<span style="color:#f92672">.</span>iloc[start_index:stop_index]<span style="color:#f92672">.</span>iterrows():
+</span></span><span style="display:flex;"><span>                date <span style="color:#f92672">=</span> rows<span style="color:#f92672">.</span>name<span style="color:#f92672">.</span>to_pydatetime()<span style="color:#f92672">.</span>strftime(<span style="color:#e6db74">&#39;%Y-%m-</span><span style="color:#e6db74">%d</span><span style="color:#e6db74">&#39;</span>)
+</span></span><span style="display:flex;"><span>                value <span style="color:#f92672">=</span> rows[<span style="color:#e6db74">&#39;EUR Value&#39;</span>]
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> purchased <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">and</span> self<span style="color:#f92672">.</span>should_buy(date):
+</span></span><span style="display:flex;"><span>                    amount_shares <span style="color:#f92672">=</span> int(self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>balance()<span style="color:#f92672">/</span>value)
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;BUY </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> SHARES&#39;</span><span style="color:#f92672">.</span>format(amount_shares), 
+</span></span><span style="display:flex;"><span>                                    <span style="color:#f92672">-</span> value<span style="color:#f92672">*</span>amount_shares<span style="color:#f92672">*</span>(<span style="color:#ae81ff">1</span> <span style="color:#f92672">+</span> MARKET_FLUCTUATION))
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;COMMISSION&#39;</span>, <span style="color:#f92672">-</span> commission)
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;ANALYSIS WAGE&#39;</span>, <span style="color:#f92672">-</span> WAGE)
+</span></span><span style="display:flex;"><span>                    
+</span></span><span style="display:flex;"><span>                    purchased <span style="color:#f92672">=</span> amount_shares
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">elif</span> purchased <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">and</span> self<span style="color:#f92672">.</span>should_sell(date):
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;SELL </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> SHARES&#39;</span><span style="color:#f92672">.</span>format(purchased), 
+</span></span><span style="display:flex;"><span>                                    value<span style="color:#f92672">*</span>purchased<span style="color:#f92672">*</span>(<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> MARKET_FLUCTUATION))
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;COMMISSION&#39;</span>, <span style="color:#f92672">-</span> commission)
+</span></span><span style="display:flex;"><span>                    self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;ANALYSIS WAGE&#39;</span>, <span style="color:#f92672">-</span> WAGE)
+</span></span><span style="display:flex;"><span>                    purchased <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>                self<span style="color:#f92672">.</span>calculate_dividends(date, purchased)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> purchased<span style="color:#f92672">&gt;</span><span style="color:#ae81ff">0</span>:
+</span></span><span style="display:flex;"><span>                self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;SELL </span><span style="color:#e6db74">{}</span><span style="color:#e6db74"> SHARES&#39;</span><span style="color:#f92672">.</span>format(purchased), 
+</span></span><span style="display:flex;"><span>                                value<span style="color:#f92672">*</span>purchased<span style="color:#f92672">*</span>(<span style="color:#ae81ff">1</span> <span style="color:#f92672">-</span> MARKET_FLUCTUATION))
+</span></span><span style="display:flex;"><span>                self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;COMMISSION&#39;</span>, <span style="color:#f92672">-</span> commission)
+</span></span><span style="display:flex;"><span>                self<span style="color:#f92672">.</span>wallet<span style="color:#f92672">.</span>add(date, <span style="color:#e6db74">&#39;ANALYSIS WAGE&#39;</span>, <span style="color:#f92672">-</span> WAGE)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            self<span style="color:#f92672">.</span>return_results(results)
+</span></span><span style="display:flex;"><span>    
+</span></span></code></pre></div><p>In the next post, I will glue everything together to run a simulation over a period of one year.</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/trading/">trading</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/investing/">investing</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/python/">python</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/finance/">finance</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/business/">business</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        1508 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2020-12-13
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-1%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-1%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Trading%20in%20Python%3a%20Part%201&amp;caption=Trading%20in%20Python%3a%20Part%201&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-1%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Trading%20in%20Python%3a%20Part%201&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-1%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-1%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-1%2f;description=Trading%20in%20Python%3a%20Part%201" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-1%2f&amp;title=Trading%20in%20Python%3a%20Part%201&amp;summary=Trading%20in%20Python%3a%20Part%201&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-1%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-1%2f&amp;resubmit=true&amp;title=Trading%20in%20Python%3a%20Part%201" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-1%2f;title=Trading%20in%20Python%3a%20Part%201" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Trading%20in%20Python%3a%20Part%201%20https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-1%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-1%2f&amp;t=Trading%20in%20Python%3a%20Part%201" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Trading%20in%20Python%3a%20Part%201&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2020%2f12%2ftrading-in-python-part-1%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2020/12/trading-in-python-part-2/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">Trading in Python: Part 2</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2020/11/web-automation-with-selenium/">
+                    <span class="button__text">Web automation with Selenium</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

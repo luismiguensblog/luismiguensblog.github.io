@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Introduction Concurrent programming allows a C&#43;&#43; program to execute multiple tasks simultaneously (or at least appear to). In practice, this means breaking a program into threads that run independently. Threads are units of execution that can run concurrently and potentially in parallel on multi-core systems. C&#43;&#43;17 builds on the threading facilities introduced in C&#43;&#43;11, providing standard tools to create threads, synchronise access to shared data, and avoid race conditions. In this post, we&rsquo;ll explore key multithreading concepts in modern C&#43;&#43;: starting threads with std::thread, using mutual exclusion with std::mutex, coordinating threads with condition variables (std::condition_variable), and leveraging atomic operations with std::atomic. Along the way, we&rsquo;ll look at code examples and discuss best practices to write safe and efficient multi-threaded C&#43;&#43;17 code.
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2025/04/concurrency-and-multithreading-in-c-17/" />
+
+
+    <title>
+        
+            Concurrency and Multithreading in C&#43;&#43;17 :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="Concurrency and Multithreading in C&#43;&#43;17">
+  <meta itemprop="description" content="Introduction Concurrent programming allows a C&#43;&#43; program to execute multiple tasks simultaneously (or at least appear to). In practice, this means breaking a program into threads that run independently. Threads are units of execution that can run concurrently and potentially in parallel on multi-core systems. C&#43;&#43;17 builds on the threading facilities introduced in C&#43;&#43;11, providing standard tools to create threads, synchronise access to shared data, and avoid race conditions. In this post, we’ll explore key multithreading concepts in modern C&#43;&#43;: starting threads with std::thread, using mutual exclusion with std::mutex, coordinating threads with condition variables (std::condition_variable), and leveraging atomic operations with std::atomic. Along the way, we’ll look at code examples and discuss best practices to write safe and efficient multi-threaded C&#43;&#43;17 code.">
+  <meta itemprop="datePublished" content="2025-04-22T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2025-04-22T00:00:00+00:00">
+  <meta itemprop="wordCount" content="3142">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="C_cpp,Programming">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="Concurrency and Multithreading in C&#43;&#43;17">
+  <meta name="twitter:description" content="Introduction Concurrent programming allows a C&#43;&#43; program to execute multiple tasks simultaneously (or at least appear to). In practice, this means breaking a program into threads that run independently. Threads are units of execution that can run concurrently and potentially in parallel on multi-core systems. C&#43;&#43;17 builds on the threading facilities introduced in C&#43;&#43;11, providing standard tools to create threads, synchronise access to shared data, and avoid race conditions. In this post, we’ll explore key multithreading concepts in modern C&#43;&#43;: starting threads with std::thread, using mutual exclusion with std::mutex, coordinating threads with condition variables (std::condition_variable), and leveraging atomic operations with std::atomic. Along the way, we’ll look at code examples and discuss best practices to write safe and efficient multi-threaded C&#43;&#43;17 code.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2025/04/concurrency-and-multithreading-in-c-17/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="Concurrency and Multithreading in C&#43;&#43;17">
+  <meta property="og:description" content="Introduction Concurrent programming allows a C&#43;&#43; program to execute multiple tasks simultaneously (or at least appear to). In practice, this means breaking a program into threads that run independently. Threads are units of execution that can run concurrently and potentially in parallel on multi-core systems. C&#43;&#43;17 builds on the threading facilities introduced in C&#43;&#43;11, providing standard tools to create threads, synchronise access to shared data, and avoid race conditions. In this post, we’ll explore key multithreading concepts in modern C&#43;&#43;: starting threads with std::thread, using mutual exclusion with std::mutex, coordinating threads with condition variables (std::condition_variable), and leveraging atomic operations with std::atomic. Along the way, we’ll look at code examples and discuss best practices to write safe and efficient multi-threaded C&#43;&#43;17 code.">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-04-22T00:00:00+00:00">
+    <meta property="article:modified_time" content="2025-04-22T00:00:00+00:00">
+    <meta property="article:tag" content="C_cpp">
+    <meta property="article:tag" content="Programming">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2025-04-22 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        15 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2025/04/concurrency-and-multithreading-in-c-17/">Concurrency and Multithreading in C++17</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="introduction">Introduction</h2>
+<p>Concurrent programming allows a C++ program to execute multiple tasks <em>simultaneously</em> (or at least appear to). In practice, this means breaking a program into <strong>threads</strong> that run independently. Threads are units of execution that can run concurrently and potentially in parallel on multi-core systems. C++17 builds on the threading facilities introduced in C++11, providing standard tools to create threads, synchronise access to shared data, and avoid race conditions. In this post, we&rsquo;ll explore key multithreading concepts in modern C++: starting threads with <code>std::thread</code>, using mutual exclusion with <code>std::mutex</code>, coordinating threads with condition variables (<code>std::condition_variable</code>), and leveraging atomic operations with <code>std::atomic</code>. Along the way, we&rsquo;ll look at code examples and discuss best practices to write safe and efficient multi-threaded C++17 code.</p>
+<p><strong>What is Concurrency?</strong> In simple terms, concurrency is the ability for different parts of a program to execute out-of-order or in partial overlap, without affecting the final outcome (<a href="https://commons.wikimedia.org/wiki/Category:Concurrency_%28computer_science%29#:~:text=concurrency">Category:Concurrency (computer science) - Wikimedia Commons</a>). This is distinct from parallelism – truly executing at the same time – but on modern multi-core processors, threads may indeed run in parallel. The C++ standard library&rsquo;s concurrency support (largely introduced in C++11) gives developers a portable way to write multi-threaded code, moving beyond platform-specific APIs. Let&rsquo;s start by looking at how to spawn new threads in C++.</p>
+<h2 id="starting-threads-with-stdthread">Starting Threads with <code>std::thread</code></h2>
+<p>C++17 uses the <code>std::thread</code> class (defined in the <code>&lt;thread&gt;</code> header) to represent and manage threads of execution. A <code>std::thread</code> object starts running as soon as it&rsquo;s created (<a href="https://en.cppreference.com/w/cpp/thread/thread#:~:text=The%20class%20,multiple%20functions%20to%20execute%20concurrently">std::thread - cppreference.com</a>), invoking a function or callable that you provide. For example, we can launch a simple thread that prints a message:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;thread&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">printMessage</span>(<span style="color:#66d9ef">const</span> std<span style="color:#f92672">::</span>string<span style="color:#f92672">&amp;</span> msg, <span style="color:#66d9ef">int</span> id) {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Thread &#34;</span> <span style="color:#f92672">&lt;&lt;</span> id <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> msg <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span><span style="color:#66d9ef">thread</span> t1(printMessage, <span style="color:#e6db74">&#34;Hello from thread&#34;</span>, <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span><span style="color:#66d9ef">thread</span> t2(printMessage, <span style="color:#e6db74">&#34;Hello from thread&#34;</span>, <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Threads launched</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Wait for the threads to finish execution
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    t1.join();
+</span></span><span style="display:flex;"><span>    t2.join();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In this example, the main program spawns two threads (<code>t1</code> and <code>t2</code>), each executing the <code>printMessage</code> function with different arguments. The threads begin executing immediately upon construction (subject to OS scheduling) (<a href="https://en.cppreference.com/w/cpp/thread/thread#:~:text=Threads%20begin%20execution%20immediately%20upon,see%20%2059%20and%20std%3A%3Aatomic">std::thread - cppreference.com</a>). The main thread then continues to its next statement (printing &ldquo;Threads launched&rdquo;) without waiting for the new threads to complete. We call <code>join()</code> on each thread to block the main thread until those threads finish. The output might interleave the thread messages with the main thread&rsquo;s output, e.g.:</p>
+<pre tabindex="0"><code>Threads launched  
+Thread 2: Hello from thread  
+Thread 1: Hello from thread  
+</code></pre><p>The exact order may vary on each run, which is a hallmark of concurrent execution.</p>
+<p><strong>Joining and Detaching Threads:</strong> It is crucial to either join or <em>detach</em> every thread that you spawn. Calling <code>join()</code> waits for the thread to finish, as shown above. Alternatively, you can call <code>detach()</code> to allow the thread to run independently (in the background, with no way to synchronise with it thereafter). If a <code>std::thread</code> object is destroyed while still <strong>joinable</strong> (i.e., it represents an active thread that hasn&rsquo;t been joined or detached), the C++ runtime will call <code>std::terminate()</code> and likely abort the program (<a href="https://stackoverflow.com/questions/25559918/c-stdthread-crashes-upon-execution#:~:text=Destroying%20a%20,thread.thread.destr">multithreading - C++ - std::thread crashes upon execution - Stack Overflow</a>). This design prevents difficult bugs that could arise from threads continuing after their <code>std::thread</code> object goes out of scope. In summary, always ensure each thread is either joined (if you need to wait for it) or detached (if it should run on its own) before the thread object is destroyed.</p>
+<p><strong>Passing Arguments:</strong> As seen above, <code>std::thread</code> can take a function pointer or any callable (such as a lambda) and parameters for that function. The parameters are copied (or moved) into the new thread&rsquo;s context. Be mindful when passing pointers or references to avoid accessing data that might go out of scope. For example, passing a pointer to a local variable into a detached thread can lead to undefined behaviour if the local variable is destroyed while the thread is still running.</p>
+<h2 id="race-conditions-and-mutual-exclusion-mutexes">Race Conditions and Mutual Exclusion (Mutexes)</h2>
+<p>When multiple threads access the same data without proper coordination, you may hit a <strong>race condition</strong> – a situation where the program&rsquo;s outcome depends on the unpredictable timing of threads. Let&rsquo;s illustrate a simple race condition:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;thread&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;vector&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> counter <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;  <span style="color:#75715e">// shared data
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">increment</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">100000</span>; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">++</span>counter;  <span style="color:#75715e">// increment shared counter
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span><span style="color:#66d9ef">thread</span><span style="color:#f92672">&gt;</span> threads;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Launch multiple threads that increment the counter
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">4</span>; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>        threads.emplace_back(increment);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Wait for all threads to finish
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> t : threads) {
+</span></span><span style="display:flex;"><span>        t.join();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Final counter value: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> counter <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>We might expect the final counter to be <code>400000</code> (since four threads increment it 100000 times each), but in practice, the result is often lower and non-deterministic. This is a classic race condition: the threads interfere with each other when updating <code>counter</code>. The <code>++counter</code> operation is not atomic – internally it involves a read, an addition, and a write, which can be interleaved between threads. In a run of this program, two threads might read the same old value of <code>counter</code> and then both write back updates, losing one increment. A data race like this leads to undefined behaviour in C++ (<a href="https://en.cppreference.com/w/cpp/language/multithread#:~:text=If%20a%20data%20race%20occurs%2C,of%20the%20program%20is%20undefined">Multi-threaded executions and data races (since C++11) - cppreference.com</a>), so we need to prevent it.</p>
+<p>The typical solution is to use a <strong>mutex</strong> to protect the shared resource. A mutex (mutual exclusion) is a synchronisation primitive that allows only one thread to access a section of code at a time (<a href="https://en.cppreference.com/w/cpp/thread/mutex#:~:text=The%20,simultaneously%20accessed%20by%20multiple%20threads">std::mutex - cppreference.com</a>). Think of it as a lock: a thread must acquire the mutex before entering a critical section (the code that accesses shared data), and release it when done, so that other threads can proceed. In C++, we use <code>std::mutex</code> from <code>&lt;mutex&gt;</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;mutex&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>std<span style="color:#f92672">::</span>mutex counterMutex;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">incrementSafe</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">100000</span>; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>lock_guard<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>mutex<span style="color:#f92672">&gt;</span> lock(counterMutex);
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">++</span>counter;
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// mutex is automatically released at end of scope (lock_guard destructor)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Here we introduced a global <code>counterMutex</code>. In <code>incrementSafe()</code>, each iteration locks the mutex before incrementing and unlocks upon leaving the scope (thanks to <code>std::lock_guard</code>). <code>std::lock_guard</code> is a convenient RAII wrapper that locks a given mutex upon construction and unlocks it when destroyed (when leaving scope) (<a href="https://en.cppreference.com/w/cpp/thread/lock_guard#:~:text=The%20class%20,duration%20of%20a%20scoped%20block">std::lock_guard - cppreference.com</a>). By using <code>lock_guard</code>, we ensure the mutex is released even if an exception occurs within the block, making our code exception-safe. Only one thread can hold the mutex at a time, so the increments on <code>counter</code> are serialised – one thread&rsquo;s loop iteration will exclude others until it finishes incrementing. This guarantees correct results, at the cost of some performance due to threads waiting their turn.</p>
+<p>Let&rsquo;s apply this fix to our example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">incrementSafe</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">100000</span>; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>lock_guard<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>mutex<span style="color:#f92672">&gt;</span> lock(counterMutex);
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">++</span>counter;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... launch threads with incrementSafe instead ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">auto</span><span style="color:#f92672">&amp;</span> t : threads) t.join();
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Final counter value: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> counter <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Now the final counter value will reliably be 400000. We have removed the race condition by preventing concurrent access to the shared variable. Note that locking has a runtime cost, and if the critical section is very small (like just incrementing a variable), a mutex might be overkill – we&rsquo;ll discuss alternatives like atomic variables shortly. However, for more complex shared structures, mutexes are the go-to tool.</p>
+<p><strong>Mutex Basics:</strong> A <code>std::mutex</code> provides exclusive ownership: when one thread locks it, other threads attempting to lock will block until it is unlocked (<a href="https://en.cppreference.com/w/cpp/thread/mutex#:~:text=,calling%20%20146%20or%20try_lock">std::mutex - cppreference.com</a>). If a thread tries to lock the same mutex twice (without unlocking first), it will deadlock itself (standard <code>std::mutex</code> is non-recursive). Always design your locking carefully to avoid <strong>deadlocks</strong> where two or more threads are waiting indefinitely for each other to release locks. A simple deadlock scenario is if thread A locks mutex X then mutex Y, while thread B locks mutex Y then mutex X – each will wait forever for the other. In general, to prevent deadlock, ensure all threads lock multiple mutexes in a consistent global order, or use higher-level concurrency primitives when possible.</p>
+<p>Deadlocks can be subtle in larger programs. As a rule, keep the duration for which a mutex is locked as short as possible (hold a lock only for the necessary operations, then release). This maximises concurrency and minimises the chance of cyclic lock dependencies. If you need to lock multiple mutexes, C++17 offers <code>std::scoped_lock</code> to lock several at once (avoiding intermediate interleavings), or you can use <code>std::lock()</code> on multiple mutexes safely.</p>
+<p><em>(Side note: &ldquo;deadlock&rdquo; formally means a set of threads are all blocked, each waiting for a resource owned by one of the other threads, such that none can proceed (<a href="https://web.stanford.edu/~ouster/cs111-spring24/lectures/deadlock/#:~:text=,none%20can%20release%20their%20resources">Deadlock</a>). Avoiding deadlocks is a key part of multithreaded program design.)</em></p>
+<h2 id="condition-variables-for-thread-synchronisation">Condition Variables for Thread Synchronisation</h2>
+<p>Mutexes provide mutual exclusion, but they don&rsquo;t by themselves provide a mechanism for threads to wait for certain conditions or events. This is where <strong>condition variables</strong> come in. A <code>std::condition_variable</code> (from <code>&lt;condition_variable&gt;</code>) allows one or more threads to wait (sleep) until some condition is met and another thread signals them to wake up (<a href="https://en.cppreference.com/w/cpp/thread/condition_variable#:~:text=,std%3A%3Acondition_variable">std::condition_variable - cppreference.com</a>). Condition variables are often used in conjunction with a mutex to coordinate producer-consumer scenarios or other situations where threads need to rendezvous.</p>
+<p>(<a href="https://www.scaler.com/topics/producer-consumer-problem-in-c/">What is producer consumer problem in C? | Scaler Topics</a>) <em>An illustration of a producer-consumer setup. One thread (the producer) inserts data into a shared buffer, and another thread (the consumer) removes data from it. A condition variable allows the consumer thread to wait until new data is produced before consuming.</em></p>
+<p>For example, imagine one thread is producing data and another is consuming it. The consumer should wait (not loop continuously) until data is available. We can achieve this with a condition variable:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;queue&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;condition_variable&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>queue<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> dataQueue;
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>mutex dataMutex;
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>condition_variable dataCond;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">bool</span> finished <span style="color:#f92672">=</span> false;  <span style="color:#75715e">// flag to indicate producer is done
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Consumer thread function
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">consumer</span>() {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>unique_lock<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>mutex<span style="color:#f92672">&gt;</span> lock(dataMutex);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">while</span> (<span style="color:#f92672">!</span>finished) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Wait until dataCond is notified and condition (queue not empty or finished) is true
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        dataCond.wait(lock, []{ <span style="color:#66d9ef">return</span> <span style="color:#f92672">!</span>dataQueue.empty() <span style="color:#f92672">||</span> finished; });
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Now we have the lock again and either queue is not empty or finished is true
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">while</span> (<span style="color:#f92672">!</span>dataQueue.empty()) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">int</span> item <span style="color:#f92672">=</span> dataQueue.front();
+</span></span><span style="display:flex;"><span>            dataQueue.pop();
+</span></span><span style="display:flex;"><span>            lock.unlock();  <span style="color:#75715e">// unlock while processing item
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Consumed: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> item <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>            lock.lock();
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">// Producer thread function
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">producer</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>; i <span style="color:#f92672">&lt;=</span> <span style="color:#ae81ff">5</span>; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>        {
+</span></span><span style="display:flex;"><span>            std<span style="color:#f92672">::</span>lock_guard<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>mutex<span style="color:#f92672">&gt;</span> lock(dataMutex);
+</span></span><span style="display:flex;"><span>            dataQueue.push(i);
+</span></span><span style="display:flex;"><span>            std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Produced: &#34;</span> <span style="color:#f92672">&lt;&lt;</span> i <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>        } <span style="color:#75715e">// release lock before notifying
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        dataCond.notify_one();  <span style="color:#75715e">// wake up consumer
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        std<span style="color:#f92672">::</span>this_thread<span style="color:#f92672">::</span>sleep_for(std<span style="color:#f92672">::</span>chrono<span style="color:#f92672">::</span>milliseconds(<span style="color:#ae81ff">100</span>));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Signal the consumer that production is finished
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>lock_guard<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>mutex<span style="color:#f92672">&gt;</span> lock(dataMutex);
+</span></span><span style="display:flex;"><span>        finished <span style="color:#f92672">=</span> true;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    dataCond.notify_one();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In this example, the consumer thread waits on <code>dataCond</code> for the condition &ldquo;queue not empty or finished&rdquo; to become true. The <code>wait(lock, predicate)</code> call atomically releases the mutex and suspends the thread until <code>notify_one()</code> is called on the condition variable <em>and</em> the predicate returns true. When another thread (the producer) pushes data and calls <code>notify_one</code>, the consumer wakes up, reacquires the lock, and checks the condition. We use a loop to handle spurious wake-ups – a condition variable may wake up without a notification, so the condition must be re-checked (<a href="https://en.cppreference.com/w/cpp/thread/condition_variable#:~:text=1,resume%20waiting%20if%20not%20satisfied">std::condition_variable - cppreference.com</a>). The predicate version of <code>wait</code> does this logic internally, looping until the condition is satisfied.</p>
+<p>A few important points about condition variables in C++:</p>
+<ul>
+<li>A condition variable must always be paired with a mutex that guards the shared state (in our case, <code>dataMutex</code> guards access to <code>dataQueue</code> and <code>finished</code>). The waiting thread should hold the mutex before waiting, and the mutex will be released while waiting and reacquired upon wake-up (<a href="https://en.cppreference.com/w/cpp/thread/condition_variable#:~:text=1,Do%20one%20of%20the%20following">std::condition_variable - cppreference.com</a>).</li>
+<li><code>std::unique_lock&lt;std::mutex&gt;</code> is typically used for waiting, rather than a <code>lock_guard</code>. A <code>unique_lock</code> can be unlocked and locked, and <code>wait</code> requires a <code>unique_lock</code> so it can atomically unlock the mutex during wait (<a href="https://en.cppreference.com/w/cpp/thread/condition_variable#:~:text=1,performs%20the%20same%20three%20steps">std::condition_variable - cppreference.com</a>).</li>
+<li>Use <code>notify_one()</code> to wake a single waiting thread, or <code>notify_all()</code> to wake all waiting threads (if, for example, multiple consumers might be waiting for work).</li>
+<li>Always check the condition in a loop after waking, because notifications can be lost or wake-ups can happen without a notification (i.e., spurious wake-ups). The helper <code>wait(lock, predicate)</code> takes care of this by looping internally until the predicate is true.</li>
+<li>Condition variables are lower-level primitives; higher-level message-passing or task frameworks can sometimes simplify thread coordination, but condition variables are versatile for many patterns like the producer-consumer.</li>
+</ul>
+<p>In our producer-consumer code, the output might look like:</p>
+<pre tabindex="0"><code>Produced: 1  
+Produced: 2  
+Consumed: 1  
+Produced: 3  
+Consumed: 2  
+Produced: 4  
+Consumed: 3  
+Produced: 5  
+Consumed: 4  
+Consumed: 5  
+</code></pre><p>The consumer prints items as they become available. We carefully unlocked the mutex while processing an item (around the <code>std::cout</code>) to allow the producer to run concurrently – holding locks only when necessary is a good practice.</p>
+<h2 id="atomic-operations">Atomic Operations</h2>
+<p>Mutexes ensure exclusive access but come with overhead and complexity (risk of deadlocks, etc.). For simple shared variables like counters, <strong>atomic</strong> operations can be a lighter alternative. C++17 provides the <code>&lt;atomic&gt;</code> header, which defines atomic types such as <code>std::atomic&lt;int&gt;</code>. An atomic variable provides operations (like <code>++</code>, store, load) that are indivisible and thread-safe. In other words, if one thread modifies an atomic variable while another reads it, the outcome is well-defined and no data race occurs (<a href="https://en.cppreference.com/w/cpp/atomic#:~:text=These%20components%20are%20provided%20for,are%20free%20of%20data%20races">Concurrency support library (since C++11) - cppreference.com</a>) (<a href="https://stackoverflow.com/questions/31978324/what-exactly-is-stdatomic#:~:text=behavior%3A">c++ - What exactly is std::atomic? - Stack Overflow</a>). This can offer a more efficient way to coordinate simple state.</p>
+<p>Revisiting our earlier counter example, we can eliminate the mutex by using an atomic counter:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;atomic&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>std<span style="color:#f92672">::</span>atomic<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> atomicCounter(<span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">incrementAtomic</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">100000</span>; <span style="color:#f92672">++</span>i) {
+</span></span><span style="display:flex;"><span>        atomicCounter<span style="color:#f92672">++</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Now multiple threads can increment <code>atomicCounter</code> concurrently without data races. Under the hood, these increments might use special CPU instructions to ensure atomicity. Each atomic operation is guaranteed to happen fully before any other atomic operation on the same object begins (<a href="https://en.cppreference.com/w/cpp/atomic#:~:text=These%20components%20are%20provided%20for,are%20free%20of%20data%20races">Concurrency support library (since C++11) - cppreference.com</a>). After running four threads with this <code>incrementAtomic</code> function, <code>atomicCounter</code> will reliably end up as 400000, just like the mutex-protected version, but likely with less overhead.</p>
+<p>It&rsquo;s important to note that while atomics avoid explicit locking, they are not a magic bullet for all concurrency problems. They work best for simple shared variables or flags. If you have multiple related variables that need to be kept in sync, a mutex (to make larger sections of code atomic) or higher-level constructs might be needed. Moreover, atomic operations obey C++&rsquo;s <strong>memory ordering</strong> rules – by default they enforce a total order (sequential consistency) on operations, which is the safest but not always the fastest. C++ allows relaxed or acquire-release memory orders for advanced use cases, but those are beyond the scope of this post. For most purposes, <code>std::atomic</code> with default memory order provides a straightforward way to get thread-safe operations on a single variable without the fuss of locks.</p>
+<h2 id="best-practices-and-common-pitfalls">Best Practices and Common Pitfalls</h2>
+<p>Writing correct multithreaded code is challenging. Here are some best practices and potential pitfalls to keep in mind when using C++17 concurrency features:</p>
+<ul>
+<li>
+<p><strong>Avoid Data Races:</strong> Any unsynchronised access to shared data (where at least one access is a write) is a bug. Data races lead to undefined behaviour (<a href="https://en.cppreference.com/w/cpp/language/multithread#:~:text=If%20a%20data%20race%20occurs%2C,of%20the%20program%20is%20undefined">Multi-threaded executions and data races (since C++11) - cppreference.com</a>). Use mutexes or atomics to protect shared variables. If a piece of data is only touched by one thread (or is immutable), then you don&rsquo;t need synchronisation for that data.</p>
+</li>
+<li>
+<p><strong>Use RAII for Managing Locks:</strong> Prefer using <code>std::lock_guard</code> or <code>std::unique_lock</code> instead of manually calling <code>mutex.lock()</code> and <code>mutex.unlock()</code>. RAII wrappers ensure that locks are released when a scope is exited, even if exceptions are thrown, preventing deadlocks caused by forgotten unlocks. Similarly, consider wrapping thread management in RAII classes (or at least in <code>try/catch</code>) to ensure threads are joined even if exceptions occur.</p>
+</li>
+<li>
+<p><strong>Minimise Lock Granularity:</strong> Hold locks for the shortest duration necessary. Only lock around the critical section that truly needs exclusive access. This reduces contention and the chance of deadlocks. If possible, do work (especially expensive I/O or computation) outside the locked section.</p>
+</li>
+<li>
+<p><strong>Consistent Lock Ordering:</strong> When a situation requires multiple mutexes, always lock them in a consistent global order. Inconsistent ordering between threads can easily cause deadlock. If locking multiple mutexes at once, C++17&rsquo;s <code>std::scoped_lock</code> (or <code>std::lock</code> with <code>std::adopt_lock</code>) can be used to lock without risking interleaved locking.</p>
+</li>
+<li>
+<p><strong>Beware of Deadlocks:</strong> Deadlocks occur when threads cyclically wait on each other and none can proceed (<a href="https://web.stanford.edu/~ouster/cs111-spring24/lectures/deadlock/#:~:text=,none%20can%20release%20their%20resources">Deadlock</a>). Aside from lock ordering issues, deadlock can also happen if a thread tries to lock a mutex twice, or if there&rsquo;s a circular wait involving condition variables or other resources. Avoid long-held locks and design clear ownership of resources.</p>
+</li>
+<li>
+<p><strong>Condition Variable Usage:</strong> Always use a loop when waiting on a condition variable (or use the predicate overload of <code>wait</code>). Ensure the condition and associated state are protected by the same mutex. Also, be careful to notify <em>after</em> updating the condition state (as seen in the producer-consumer example, we unlocked before notifying to avoid waking the consumer before the state was ready).</p>
+</li>
+<li>
+<p><strong>Thread Lifetime and Exceptions:</strong> As noted, make sure threads are joined or detached properly. A common pitfall is to forget to join a thread before a function returns (leading to std::terminate). If your program throws exceptions, consider what happens to threads – you might need to catch exceptions, join threads, then rethrow, or use <code>std::jthread</code> (introduced in C++20) which automatically joins on destruction. C++17 doesn&rsquo;t have <code>jthread</code>, so manual care is needed.</p>
+</li>
+<li>
+<p><strong>Use Atomics for Simple Flags/Counters:</strong> If you just need to signal a boolean flag or count events, use <code>std::atomic</code> instead of a full mutex+condition pair. For example, an atomic bool can be used to publish a &ldquo;stop&rdquo; flag to worker threads. This is simpler and often faster. But don&rsquo;t mix atomic and non-atomic accesses to the same variable.</p>
+</li>
+<li>
+<p><strong>Tools and Debugging:</strong> Multithreading bugs can be non-deterministic and hard to reproduce. Use tools like ThreadSanitizer (available in many compilers) to catch data races. When debugging, try to simplify and enforce ordering (e.g., with logging or sleeps) to reproduce issues, but be aware that adding debug output can sometimes &ldquo;heal&rdquo; a race due to timing changes.</p>
+</li>
+</ul>
+<p>In conclusion, C++17 provides robust low-level constructs for concurrency that make cross-platform multithreading achievable in standard C++. We have <code>std::thread</code> for creating threads, mutexes and condition variables for coordinating access to shared resources, and atomic types for lock-free operations on single variables. By understanding these tools and following best practices, you can harness the power of multi-core systems, making your C++ programs faster and more responsive. Just remember that with great power comes great responsibility – always consider the complexity that threads introduce, and strive to write clear, well-synchronised code. Happy threading!</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        3142 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2025-04-22
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f04%2fconcurrency-and-multithreading-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f04%2fconcurrency-and-multithreading-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Concurrency%20and%20Multithreading%20in%20C%2b%2b17&amp;caption=Concurrency%20and%20Multithreading%20in%20C%2b%2b17&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f04%2fconcurrency-and-multithreading-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Concurrency%20and%20Multithreading%20in%20C%2b%2b17&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f04%2fconcurrency-and-multithreading-in-c-17%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f04%2fconcurrency-and-multithreading-in-c-17%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f04%2fconcurrency-and-multithreading-in-c-17%2f;description=Concurrency%20and%20Multithreading%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f04%2fconcurrency-and-multithreading-in-c-17%2f&amp;title=Concurrency%20and%20Multithreading%20in%20C%2b%2b17&amp;summary=Concurrency%20and%20Multithreading%20in%20C%2b%2b17&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f04%2fconcurrency-and-multithreading-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f04%2fconcurrency-and-multithreading-in-c-17%2f&amp;resubmit=true&amp;title=Concurrency%20and%20Multithreading%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f04%2fconcurrency-and-multithreading-in-c-17%2f;title=Concurrency%20and%20Multithreading%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Concurrency%20and%20Multithreading%20in%20C%2b%2b17%20https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f04%2fconcurrency-and-multithreading-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f04%2fconcurrency-and-multithreading-in-c-17%2f&amp;t=Concurrency%20and%20Multithreading%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Concurrency%20and%20Multithreading%20in%20C%2b%2b17&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2025%2f04%2fconcurrency-and-multithreading-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2025/05/if-constexpr-in-c-17-enabling-compile-time-conditionals/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">if constexpr in C&#43;&#43;17 – Enabling Compile-Time Conditionals</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2025/03/smart-pointers-and-memory-management-in-c-17/">
+                    <span class="button__text">Smart Pointers and Memory Management in C&#43;&#43;17</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

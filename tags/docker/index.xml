@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Docker on Luis Miguens Blog</title>
+    <link>https://blog.miguens.one/tags/docker/</link>
+    <description>Recent content in Docker on Luis Miguens Blog</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 01 May 2017 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://blog.miguens.one/tags/docker/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How to make your own Netflix with Docker</title>
+      <link>https://blog.miguens.one/posts/2017/05/how-to-make-your-own-netflix-with-docker/</link>
+      <pubDate>Mon, 01 May 2017 00:00:00 +0000</pubDate>
+      <guid>https://blog.miguens.one/posts/2017/05/how-to-make-your-own-netflix-with-docker/</guid>
+      <description>&lt;h1 id=&#34;how-to-create-your-own-netflix&#34;&gt;How to create your own Netflix&lt;/h1&gt;&#xA;&lt;p&gt;&lt;strong&gt;This is post is only for educational purposes. I am not condoning media piracy in any way&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;I was asking myself, how can I build my own Netflix. That questions derived in more specific questions like &amp;ldquo;how can I&amp;hellip;&amp;rdquo;:&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;easily stream content from my storage device to my TV?&lt;/li&gt;&#xA;&lt;li&gt;automate the gathering of content to put onto my storage device?&lt;/li&gt;&#xA;&lt;li&gt;securely control the resulting system?&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;In this post, we will see how I managed to answer such questions, while at the same time, it was an excellent exercise to learn about Docker, combining several open sources or free programs.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
