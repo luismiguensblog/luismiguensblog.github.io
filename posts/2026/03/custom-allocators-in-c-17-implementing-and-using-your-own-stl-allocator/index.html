@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Introduction Custom memory allocators in C&#43;&#43; are an advanced feature that let developers fine-tune how dynamic memory is managed by STL containers. All standard library containers (and even std::string) have an Allocator template parameter (defaulting to std::allocator) responsible for managing memory and object lifetimes. In practice, the default std::allocator simply wraps the global heap (using new to allocate and delete to free). While the default behavior is sufficient for most programs, I have found that in performance-critical or memory-constrained scenarios, a custom allocator can provide significant benefits. In this post, I will examine how allocators work with the STL, show how to implement a custom allocator in C&#43;&#43;17, and demonstrate its usage with std::vector, all in a detailed and analytical manner.
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2026/03/custom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator/" />
+
+
+    <title>
+        
+            Custom Allocators in C&#43;&#43;17: Implementing and Using Your Own STL Allocator :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="Custom Allocators in C&#43;&#43;17: Implementing and Using Your Own STL Allocator">
+  <meta itemprop="description" content="Introduction Custom memory allocators in C&#43;&#43; are an advanced feature that let developers fine-tune how dynamic memory is managed by STL containers. All standard library containers (and even std::string) have an Allocator template parameter (defaulting to std::allocator) responsible for managing memory and object lifetimes. In practice, the default std::allocator simply wraps the global heap (using new to allocate and delete to free). While the default behavior is sufficient for most programs, I have found that in performance-critical or memory-constrained scenarios, a custom allocator can provide significant benefits. In this post, I will examine how allocators work with the STL, show how to implement a custom allocator in C&#43;&#43;17, and demonstrate its usage with std::vector, all in a detailed and analytical manner.">
+  <meta itemprop="datePublished" content="2026-03-20T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2026-03-20T00:00:00+00:00">
+  <meta itemprop="wordCount" content="3127">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="C_cpp,Programming">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="Custom Allocators in C&#43;&#43;17: Implementing and Using Your Own STL Allocator">
+  <meta name="twitter:description" content="Introduction Custom memory allocators in C&#43;&#43; are an advanced feature that let developers fine-tune how dynamic memory is managed by STL containers. All standard library containers (and even std::string) have an Allocator template parameter (defaulting to std::allocator) responsible for managing memory and object lifetimes. In practice, the default std::allocator simply wraps the global heap (using new to allocate and delete to free). While the default behavior is sufficient for most programs, I have found that in performance-critical or memory-constrained scenarios, a custom allocator can provide significant benefits. In this post, I will examine how allocators work with the STL, show how to implement a custom allocator in C&#43;&#43;17, and demonstrate its usage with std::vector, all in a detailed and analytical manner.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2026/03/custom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="Custom Allocators in C&#43;&#43;17: Implementing and Using Your Own STL Allocator">
+  <meta property="og:description" content="Introduction Custom memory allocators in C&#43;&#43; are an advanced feature that let developers fine-tune how dynamic memory is managed by STL containers. All standard library containers (and even std::string) have an Allocator template parameter (defaulting to std::allocator) responsible for managing memory and object lifetimes. In practice, the default std::allocator simply wraps the global heap (using new to allocate and delete to free). While the default behavior is sufficient for most programs, I have found that in performance-critical or memory-constrained scenarios, a custom allocator can provide significant benefits. In this post, I will examine how allocators work with the STL, show how to implement a custom allocator in C&#43;&#43;17, and demonstrate its usage with std::vector, all in a detailed and analytical manner.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-03-20T00:00:00+00:00">
+    <meta property="article:modified_time" content="2026-03-20T00:00:00+00:00">
+    <meta property="article:tag" content="C_cpp">
+    <meta property="article:tag" content="Programming">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2026-03-20 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( true ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        15 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2026/03/custom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator/">Custom Allocators in C++17: Implementing and Using Your Own STL Allocator</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="introduction">Introduction</h2>
+<p>Custom memory allocators in C++ are an advanced feature that let developers fine-tune how dynamic memory is managed by STL containers. All standard library containers (and even <code>std::string</code>) have an <strong>Allocator</strong> template parameter (defaulting to <code>std::allocator</code>) responsible for managing memory and object lifetimes. In practice, the default <code>std::allocator</code> simply wraps the global heap (using <code>new</code> to allocate and <code>delete</code> to free). While the default behavior is sufficient for most programs, I have found that in performance-critical or memory-constrained scenarios, a custom allocator can provide significant benefits. In this post, I will examine how allocators work with the STL, show how to implement a custom allocator in C++17, and demonstrate its usage with <code>std::vector</code>, all in a detailed and analytical manner.</p>
+<h2 id="how-allocators-work-with-the-stl">How Allocators Work with the STL</h2>
+<p>An allocator abstractly represents a <strong>handle to a memory resource</strong>, separating raw memory allocation from object construction (and deallocation from object destruction). This separation is useful because STL containers often allocate memory in larger chunks and construct objects later as needed. For example, calling <code>vector.reserve(n)</code> on a <code>std::vector</code> will allocate enough raw memory for <em>n</em> elements without constructing them immediately. Elements can then be constructed in that pre-allocated space when we <code>push_back</code> new items. Similarly, calling <code>vector.clear()</code> will destroy the objects in the vector but typically <strong>will not deallocate</strong> the underlying memory capacity. This behaviour is by design – it enables efficient memory reuse and is made possible by the allocator design separating the two steps.</p>
+<p>By default, the STL uses <code>std::allocator</code>, which obtains memory from the heap. Allocators provide functions like <code>allocate</code> (to acquire uninitialized storage for a given number of objects) and <code>deallocate</code> (to free that storage), as well as utilities to construct objects in-place. Prior to C++17, allocators also had member functions <code>construct</code> and <code>destroy</code> for placement-new construction and explicit destruction, but these became deprecated (and removed in C++20) because the library now uses placement new and <code>std::allocator_traits</code> to handle object construction/destruction generically. The key point is that an allocator allows the container to <strong>ask for memory without knowing the details</strong> – whether the memory comes from <code>new</code>, from a custom pool, from stack space, or elsewhere is up to the allocator.</p>
+<p><strong>Why might one want to replace the default allocator?</strong> In my experience, custom allocators are typically used to achieve one of the following:</p>
+<ul>
+<li>
+<p><strong>Improved performance or efficiency:</strong> For instance, reducing allocation overhead or fragmentation by using a memory pool or arena. Allocating from a pool can be much faster than using the general heap for many small objects, and it improves cache locality by clustering allocations. A real-world example comes from Intel TBB’s scalable allocator, which replaces the default heap with a thread-local heap to boost multithreaded performance. Simply switching a vector to use <code>tbb::scalable_allocator</code> (a drop-in STL allocator) significantly improved performance in one case. This illustrates that in high-concurrency scenarios, a custom allocator tuned for multithreading can alleviate contention and scale better than the general-purpose allocator.</p>
+</li>
+<li>
+<p><strong>Memory constraint management:</strong> In some systems (embedded devices or game console development), memory is limited and there’s no virtual memory swap. Custom allocators let you partition and control memory usage per subsystem. For example, game engines often use custom allocators or even custom STL implementations (like EA’s EASTL) to ensure one subsystem can’t exhaust memory needed by another, and to use pool allocators to reduce fragmentation. In such environments, the default heap might be too unpredictable; a custom allocator can enforce limits or allocate from pre-reserved regions (such as VRAM, stack, or memory-mapped files).</p>
+</li>
+<li>
+<p><strong>Special allocation strategies:</strong> Sometimes you need a non-standard strategy – for example, an allocator that <em>never frees</em> memory until the end of the program (useful for certain performance-sensitive contexts where you want ultra-fast allocation and can afford to release memory only once), or an allocator that places objects in shared memory. C++17’s introduction of <em>polymorphic memory resources</em> (in the <code>&lt;memory_resource&gt;</code> library) was largely motivated by such use cases. It allows building <em>arena allocators</em>, <em>monotonic (append-only) allocators</em>, etc., more easily. (Notably, <code>std::pmr::monotonic_buffer_resource</code> can allocate but not deallocate memory until the entire resource is reset, fitting the “allocate but don’t deallocate” scenario.)</p>
+</li>
+</ul>
+<p>It’s worth mentioning that custom allocators are an <strong>optional</strong> facility – many applications never need to write one. I’ve observed that unless you have evidence of a memory allocation bottleneck or a strict memory layout requirement, sticking with <code>std::allocator</code> is usually fine. Custom allocators introduce extra complexity and potential pitfalls, so they should be used only when there is a clear benefit. With that said, when needed, the STL provides a well-defined interface for plugging in your own allocator, which we’ll explore next.</p>
+<h2 id="the-allocator-interface-and-requirements">The Allocator Interface and Requirements</h2>
+<p>To create a custom allocator for use with STL containers, you must implement a certain interface so that your allocator can stand in for <code>std::allocator</code>. In C++17, the requirements for an Allocator are outlined by the <strong>Allocator named requirement</strong>. In simpler terms, a compliant allocator type <code>MyAllocator&lt;T&gt;</code> should provide:</p>
+<ul>
+<li>
+<p>A member type <code>value_type</code> which aliases the allocation type (e.g. <code>T</code>).</p>
+</li>
+<li>
+<p>A type template copy-constructor or <em>rebind</em> mechanism so that the allocator can produce an allocator for a different type (e.g. from <code>MyAllocator&lt;int&gt;</code> to <code>MyAllocator&lt;char&gt;</code>). Typically this is done by defining <code>template&lt;class U&gt; MyAllocator(const MyAllocator&lt;U&gt;&amp;)</code> constructor. (Older code sometimes uses a nested <code>rebind</code> struct for this purpose, but a templated constructor is the modern approach.)</p>
+</li>
+<li>
+<p>A public member function <code>allocate(size_t n)</code> that returns a <code>T*</code> pointer to a block of uninitialized memory sufficient to hold <code>n</code> objects of type <code>T</code>. The function should throw <code>std::bad_alloc</code> (or another exception) if it cannot satisfy the request. If <code>n==0</code>, it may return a null pointer or some other pointer — the standard doesn’t require a particular value in that case.</p>
+</li>
+<li>
+<p>A public member function <code>deallocate(T* p, size_t n)</code> that frees the memory previously allocated for <code>n</code> objects of type <code>T</code> at pointer <code>p</code>. The <code>n</code> parameter provides the number of objects (and by extension the total size) that was originally allocated. Typically, <code>deallocate</code> should not throw exceptions.</p>
+</li>
+<li>
+<p>Equality comparison operators (<code>==</code> and <code>!=</code>) so that two allocators can be compared. This is used by containers to decide if two allocator instances are interchangeable. For stateless allocators (most custom allocators are written statelessly), these operators can simply return true for any two instances, indicating that all instances of the allocator can deallocate memory allocated by each other.</p>
+</li>
+</ul>
+<p>Thanks to <code>std::allocator_traits</code> in C++11 and later, <strong>this minimal interface is actually enough</strong> to work with STL containers. The <code>allocator_traits</code> template will automatically provide sensible defaults or utilize your provided <code>allocate</code>/<code>deallocate</code> for other operations. For example, <code>allocator_traits&lt;MyAllocator&lt;T&gt;&gt;::construct</code> will use placement new (<code>::new(p) U(args...)</code>) to construct an object of type <code>U</code> in allocated memory, unless you override construct yourself. Similarly, the traits know how to rebind allocators to different value_types using that templated copy constructor. This means we do <em>not</em> need to implement member functions like <code>construct</code>, <code>destroy</code>, <code>address</code>, or even <code>max_size</code> in a custom allocator in C++17 – providing <code>allocate</code> and <code>deallocate</code> (and the type aliases) is sufficient for a working allocator.</p>
+<p><strong>Stateful vs. Stateless Allocators:</strong> Another consideration is whether your allocator type has internal state. A <em>stateless</em> allocator is typically an empty class with no data members (all instances are essentially identical and can be treated as equal). A <em>stateful</em> allocator might hold, say, a pointer to a specific memory pool, an ID for a shared memory segment, or any other context. If allocators have state, the standard library’s behavior can get complex. The container might need to know whether to propagate an allocator’s state during copy/move operations, or what to do if two vectors with unequal allocators are swapped. There are optional traits such as <code>propagate_on_container_copy_assignment</code> and <code>is_always_equal</code> to govern this. For instance, <code>is_always_equal</code> should be a constant <code>true_type</code> if all instances are effectively interchangeable (stateless). If it’s <code>false</code>, the allocator is stateful and two instances might not be able to deallocate each other’s memory – in such cases, the standard imposes certain restrictions. In fact, using two unequal stateful allocators with the same container <strong>may result in undefined or implementation-defined behavior</strong> if the library doesn’t support it. In this article, I focus on stateless allocators (which are the most common and simpler to get right), but one should be aware of these nuances when designing an allocator with state.</p>
+<h2 id="implementing-a-custom-allocator-example">Implementing a Custom Allocator (Example)</h2>
+<p>Let’s implement a simple custom allocator to solidify these concepts. For illustration, I will create an allocator that uses <code>std::malloc</code>/<code>std::free</code> for memory management and logs allocations and deallocations to <code>std::cout</code>. (In a real allocator, you wouldn’t typically log every call, but it’s educational to see when and how often allocations happen.) We’ll call this allocator <code>LoggingAllocator</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;cstdlib&gt;</span><span style="color:#75715e"> </span><span style="color:#75715e">// for malloc/free
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e"> </span><span style="color:#75715e">// for demonstration logging
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;new&gt;</span><span style="color:#75715e"> </span><span style="color:#75715e">// for std::bad_alloc
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;limits&gt;</span><span style="color:#75715e"> </span><span style="color:#75715e">// for std::numeric_limits
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> T<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">LoggingAllocator</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">using</span> value_type <span style="color:#f92672">=</span> T;
+</span></span><span style="display:flex;"><span>    LoggingAllocator() <span style="color:#66d9ef">noexcept</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">default</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> U<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">constexpr</span> LoggingAllocator(<span style="color:#66d9ef">const</span> LoggingAllocator<span style="color:#f92672">&lt;</span>U<span style="color:#f92672">&gt;&amp;</span>) <span style="color:#66d9ef">noexcept</span> {} <span style="color:#75715e">// rebinding constructor [[nodiscard]] T* allocate(std::size_t n) {
+</span></span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Calculate total bytes, with overflow check if(n &gt; std::numeric_limits&lt;std::size_t&gt;::max() / sizeof(T)) throw std::bad_array_new_length();
+</span></span></span><span style="display:flex;"><span>        <span style="color:#75715e">// too many objects std::size_t bytes = n * sizeof(T);
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (bytes <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nullptr</span>;
+</span></span><span style="display:flex;"><span>        } <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">void</span><span style="color:#f92672">*</span> ptr <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>malloc(bytes)) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;[LoggingAllocator] Allocated &#34;</span> <span style="color:#f92672">&lt;&lt;</span> bytes <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; bytes at &#34;</span> <span style="color:#f92672">&lt;&lt;</span> ptr <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span>T<span style="color:#f92672">*&gt;</span>(ptr);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">throw</span> std<span style="color:#f92672">::</span>bad_alloc();
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// malloc failed
+</span></span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">deallocate</span>(T<span style="color:#f92672">*</span> p, std<span style="color:#f92672">::</span>size_t n) <span style="color:#66d9ef">noexcept</span> {
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>size_t bytes <span style="color:#f92672">=</span> n <span style="color:#f92672">*</span> <span style="color:#66d9ef">sizeof</span>(T);
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;[LoggingAllocator] Deallocated &#34;</span> <span style="color:#f92672">&lt;&lt;</span> bytes <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; bytes from &#34;</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#66d9ef">static_cast</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">void</span><span style="color:#f92672">*&gt;</span>(p) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>free(p);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Allocators of different value_types are considered equal (stateless)
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> T, <span style="color:#66d9ef">typename</span> U<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">bool</span> <span style="color:#66d9ef">operator</span><span style="color:#f92672">==</span>(<span style="color:#66d9ef">const</span> LoggingAllocator<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;&amp;</span>, <span style="color:#66d9ef">const</span> LoggingAllocator<span style="color:#f92672">&lt;</span>U<span style="color:#f92672">&gt;&amp;</span>) <span style="color:#66d9ef">noexcept</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> true;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> T, <span style="color:#66d9ef">typename</span> U<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">bool</span> <span style="color:#66d9ef">operator</span><span style="color:#f92672">!=</span>(<span style="color:#66d9ef">const</span> LoggingAllocator<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;&amp;</span> a, <span style="color:#66d9ef">const</span> LoggingAllocator<span style="color:#f92672">&lt;</span>U<span style="color:#f92672">&gt;&amp;</span> b) <span style="color:#66d9ef">noexcept</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#f92672">!</span>(a <span style="color:#f92672">==</span> b);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Let’s break down this implementation:</p>
+<ul>
+<li>
+<p><code>value_type</code> is an alias for the template parameter <code>T</code>. The STL containers will refer to this to know what type the allocator allocates.</p>
+</li>
+<li>
+<p>We provide a templated copy constructor <code>LoggingAllocator&lt;const U&gt;&amp;</code> so that the allocator can be converted to an allocator for a different type. This satisfies the rebind requirement in a modern way. It’s <code>noexcept</code> and trivial in this case because our allocator has no state to carry over.</p>
+</li>
+<li>
+<p>The <code>allocate(size_t n)</code> method computes the number of bytes needed (<code>n * sizeof(T)</code>) and calls <code>std::malloc</code> to get raw memory. We include an overflow check: if <code>n</code> is so large that <code>n * sizeof(T)</code> would overflow <code>size_t</code> (meaning an astronomically large request), we throw <code>std::bad_array_new_length</code> (the standard’s choice of exception for length errors). If <code>malloc</code> returns a null pointer, we throw <code>std::bad_alloc</code> to signal failure. On success, we cast the void pointer to <code>T*</code> and return it. We also print a log message indicating how many bytes were allocated and the address. The <code>[[nodiscard]]</code> attribute (C++17) is used to warn if someone accidentally ignores the pointer returned by allocate.</p>
+</li>
+<li>
+<p>The <code>deallocate(T* p, size_t n)</code> method computes the size in bytes again (not strictly necessary for freeing memory, but good for the log) and prints a message, then frees the memory with <code>std::free</code>. The standard library might pass the same <code>n</code> to <code>deallocate</code> that was used in <code>allocate</code> for symmetry (and typically it does). We mark this noexcept because deallocation shouldn’t throw.</p>
+</li>
+<li>
+<p>We also define <code>operator==</code> and <code>operator!=</code> for our allocator. Here we declare that any two <code>LoggingAllocator</code> instances are always equal, meaning memory allocated by one can be deallocated by another. This makes sense as our allocator uses the global <code>malloc/free</code> which is a single shared resource. Declaring them equal also implicitly means <code>is_always_equal</code> is true for this allocator type (we could also <code>typedef std::true_type is_always_equal</code> inside the class if we wanted).</p>
+</li>
+</ul>
+<p>This <code>LoggingAllocator</code> satisfies the minimal interface for an Allocator. We didn’t implement things like <code>construct</code> or <code>destroy</code> – as noted earlier, those are supplied by <code>std::allocator_traits</code> by using placement new and direct destructor calls on the pointer we return. We also omitted member typedefs like <code>pointer</code>, <code>reference</code>, etc., because the standard defines defaults for those in <code>allocator_traits</code> (they default to <code>T*</code>, <code>T&amp;</code> and so on, which are fine for our needs). Thus, the code is succinct yet fully functional as an STL allocator. In summary, <strong>our custom allocator simply delegates to the C heap (<code>malloc/free</code>) but could be modified to use any source (stack memory, custom pool, OS APIs, etc.)</strong> as desired. The logging is there to help us observe its behavior.</p>
+<h2 id="using-a-custom-allocator-with-stdvector-demonstration">Using a Custom Allocator with <code>std::vector</code> (Demonstration)</h2>
+<p>Now that we have <code>LoggingAllocator&lt;T&gt;</code>, let’s use it with an STL container to see it in action. We’ll use <code>std::vector&lt;int, LoggingAllocator&lt;int&gt;&gt;</code> as an example. This creates a vector of ints which uses our allocator for all its dynamic memory needs. Any time the vector needs to allocate or free memory (e.g. when growing or when being destroyed), it will call our <code>allocate</code>/<code>deallocate</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;vector&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span>, LoggingAllocator<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;&gt;</span> vec;
+</span></span><span style="display:flex;"><span>    vec.reserve(<span style="color:#ae81ff">8</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// request space for 8 ints vec.push_back(42);
+</span></span></span><span style="display:flex;"><span>    vec.push_back(<span style="color:#ae81ff">13</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... (other operations) return 0;
+</span></span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>If we run this example, the output might look something like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>[LoggingAllocator] Allocated 32 bytes at 0x55f7e4401e70 [LoggingAllocator] Allocated 64 bytes at 0x55f7e4401ea0 [LoggingAllocator] Deallocated 32 bytes from 0x55f7e4401e70 [LoggingAllocator] Deallocated 64 bytes from 0x55f7e4401ea0
+</span></span></code></pre></div><p>Let’s interpret what happened. When we called <code>vec.reserve(8)</code>, the vector needed space for at least 8 integers. It requested 8 * 4 = 32 bytes (assuming 4-byte <code>int</code>) from our allocator, which is why we see the first &ldquo;Allocated 32 bytes&rdquo; log. No objects are constructed yet (the vector is just reserving capacity). Next, <code>vec.push_back(42)</code> causes the first element to be constructed in that allocated space. The log doesn’t show anything new for this because no <em>new</em> allocation was needed (we already had space for 8). When we <code>push_back(13)</code>, it still fits in the existing 32-byte buffer. Now, if we continued push-backing more elements, once we exceed 8 elements, the vector will need to grow its capacity. Typically, <code>std::vector</code> will allocate a larger array (often doubling the capacity). In our log above, we see an allocation of 64 bytes and a deallocation of 32 bytes – that suggests that when we tried to insert the 9th element, <code>vector</code> grew capacity from 8 to 16 (allocating 16 * 4 = 64 bytes), then moved the existing 8 elements into the new space, and freed the old 32-byte buffer. Finally, when the program ends (or when the vector is destroyed), it frees the 64-byte block as well.</p>
+<p>This matches the typical behavior of <code>std::vector</code>: allocate, reallocate on expansion, and deallocate on destruction. By observing the log, we confirm our custom allocator is indeed being used under the hood. The example is simplistic, but it demonstrates that <em>to use a custom allocator, you just need to specify it as a template argument to the container</em>. The rest of the container’s API remains the same. For instance, we could also use <code>std::list&lt;int, LoggingAllocator&lt;int&gt;&gt;</code> or <code>std::map&lt;Key, T, Compare, LoggingAllocator&lt;std::pair&lt;const Key,T&gt;&gt;&gt;</code> in a similar way – all standard containers accept an allocator template parameter.</p>
+<h2 id="advanced-notes-polymorphic-allocators-and-modern-c17-features">Advanced Notes: Polymorphic Allocators and Modern C++17 Features</h2>
+<p>C++17 introduced the <strong>Polymorphic Allocator</strong> framework (<code>&lt;memory_resource&gt;</code> and <code>std::pmr::polymorphic_allocator</code>) which provides an alternative and often more convenient way to customize memory management. Instead of writing a bespoke allocator class for each container and value_type, you can create a custom <strong>memory resource</strong> (deriving from <code>std::pmr::memory_resource</code> by implementing <code>do_allocate</code>/<code>do_deallocate</code>), and then use <code>std::pmr::polymorphic_allocator</code> to redirect allocations to that resource. The standard library provides several ready-made memory resources, such as <code>std::pmr::monotonic_buffer_resource</code> (for arena allocation with no freeing until destruction) and <code>std::pmr::unsynchronized_pool_resource</code> (a pooling allocator). There are also <code>std::pmr::vector</code>, <code>std::pmr::string</code>, etc., which are aliases of the usual containers using <code>polymorphic_allocator</code>. For example, <code>std::pmr::vector&lt;int&gt;</code> is effectively <code>std::vector&lt;int, std::pmr::polymorphic_allocator&lt;int&gt;&gt;</code>. Using these, we could achieve similar effects to our <code>LoggingAllocator</code> without writing a full template: we might write a custom memory_resource that logs allocations, then use <code>std::pmr::vector&lt;int&gt;</code> with that resource. The polymorphic approach decouples the allocator from the type system – one memory resource can service allocations for many container types – and can be easier to integrate in large codebases. It’s a powerful addition in C++17 for customising allocators at runtime.</p>
+<p>Another advanced point is that writing a truly robust custom allocator can be challenging. One must consider alignment (our example implicitly relies on <code>malloc</code> returning suitably aligned memory for any <code>T</code>; in more complex allocators you may need to use <code>std::aligned_alloc</code> or over-align manually if needed for special types). The allocator also needs to interact correctly with container rebind mechanics and exception safety (e.g. if an allocation throws, the container will handle it, but your allocator shouldn’t leak resources in a failure). Thankfully, the allocator API and <code>allocator_traits</code> handle much of this for straightforward cases. The example we walked through is a good first step, and indeed <strong>the minimal allocator interface is often just a few lines of code</strong> (as shown in the C++ standard’s own example of a “minimal allocator”). From there, complexity grows only if you introduce state or fancy pointer types.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Custom allocators in C++17 allow developers to inject their own memory management strategies into standard containers, enabling optimisations and behaviors tailored to specific needs. We saw that by implementing a small set of functions (and leveraging <code>allocator_traits</code> for the rest), we can create a custom allocator and use it with <code>std::vector</code> seamlessly. This mechanism separates allocation from object construction, which is a cornerstone of how STL containers manage memory efficiently. In my view, while custom allocators are not needed in most day-to-day programming, they become invaluable in high-performance contexts, low-level systems, and memory-constrained environments. Modern C++17 features like polymorphic allocators have also made it easier to experiment with custom allocation strategies without as much boilerplate.</p>
+<p>In summary, implementing a custom allocator requires careful adherence to the expected interface, but it rewards you with fine-grained control over memory allocation and deallocation in the STL. By critically analysing when a custom allocator is warranted and designing it with the outlined best practices, you can improve your program’s performance or memory usage in ways that would be impossible using the default global new/delete allocator. As always, such optimisations should be guided by profiling and specific requirements – but C++ gives us the tools, in C++17 more than ever, to manage memory as we see fit <strong>without changing our high-level container code</strong>. This separation of concerns is one of the powerful aspects of C++ allocator awareness, and it continues to evolve, bridging the gap between convenience and low-level control.</p>
+<h2 id="references-custom-allocator-design-and-usage-in-c-is-discussed-in-numerous-sources-including-the-c-standard-reference-and-community-articles-for-further-reading-you-may-refer-to-the-c-named-requirements-for-allocators-on-cppreferenceencppreferencecomencppreferencecom-discussions-on-stack-overflow-about-when-custom-allocators-are-usefulstackoverflowcomstackoverflowcom-and-tutorials-on-memory-pools-and-polymorphic-allocatorsmodernescppcommodernescppcom-these-provide-deeper-insights-and-examples-to-complement-the-example-we-explored-here">References Custom allocator design and usage in C++ is discussed in numerous sources, including the C++ standard reference and community articles. For further reading, you may refer to the C++ named requirements for Allocators on cppreference<a href="https://en.cppreference.com/w/cpp/named_req/Allocator#:~:text=Storage%20and%20lifetime%20operations%20,the%20return%20value%20is%20unspecified">en.cppreference.com</a><a href="https://en.cppreference.com/w/cpp/named_req/Allocator#:~:text=">en.cppreference.com</a>, discussions on Stack Overflow about when custom allocators are useful<a href="https://stackoverflow.com/questions/826569/compelling-examples-of-custom-c-allocators#:~:text=As%20I%20mention%20here%2C%20I%27ve,simply%20by%20changing%20a%20single">stackoverflow.com</a><a href="https://stackoverflow.com/questions/826569/compelling-examples-of-custom-c-allocators#:~:text=99">stackoverflow.com</a>, and tutorials on memory pools and polymorphic allocators<a href="https://www.modernescpp.com/index.php/polymorphic-allocators-in-c17/#:~:text=,type%20if%20its%20size%20increases">modernescpp.com</a><a href="https://www.modernescpp.com/index.php/polymorphic-allocators-in-c17/#:~:text=std%3A%3Aarray,myVec1.push_back%28i%29%3B">modernescpp.com</a>. These provide deeper insights and examples to complement the example we explored here.</h2>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        3127 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-03-20
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f03%2fcustom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f03%2fcustom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Custom%20Allocators%20in%20C%2b%2b17%3a%20Implementing%20and%20Using%20Your%20Own%20STL%20Allocator&amp;caption=Custom%20Allocators%20in%20C%2b%2b17%3a%20Implementing%20and%20Using%20Your%20Own%20STL%20Allocator&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f03%2fcustom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Custom%20Allocators%20in%20C%2b%2b17%3a%20Implementing%20and%20Using%20Your%20Own%20STL%20Allocator&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f03%2fcustom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f03%2fcustom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f03%2fcustom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator%2f;description=Custom%20Allocators%20in%20C%2b%2b17%3a%20Implementing%20and%20Using%20Your%20Own%20STL%20Allocator" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f03%2fcustom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator%2f&amp;title=Custom%20Allocators%20in%20C%2b%2b17%3a%20Implementing%20and%20Using%20Your%20Own%20STL%20Allocator&amp;summary=Custom%20Allocators%20in%20C%2b%2b17%3a%20Implementing%20and%20Using%20Your%20Own%20STL%20Allocator&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f03%2fcustom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f03%2fcustom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator%2f&amp;resubmit=true&amp;title=Custom%20Allocators%20in%20C%2b%2b17%3a%20Implementing%20and%20Using%20Your%20Own%20STL%20Allocator" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f03%2fcustom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator%2f;title=Custom%20Allocators%20in%20C%2b%2b17%3a%20Implementing%20and%20Using%20Your%20Own%20STL%20Allocator" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Custom%20Allocators%20in%20C%2b%2b17%3a%20Implementing%20and%20Using%20Your%20Own%20STL%20Allocator%20https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f03%2fcustom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f03%2fcustom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator%2f&amp;t=Custom%20Allocators%20in%20C%2b%2b17%3a%20Implementing%20and%20Using%20Your%20Own%20STL%20Allocator" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Custom%20Allocators%20in%20C%2b%2b17%3a%20Implementing%20and%20Using%20Your%20Own%20STL%20Allocator&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f03%2fcustom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2026/04/implementing-common-design-patterns-in-c-17/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">Implementing Common Design Patterns in C&#43;&#43;17</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2026/02/advanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance/">
+                    <span class="button__text">Advanced STL Usage in C&#43;&#43;17: Hidden Gems, Iterators, and Performance</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

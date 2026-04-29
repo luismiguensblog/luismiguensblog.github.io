@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Introduction C&#43;&#43;17 brought a multitude of additions to the Standard Template Library (STL), significantly expanding the tools available to developers. Many of these features – from new container types to algorithm tweaks – remain underutilised or lesser-known. In this post, I will critically examine some advanced uses of the STL introduced or enhanced in C&#43;&#43;17, targeting an intermediate to advanced audience. I aim to discuss hidden gems of the STL, demonstrate advanced iterator techniques, and analyse performance considerations in a formal yet personal tone. By exploring these facets with code examples and references, I hope to provide a clear understanding of how embracing these features can lead to more expressive and efficient C&#43;&#43; code.
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2026/02/advanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance/" />
+
+
+    <title>
+        
+            Advanced STL Usage in C&#43;&#43;17: Hidden Gems, Iterators, and Performance :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="Advanced STL Usage in C&#43;&#43;17: Hidden Gems, Iterators, and Performance">
+  <meta itemprop="description" content="Introduction C&#43;&#43;17 brought a multitude of additions to the Standard Template Library (STL), significantly expanding the tools available to developers. Many of these features – from new container types to algorithm tweaks – remain underutilised or lesser-known. In this post, I will critically examine some advanced uses of the STL introduced or enhanced in C&#43;&#43;17, targeting an intermediate to advanced audience. I aim to discuss hidden gems of the STL, demonstrate advanced iterator techniques, and analyse performance considerations in a formal yet personal tone. By exploring these facets with code examples and references, I hope to provide a clear understanding of how embracing these features can lead to more expressive and efficient C&#43;&#43; code.">
+  <meta itemprop="datePublished" content="2026-02-24T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2026-02-24T00:00:00+00:00">
+  <meta itemprop="wordCount" content="3941">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="C_cpp,Programming">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="Advanced STL Usage in C&#43;&#43;17: Hidden Gems, Iterators, and Performance">
+  <meta name="twitter:description" content="Introduction C&#43;&#43;17 brought a multitude of additions to the Standard Template Library (STL), significantly expanding the tools available to developers. Many of these features – from new container types to algorithm tweaks – remain underutilised or lesser-known. In this post, I will critically examine some advanced uses of the STL introduced or enhanced in C&#43;&#43;17, targeting an intermediate to advanced audience. I aim to discuss hidden gems of the STL, demonstrate advanced iterator techniques, and analyse performance considerations in a formal yet personal tone. By exploring these facets with code examples and references, I hope to provide a clear understanding of how embracing these features can lead to more expressive and efficient C&#43;&#43; code.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2026/02/advanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="Advanced STL Usage in C&#43;&#43;17: Hidden Gems, Iterators, and Performance">
+  <meta property="og:description" content="Introduction C&#43;&#43;17 brought a multitude of additions to the Standard Template Library (STL), significantly expanding the tools available to developers. Many of these features – from new container types to algorithm tweaks – remain underutilised or lesser-known. In this post, I will critically examine some advanced uses of the STL introduced or enhanced in C&#43;&#43;17, targeting an intermediate to advanced audience. I aim to discuss hidden gems of the STL, demonstrate advanced iterator techniques, and analyse performance considerations in a formal yet personal tone. By exploring these facets with code examples and references, I hope to provide a clear understanding of how embracing these features can lead to more expressive and efficient C&#43;&#43; code.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-02-24T00:00:00+00:00">
+    <meta property="article:modified_time" content="2026-02-24T00:00:00+00:00">
+    <meta property="article:tag" content="C_cpp">
+    <meta property="article:tag" content="Programming">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2026-02-24 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( true ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        19 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2026/02/advanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance/">Advanced STL Usage in C++17: Hidden Gems, Iterators, and Performance</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="introduction">Introduction</h2>
+<p>C++17 brought a multitude of additions to the Standard Template Library (STL), significantly expanding the tools available to developers. Many of these features – from new container types to algorithm tweaks – remain underutilised or lesser-known. In this post, I will critically examine some advanced uses of the STL introduced or enhanced in C++17, targeting an intermediate to advanced audience. I aim to discuss <em>hidden gems</em> of the STL, demonstrate advanced iterator techniques, and analyse performance considerations in a formal yet personal tone. By exploring these facets with code examples and references, I hope to provide a clear understanding of how embracing these features can lead to more expressive and efficient C++ code.</p>
+<h2 id="lesser-known-stl-features-in-c17">Lesser-Known STL Features in C++17</h2>
+<p>C++17 introduced numerous library features that can elevate your code, although several remain relatively obscure. Below, I highlight some of these features along with their purpose and benefits:</p>
+<ul>
+<li>
+<p><strong><code>std::optional</code> and <code>std::variant</code></strong> – The class template <code>std::optional</code> represents an object that may or may not contain a value. It provides a safer alternative to approaches like using sentinel values or <code>std::pair&lt;T,bool&gt;</code>, especially for function return values that might fail. In my experience, <code>std::optional</code> makes code more readable and intent-expressive, and it handles expensive-to-construct objects efficiently by avoiding unnecessary default constructions. C++17’s <code>std::variant</code> is a type-safe union that can hold one of several types (introduced alongside <code>std::optional</code> and <code>std::any</code> as new “vocabulary types”). Like optional, <code>variant</code> eliminates the need for unsafe unions or <code>boost::variant</code> – it is particularly useful when a function needs to return different data types safely. These additions make code more robust by formally modelling empty or variant states, thereby reducing misuse of pointers or flags to indicate “no value.”</p>
+</li>
+<li>
+<p><strong><code>std::any</code></strong> – Another C++17 newcomer, <code>std::any</code> can hold an instance of any type, with value-type semantics (type-erased storage). This is essentially a safe, std::string-like box for single values of arbitrary types. While I tend to use it sparingly (due to runtime type-check costs), it is handy for cases where variant alternatives are too rigid. C++17’s inclusion of <code>std::any</code> (from Boost.TypeErasure experience) means we have a standard way to store heterogeneous types when necessary. It’s a niche tool, but in advanced architectures (e.g. plugin systems or loosely typed interfaces), <code>std::any</code> provides flexibility at the cost of type safety (one must use <code>any_cast</code> to extract the value).</p>
+</li>
+<li>
+<p><strong><code>std::string_view</code></strong> – Perhaps one of the most impactful additions for performance, <code>std::string_view</code> is a lightweight, non-owning reference to a sequence of characters. Unlike <code>std::string</code>, a <code>string_view</code> does not allocate or copy the character data; it merely <em>views</em> an existing string or char array. Copying a string_view is cheap (just copying pointer and length), and creating substrings is efficient since it avoids new allocations. I have found this particularly useful for parsing or interfacing with APIs without incurring the cost of allocating new strings. In fact, <code>std::string_view</code> was designed to improve performance by avoiding unnecessary copying of substrings or function arguments, making it highly desirable when working with large or repeated string data. One must be cautious, however, since it doesn’t own the data – ensuring the referenced string outlives the view is critical to avoid dangling references.</p>
+</li>
+<li>
+<p><strong>Polymorphic Allocators (<code>&lt;memory_resource&gt;</code> and <code>std::pmr</code> types)</strong> – C++17 introduced <em>polymorphic memory resources</em>, an <em>almost unknown feature</em> that can nevertheless be powerful for customising allocation strategies. In traditional STL usage, containers use <code>std::allocator</code> (typically allocating from the heap) by default. Polymorphic allocators (<code>std::pmr::polymorphic_allocator</code>) allow containers to use user-specified memory resources (e.g. memory pools, stack storage) without changing the container’s type. All standard containers have <code>pmr::</code> aliases (e.g. <code>std::pmr::vector</code>) that use polymorphic_allocator. This feature enables advanced memory management techniques: for example, using a fixed-size buffer or a memory pool to back a <code>pmr::vector</code> can reduce heap allocations and improve cache locality. In scenarios where many small allocations are a bottleneck, I’ve leveraged <code>std::pmr::monotonic_buffer_resource</code> to <em>allocate once and never deallocate</em>, dramatically speeding up certain workloads. Thanks to polymorphic allocators, one can easily swap allocation strategies (stack vs heap, pooled vs default) by providing a different <code>memory_resource</code> – something that was error-prone with pre-C++17 custom allocators. (It’s worth noting, however, that using polymorphic allocators incurs a small indirection cost and should be justified by a real need for custom allocation.)</p>
+</li>
+<li>
+<p><strong>Node Handle Operations in Associative Containers</strong> – C++17 introduced the ability to extract and insert <em>node handles</em> from associative containers (<code>std::map</code>, <code>std::unordered_set</code>, etc.). Functions like <code>map.extract(key)</code> produce a <em>node handle</em> that contains the element’s key/value and can be reinserted into a container. This feature allows advanced manipulations: you can easily move an element from one map to another, or even modify the key of a map element (something previously impossible because map keys are immutably <code>const</code> once in the container). The key insight is that extraction <em>unlinks</em> the internal node without destroying it, so no allocation or deallocation is performed on extract or insert of node handles. Only pointers inside the containers are adjusted, making it a zero-copy transfer (though operations may rebalance the tree). In practice, I have found node handles extremely useful for scenarios like updating a key in a map: prior to C++17 one had to remove and reinsert (incurring allocation), but now one can extract, change the key, and reinsert with no new memory allocation. This is a prime example of an STL “hidden gem” – it’s not commonly used, but it can save both coding effort and runtime cost in certain cases (e.g. moving large entries between containers efficiently).</p>
+</li>
+<li>
+<p><strong><code>std::map::try_emplace</code> and <code>std::map::insert_or_assign</code></strong> – Associative containers in C++17 gained new insertion methods that improve performance and clarity in specific use cases. <code>try_emplace</code> is like <code>emplace</code>, but it <em>only</em> creates a new element <em>if the key is not already present</em>. If the element already exists, no object is created or moved at all. This avoids unnecessary work and is especially important when the object construction is expensive. For example, inserting into a map of heavy objects could needlessly construct and then destroy an object if the key was already present using older methods. With <code>try_emplace</code>, the object is constructed only when needed, which <em>“boosts the performance in case objects of that type are expensive to create.”</em>. I frequently use <code>try_emplace</code> to avoid redundant allocations – it cleanly handles the “check then insert” idiom in one call. Similarly, <code>insert_or_assign</code> was added to perform “insert if not exists, otherwise assign”, which can be clearer than using <code>operator[]</code> or manually checking and updating. These functions, while simple, exemplify how STL evolved to provide more efficient primitives for common patterns.</p>
+</li>
+<li>
+<p><strong>Other Notable Features</strong> – C++17 included several new algorithms and utilities that, while smaller in scope, are worth mentioning. The new <code>std::clamp</code> algorithm provides a convenient way to bound a value between a min and max. <code>std::sample</code> can randomly select <em>N</em> elements from a sequence (useful for reservoir sampling scenarios). The header <code>&lt;filesystem&gt;</code> (merged from TS) offers a powerful, high-level API for file system operations – extremely handy in tools and applications (though technically more of a library addition than a container/algorithm feature). The <code>&lt;functional&gt;</code> header gained <code>std::not_fn</code> to replace the old negators (like <code>std::not1</code>), making it easy to create the logical NOT of a function object or lambda. Finally, and very significantly, <strong>parallel algorithms</strong> were introduced via <code>&lt;execution&gt;</code>: most of <code>&lt;algorithm&gt;</code> functions (sorting, searching, transforming, etc.) can now accept an execution policy like <code>std::execution::par</code> to automatically run in parallel when possible. I consider this a major advancement for the STL – it allows developers to utilise multi-core hardware by simply adding an execution tag, although one must be mindful of thread-safety and diminishing returns on small data (we will discuss this more in the performance section).</p>
+</li>
+</ul>
+<p>As we can see, C++17’s STL brought both utilitarian conveniences and powerful low-level mechanisms. Embracing these lesser-known features can improve code clarity (expressing intent more directly) and sometimes performance. Next, I will delve into iterator techniques that leverage the STL’s flexibility, which is another area where C++ provides immense power if used skilfully.</p>
+<h2 id="advanced-iterator-techniques">Advanced Iterator Techniques</h2>
+<p>Iterators are the glue between containers and algorithms in C++, and advanced iterator usage can greatly simplify certain tasks or improve performance. In this section, I explore some iterator techniques and patterns that seasoned C++17 developers find valuable.</p>
+<h3 id="iterator-adapters-for-container-insertion">Iterator Adapters for Container Insertion</h3>
+<p>One elegant feature of the STL is the family of <em>iterator adapters</em> that facilitate writing to containers through algorithms. For instance, <code>std::back_inserter</code> returns an iterator that appends to a container when written to. This allows algorithms like <code>std::copy</code> or <code>std::transform</code> to insert results into a container without manually resizing or using push_back in a loop. I often use <code>std::back_inserter</code> for its brevity and safety – it automatically calls <code>container.push_back(value)</code> for each assignment. Similarly, <code>std::front_inserter</code> can insert at the front of containers that support push_front (like <code>std::deque</code> or <code>std::list</code>), and <code>std::inserter</code> allows inserting at an arbitrary position (you provide the position iterator). These adapters exemplify <em>composable design</em>: you can connect algorithms and containers seamlessly.</p>
+<p><strong>Example:</strong> Suppose we want to copy all elements from one vector to another. Instead of writing a loop, we can do:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> source <span style="color:#f92672">=</span> {<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">3</span>};
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> dest;
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>copy(source.begin(), source.end(), std<span style="color:#f92672">::</span>back_inserter(dest));
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// dest now contains 1, 2, 3
+</span></span></span></code></pre></div><p>In this snippet, <code>std::back_inserter(dest)</code> returns an output iterator that uses <code>dest.push_back</code> internally for each element copied. The beauty is that <code>dest</code> did not need to be pre-sized; the adapter took care of growing the container. For associative containers, <code>std::inserter(container, pos)</code> can direct inserts to a specific hint position. Although this usage is more niche, it can be useful if you are, for example, merging sorted sequences into a <code>std::set</code> with a hint to optimise insertion. These iterator adapters are not new in C++17, but they remain underused – mastering them lets me write more generic and declarative code.</p>
+<h3 id="move-iterators-for-efficient-element-transfer">Move Iterators for Efficient Element Transfer</h3>
+<p>C++17 emphasises move semantics and memory efficiency. A powerful pattern that combines both is using <strong>move iterators</strong> (via <code>std::make_move_iterator</code>). A <code>std::move_iterator</code> is a wrapper that converts a normal iterator’s lvalue references into rvalue references, so that algorithms will <code>move</code> elements out instead of copying them. This is extremely useful when you want to transfer elements from one container to another, leaving the source in a valid but unspecified (essentially “moved-out”) state, without incurring copies of possibly expensive objects.</p>
+<p>Consider a scenario with two containers of <code>std::string</code> where we want to concatenate one onto the other and empty the source. Copying each string would be expensive, but moving them is cheap (just pointer swaps for <code>std::string</code>). Here’s how we can do it:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> v1 <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;one&#34;</span>, <span style="color:#e6db74">&#34;two&#34;</span>, <span style="color:#e6db74">&#34;three&#34;</span>};
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> v2;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Move elements from v1 to the end of v2: v2.insert(v2.end(), std::make_move_iterator(v1.begin()), std::make_move_iterator(v1.end()));
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// Now v2 = {&#34;one&#34;, &#34;two&#34;, &#34;three&#34;}, and v1&#39;s strings are empty.
+</span></span></span></code></pre></div><p>In this example, <code>std::make_move_iterator</code> turns <code>v1.begin()</code> and <code>v1.end()</code> into move iterators. The call to <code>v2.insert</code> then move-constructs strings from the range, rather than copy-constructing. The result is that each string’s internal buffer is moved to <code>v2</code> – a much cheaper operation than allocating and copying the characters. As one Stack Overflow answer explains, a move iterator “returns an rvalue reference instead of an lvalue reference when dereferenced, permitting the element to be moved-from”. After this operation, <code>v1</code> still has the same number of elements, but each is in a moved-from (empty) state. This technique is advanced yet practical: I often employ it when migrating elements between containers or returning large containers from functions (to avoid deep copies). The key is to ensure that it’s acceptable for the source to be left empty or in a valid-but-indeterminate state afterwards.</p>
+<h3 id="custom-iterators-and-iterator-categories">Custom Iterators and Iterator Categories</h3>
+<p>For truly advanced usage, one might create custom iterators for user-defined containers or ranges. Prior to C++17, implementing an iterator often involved inheriting from <code>std::iterator</code> to get the correct typedefs, but that helper is deprecated in C++17. Now, one should manually define the iterator’s traits (value_type, pointer, reference, iterator_category, etc.) or use existing iterator adapters. Creating a custom iterator is non-trivial, but it allows integration of custom data structures with STL algorithms. For example, you could implement an iterator for a binary tree class to traverse it in-order, enabling algorithms like <code>std::find</code> or range-based for-loops to work with the tree. When writing such iterators, it’s crucial to assign the correct <em>iterator category</em> (input, forward, bidirectional, random access) because it affects what operations the iterator supports and the performance of certain STL algorithms on that iterator.</p>
+<p>Iterator categories also matter for performance. Many STL algorithms have specialisations or different implementations depending on the strength of the iterator. For instance, <code>std::distance</code> will run in O(N) for input iterators (increment one by one), but in O(1) for random-access iterators (by pointer arithmetic). As a concrete example, consider finding the index of an element in a container by <code>std::distance(container.begin(), it)</code>. Doing this on a <code>std::list</code> (which has only bidirectional iterators) incurs a linear traversal, whereas on a <code>std::vector</code> (random access iterators) it’s constant time pointer subtraction. Being aware of such differences guides me to choose algorithms and containers wisely – e.g. if I need to frequently compute indices or random jumps, a vector is usually better suited than a list. Another nuance: certain algorithms like <code>std::lower_bound</code> require random access iterators, so they can’t directly operate on a list, whereas <code>std::find</code> works with any iterator but more slowly on a list. In summary, advanced iterator use is about <em>leveraging the right tool for the job</em>: utilising standard adapters for convenience, move iterators for efficiency, and understanding iterator categories to anticipate performance characteristics or to implement your own iterators correctly.</p>
+<h2 id="performance-considerations-in-stl-usage">Performance Considerations in STL Usage</h2>
+<p>Performance in the STL context is nuanced – it’s not just about Big-O complexity, but also about constant factors, memory locality, and algorithmic optimisations. Here I outline several performance-related insights for advanced STL use, based on both theoretical properties and empirical observations.</p>
+<ul>
+<li></li>
+</ul>
+<pre><code>_Benchmark comparing linear search in a vector vs. a list (y-axis is time, lower is better). The vector (blue) remains almost flat as size grows, while the list (red) slows dramatically due to poor cache locality._ As we can see, **container choice matters greatly for performance**. A classic example is choosing between `std::vector` and `std::list`. Although a `std::list` offers O(1) insertion or removal of elements once you have an iterator (and stable references), in practice a vector often outperforms a list in many scenarios _even for insertions/removals_, unless specifically at the front or in the middle with very large elements. The reason is that vector’s elements are contiguous in memory, making iteration and linear scans _extremely cache-friendly_. In a benchmark, linear search on a vector was _“several orders of magnitude faster”_ than on a list of the same size. This is because each access on a list node incurs a pointer chase (causing CPU cache misses), whereas a vector’s traversal benefits from spatial locality – adjacent elements are pre-fetched into cache. Even for inserting elements, where list is theoretically O(1) vs vector’s O(n) (due to shifting elements), the reality is often surprising: unless the elements are huge, copying a block of contiguous memory can be faster than constantly re-linking nodes in memory. One report noted that inserting 1000 random elements into a vector was almost an order of magnitude faster than into a list, because the cost of finding the insertion position in a list outweighed the cost of moving elements in a vector. In my experience, the advice “_almost always prefer std::vector over std::list for performance_” holds true in modern C++ design, except when you truly need list-specific features like splice or stable node addresses. If you do use lists, be aware of these trade-offs: for large element types or scenarios requiring frequent splicing of whole sequences, `std::list` or `std::forward_list` can win out, but measure and confirm rather than assuming.
+</code></pre>
+<ul>
+<li><strong>Algorithmic Complexity and Hints</strong> – The STL provides ways to optimise certain operations if you can hint information to the algorithm. A prime example is using insertion <em>hints</em> in associative containers. In a <code>std::map</code> or <code>std::set</code>, inserting an element is O(log N) due to tree lookup. However, functions like <code>map.insert</code> allow an iterator hint that, if correct, can save the tree search and achieve amortised O(1) insertion. If you are inserting elements in sorted order, providing <code>map.end()</code> as a hint (or the position where the element should be) can dramatically speed up construction of the map. The code below illustrates this idea:</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#f92672">::</span>map<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span>, std<span style="color:#f92672">::</span>string<span style="color:#f92672">&gt;</span> m;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> hint <span style="color:#f92672">=</span> m.end();
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> x : {<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">4</span>, <span style="color:#ae81ff">7</span>, <span style="color:#ae81ff">10</span>}) {
+</span></span><span style="display:flex;"><span>    hint <span style="color:#f92672">=</span> m.insert(hint, {x, <span style="color:#e6db74">&#34;value&#34;</span>});
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// O(1) insert with correct hint
+</span></span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><pre><code>In this contrived example, we continually insert a larger key, using the last insertion position as the next hint. Each insertion is O(1) (amortised) because the hint is always correct – we’re always appending to the end. If the hint is wrong, the insertion will fall back to the usual O(log N) search, so it never hurts correctness to provide one, but it can help performance. Another instance of hints is with `std::vector::reserve()`: if we know roughly how many elements we will push into a vector, calling `reserve(n)` upfront spares the vector from repeated reallocations as it grows. This is an _amortisation optimisation_ – by allocating enough capacity once, all push_backs become amortised O(1) without occasional reallocation pauses. I always try to reserve when the final size (or a close estimate) is known, as it can eliminate unpredictable latency spikes in real-time systems and improve overall throughput by avoiding multiple heap allocations.
+</code></pre>
+<ul>
+<li>
+<p><strong>Emplace vs Insert</strong> – Modern C++ emphasises <em>emplacing</em> elements in containers, and it’s not just for convenience but also for potential performance gains. <code>emplace</code> methods (like <code>emplace_back</code>, <code>emplace</code>) construct objects in-place within the container, which can save a copy or move. For example, when inserting a complex object into a vector, <code>v.emplace_back(args...)</code> will construct the object directly in the vector’s memory, whereas <code>v.push_back(obj)</code> constructs a temporary <code>obj</code> then moves (or copies) it into the vector. In many cases the compiler can optimise away the extra move, but emplace guarantees it. In associative containers, <code>emplace</code> can avoid constructing a <code>std::pair</code> only to immediately copy it into a node. C++17’s <code>try_emplace</code> (discussed earlier) goes further by avoiding even constructing the object at all if the key is already present – it effectively combines the lookup and emplacement in one step for efficiency. The general takeaway is to prefer <code>emplace</code> when you would otherwise create a temporary just to insert; it streamlines object construction. However, do note that <code>emplace</code> isn’t magic – if you already have a constructed object, doing <code>map.emplace(existing_obj)</code> will still copy/move it like insert would. The benefit is when the object does not exist yet – you provide the constructor arguments to emplace and let it build in-place.</p>
+</li>
+<li>
+<p><strong>Using Move Semantics Judiciously</strong> – C++17 continues to leverage move semantics introduced in C++11, and a performance-conscious developer should too. We saw how move iterators can avoid expensive copies. More generally, think about <code>std::move</code> and when to transfer resources instead of duplicating them. For example, if you have a function that returns a large container by value, returning a local container (which will utilise Return Value Optimisation or move semantics) is usually better than returning, say, a pointer to a static container or using an output parameter. Moving data when you would otherwise copy it (and no longer need the original) is a fundamental performance win in modern C++. One word of caution: don’t overuse <code>std::move</code> on objects you might still need, and remember that moving from an object can leave it in an unspecified but valid state (often “empty” for containers).</p>
+</li>
+<li>
+<p><strong>Memory Allocation and Locality</strong> – Memory allocation is often a hidden cost in high-level code. Polymorphic allocators (<code>std::pmr</code>) discussed earlier are one tool to manage allocation patterns. For example, if your algorithm creates lots of short-lived containers or strings, using a monotonic buffer resource (which never frees until destruction) can be a huge performance win by avoiding frequent <code>new</code>/<code>delete</code> calls. I have used <code>std::pmr::vector</code> with a custom memory_resource to achieve <em>arena allocation</em>, where all elements are efficiently allocated from one big block. This can also improve cache locality: by controlling <em>where</em> allocations come from, you can ensure related objects are near each other in memory. Another simple trick is reusing buffers: for instance, using <code>std::string::reserve</code> to keep capacity across loops, or using a static thread-local <code>std::vector</code> as scratch space to avoid fresh allocations each time a function is called (just remember to <code>.clear()</code> it and not use it concurrently across threads!). These are patterns that go slightly beyond normal STL usage but are invaluable for performance-critical systems. C++17’s allocator improvements (like <code>scoped_allocator_adaptor</code> and <code>polymorphic_allocator</code>) give us more flexibility here, but they require careful design to use correctly.</p>
+</li>
+<li>
+<p><strong>Parallel Algorithms</strong> – As noted, C++17 allows certain algorithms to execute in parallel by specifying an execution policy, e.g. <code>std::for_each(std::execution::par, begin, end, func)</code>. In theory, this can provide substantial speedups on compute-heavy operations by utilising multiple cores. In practice, I advise using parallel algorithms only when you have a large data set and a workload that truly benefits from parallel execution. The overhead of thread launching and coordination can negate any gains on small containers. Additionally, not all algorithms parallelise equally – some algorithms (like <code>std::sort</code> with <code>std::execution::par</code>) have load-balancing and cache effects to consider. There’s also the matter of safety: you must ensure that the functor you pass to these algorithms does not introduce data races (e.g. it shouldn’t modify a global state without synchronisation). When used appropriately, I have found parallel STL algorithms to significantly speed up tasks like summing large arrays (<code>std::reduce</code> with <code>par</code> policy) or applying transformations to large images or datasets in parallel. It brings high-level concurrency to STL, which is quite powerful. However, always measure – if the parallel version isn’t faster, stick to the simpler sequential call to avoid unnecessary complexity.</p>
+</li>
+</ul>
+<h2 id="conclusion">Conclusion</h2>
+<p>Advanced usage of the STL in C++17 enables writing code that is not only more expressive but often more efficient. We discussed several lesser-known features such as <code>std::optional</code>, <code>std::variant</code>, <code>std::string_view</code>, polymorphic allocators, node handles for containers, and new map insertion methods – each addressing specific problems with modern, optimised solutions. We explored iterator techniques like inserters and move iterators that allow algorithms to work at a higher abstraction level without losing performance. We also analysed performance considerations ranging from container selection (vector vs list) to algorithmic optimisations and memory management. Throughout these topics, a common theme is apparent: <strong>the STL has become richer and smarter</strong>, but it requires developers to be aware of its features to fully exploit them.</p>
+<p>In my opinion, writing modern C++ involves constantly balancing expressiveness with efficiency. STL features like those in C++17 often provide a sweet spot of both – if used judiciously. For example, replacing manual pointer manipulations with high-level calls (<code>std::move_iterator</code> or <code>std::pmr::vector</code>) can make the code clearer about <em>what</em> it is doing, while the under-the-hood optimisations ensure it does so with optimal performance. As we look beyond C++17, newer standards (C++20 and C++23) continue this trajectory – introducing concepts like ranges, coroutines, and executors – but those build on the solid foundation that C++17’s STL has laid. I encourage readers to experiment with the features discussed: try out <code>string_view</code> to eliminate unnecessary string copies, use <code>optional</code> to make your APIs safer, measure the impact of <code>try_emplace</code> or a custom memory resource in a hot code path. By critically analysing and embracing these advanced patterns, we can write C++ code that is elegant, robust, and performant – a satisfying outcome that justifies the effort to dig deep into the STL’s treasures.</p>
+<h2 id="references-the-information-and-examples-above-draw-from-the-c17-standard-library-documentation-and-respected-sources-notably-cppreference-was-used-for-precise-definitionsencppreferencecomopen-stdorg-and-performance-insights-were-supported-by-benchmarks-and-expert-analysesdzonecomdzonecom-among-others-as-cited-throughout">References The information and examples above draw from the C++17 standard library documentation and respected sources. Notably, cppreference was used for precise definitions<a href="https://en.cppreference.com/w/cpp/utility/optional.html#:~:text=The%20class%20template%20,or%20may%20not%20be%20present">en.cppreference.com</a><a href="https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p3655r1.html#:~:text=C%2B%2B17%20introduced%20std%3A%3Astring_view%2C%20a%20non,working%20with%20strings%20in%20C">open-std.org</a>, and performance insights were supported by benchmarks and expert analyses<a href="https://dzone.com/articles/c-benchmark-%E2%80%93-stdvector-vs#:~:text=yes%2C%20vector%20is%20represented%20in,in%20a%20list">dzone.com</a><a href="https://dzone.com/articles/using-stdmap-wisely-with-modern-c#:~:text=But%2C%20since%20C%2B%2B17%2C%20there%20is,type%20are%20expensive%20to%20create">dzone.com</a>, among others as cited throughout.</h2>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        3941 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-02-24
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f02%2fadvanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f02%2fadvanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Advanced%20STL%20Usage%20in%20C%2b%2b17%3a%20Hidden%20Gems%2c%20Iterators%2c%20and%20Performance&amp;caption=Advanced%20STL%20Usage%20in%20C%2b%2b17%3a%20Hidden%20Gems%2c%20Iterators%2c%20and%20Performance&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f02%2fadvanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Advanced%20STL%20Usage%20in%20C%2b%2b17%3a%20Hidden%20Gems%2c%20Iterators%2c%20and%20Performance&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f02%2fadvanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f02%2fadvanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f02%2fadvanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance%2f;description=Advanced%20STL%20Usage%20in%20C%2b%2b17%3a%20Hidden%20Gems%2c%20Iterators%2c%20and%20Performance" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f02%2fadvanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance%2f&amp;title=Advanced%20STL%20Usage%20in%20C%2b%2b17%3a%20Hidden%20Gems%2c%20Iterators%2c%20and%20Performance&amp;summary=Advanced%20STL%20Usage%20in%20C%2b%2b17%3a%20Hidden%20Gems%2c%20Iterators%2c%20and%20Performance&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f02%2fadvanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f02%2fadvanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance%2f&amp;resubmit=true&amp;title=Advanced%20STL%20Usage%20in%20C%2b%2b17%3a%20Hidden%20Gems%2c%20Iterators%2c%20and%20Performance" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f02%2fadvanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance%2f;title=Advanced%20STL%20Usage%20in%20C%2b%2b17%3a%20Hidden%20Gems%2c%20Iterators%2c%20and%20Performance" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Advanced%20STL%20Usage%20in%20C%2b%2b17%3a%20Hidden%20Gems%2c%20Iterators%2c%20and%20Performance%20https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f02%2fadvanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f02%2fadvanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance%2f&amp;t=Advanced%20STL%20Usage%20in%20C%2b%2b17%3a%20Hidden%20Gems%2c%20Iterators%2c%20and%20Performance" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Advanced%20STL%20Usage%20in%20C%2b%2b17%3a%20Hidden%20Gems%2c%20Iterators%2c%20and%20Performance&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f02%2fadvanced-stl-usage-in-c-17-hidden-gems-iterators-and-performance%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2026/03/custom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">Custom Allocators in C&#43;&#43;17: Implementing and Using Your Own STL Allocator</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2026/02/advanced-metaprogramming-in-c-17/">
+                    <span class="button__text">Advanced Metaprogramming in C&#43;&#43;17</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

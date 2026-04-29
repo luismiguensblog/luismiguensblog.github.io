@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Introduction Design patterns are proven solutions to recurring design problems in software development. They provide templates for structuring code in ways that improve flexibility, extensibility, and maintainability. In this post, I will explore four classic design patterns – Singleton, Factory Method, Observer, and Visitor – and demonstrate how to implement them using modern C&#43;&#43;17 features. These patterns were originally popularised by the “Gang of Four” (GoF) book in the 1990s, and while some argue that modern C&#43;&#43; features have reduced the need for certain patterns, a solid understanding of them remains highly valuable. Each section below introduces a pattern, provides a C&#43;&#43;17 code snippet, and discusses its use cases, benefits, and potential drawbacks (with a bit of my own perspective as an experienced C&#43;&#43; developer).
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2026/04/implementing-common-design-patterns-in-c-17/" />
+
+
+    <title>
+        
+            Implementing Common Design Patterns in C&#43;&#43;17 :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.2729760c629597024c5de34b40ea9f372f2b5a2a192dcdca537b7ddfa483eab8.css" integrity="sha256-Jyl2DGKVlwJMXeNLQOqfNy8rWioZLc3KU3t936SD6rg=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+  <meta itemprop="name" content="Implementing Common Design Patterns in C&#43;&#43;17">
+  <meta itemprop="description" content="Introduction Design patterns are proven solutions to recurring design problems in software development. They provide templates for structuring code in ways that improve flexibility, extensibility, and maintainability. In this post, I will explore four classic design patterns – Singleton, Factory Method, Observer, and Visitor – and demonstrate how to implement them using modern C&#43;&#43;17 features. These patterns were originally popularised by the “Gang of Four” (GoF) book in the 1990s, and while some argue that modern C&#43;&#43; features have reduced the need for certain patterns, a solid understanding of them remains highly valuable. Each section below introduces a pattern, provides a C&#43;&#43;17 code snippet, and discusses its use cases, benefits, and potential drawbacks (with a bit of my own perspective as an experienced C&#43;&#43; developer).">
+  <meta itemprop="datePublished" content="2026-04-15T00:00:00+00:00">
+  <meta itemprop="dateModified" content="2026-04-15T00:00:00+00:00">
+  <meta itemprop="wordCount" content="4945">
+  <meta itemprop="image" content="https://blog.miguens.one/">
+  <meta itemprop="keywords" content="C_cpp,Programming">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://blog.miguens.one/">
+  <meta name="twitter:title" content="Implementing Common Design Patterns in C&#43;&#43;17">
+  <meta name="twitter:description" content="Introduction Design patterns are proven solutions to recurring design problems in software development. They provide templates for structuring code in ways that improve flexibility, extensibility, and maintainability. In this post, I will explore four classic design patterns – Singleton, Factory Method, Observer, and Visitor – and demonstrate how to implement them using modern C&#43;&#43;17 features. These patterns were originally popularised by the “Gang of Four” (GoF) book in the 1990s, and while some argue that modern C&#43;&#43; features have reduced the need for certain patterns, a solid understanding of them remains highly valuable. Each section below introduces a pattern, provides a C&#43;&#43;17 code snippet, and discusses its use cases, benefits, and potential drawbacks (with a bit of my own perspective as an experienced C&#43;&#43; developer).">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2026/04/implementing-common-design-patterns-in-c-17/">
+  <meta property="og:site_name" content="Luis Miguens Blog">
+  <meta property="og:title" content="Implementing Common Design Patterns in C&#43;&#43;17">
+  <meta property="og:description" content="Introduction Design patterns are proven solutions to recurring design problems in software development. They provide templates for structuring code in ways that improve flexibility, extensibility, and maintainability. In this post, I will explore four classic design patterns – Singleton, Factory Method, Observer, and Visitor – and demonstrate how to implement them using modern C&#43;&#43;17 features. These patterns were originally popularised by the “Gang of Four” (GoF) book in the 1990s, and while some argue that modern C&#43;&#43; features have reduced the need for certain patterns, a solid understanding of them remains highly valuable. Each section below introduces a pattern, provides a C&#43;&#43;17 code snippet, and discusses its use cases, benefits, and potential drawbacks (with a bit of my own perspective as an experienced C&#43;&#43; developer).">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-04-15T00:00:00+00:00">
+    <meta property="article:modified_time" content="2026-04-15T00:00:00+00:00">
+    <meta property="article:tag" content="C_cpp">
+    <meta property="article:tag" content="Programming">
+    <meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2026-04-15 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( true ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        24 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2026/04/implementing-common-design-patterns-in-c-17/">Implementing Common Design Patterns in C++17</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="introduction">Introduction</h2>
+<p>Design patterns are proven solutions to recurring design problems in software development. They provide templates for structuring code in ways that improve flexibility, extensibility, and maintainability. In this post, I will explore four classic design patterns – <strong>Singleton</strong>, <strong>Factory Method</strong>, <strong>Observer</strong>, and <strong>Visitor</strong> – and demonstrate how to implement them using modern C++17 features. These patterns were originally popularised by the <em>“Gang of Four”</em> (GoF) book in the 1990s, and while some argue that modern C++ features have reduced the need for certain patterns, a solid understanding of them remains highly valuable. Each section below introduces a pattern, provides a C++17 code snippet, and discusses its use cases, benefits, and potential drawbacks (with a bit of my own perspective as an experienced C++ developer).</p>
+<h2 id="singleton-pattern">Singleton Pattern</h2>
+<p>The <strong>Singleton</strong> is a creational design pattern that ensures only one instance of a class exists and provides a global access point to that instance. In practice, a Singleton class has a private constructor and a static method (often named <code>getInstance</code>) that creates or returns the sole instance. This pattern is useful for representing unique resources like configuration managers or hardware interfaces. However, it must be used judiciously – singletons <em>effectively act as global variables</em>, which can introduce hidden dependencies and complicate testing and modularity. In fact, many C++ developers consider Singleton an <em>anti-pattern</em>, and its usage has declined in modern C++ code. I admit that in my early years I found Singletons convenient, but over time I&rsquo;ve grown cautious with them due to these pitfalls.</p>
+<p>A simple thread-safe implementation in C++17 can leverage <em>“Meyers’ Singleton”</em>, which uses a local static variable inside the <code>getInstance()</code> function. Since C++11, the initialization of function-local static variables is guaranteed to occur exactly once in a thread-safe manner. This means we avoid explicit locks and still safely initialize the singleton even in multithreaded scenarios. Here&rsquo;s how we can implement a Singleton in C++17:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;memory&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Singleton</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span> <span style="color:#75715e">// Deleted copy constructor and assignment to prevent copies. Singleton(const Singleton&amp;) = delete;
+</span></span></span><span style="display:flex;"><span>    Singleton<span style="color:#f92672">&amp;</span> <span style="color:#66d9ef">operator</span><span style="color:#f92672">=</span>(<span style="color:#66d9ef">const</span> Singleton<span style="color:#f92672">&amp;</span>) <span style="color:#f92672">=</span> <span style="color:#66d9ef">delete</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Global point of access: static method to get the single instance. static Singleton&amp; getInstance() {
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">static</span> Singleton instance;
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Lazily initialized on first call, thread-safe (C++11 guarantee). return instance;
+</span></span></span><span style="display:flex;"><span>    } <span style="color:#75715e">// Example business logic method void doSomething() {
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ... (some functionality)
+</span></span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">private</span><span style="color:#f92672">:</span> Singleton() <span style="color:#f92672">=</span> <span style="color:#66d9ef">default</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Private constructor ~Singleton() = default;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// (Optional) private destructor
+</span></span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>In this code, <code>Singleton::getInstance()</code> returns a reference to a static local <code>instance</code>. The first call initializes it, and subsequent calls return the same object. C++ ensures this initialization happens only once, even if multiple threads call <code>getInstance()</code> concurrently. We delete the copy constructor and assignment operator to prevent creating additional instances (ensuring a single instance). To use the Singleton, one would simply call <code>Singleton::getInstance().doSomething()</code> anywhere in the program.</p>
+<p>It’s worth noting a couple of C++17 specifics here. First, C++17 introduced <em>inline static variables</em>, which allow us to define static class members inside the class definition itself. We could, for example, define an <code>inline static std::unique_ptr&lt;Singleton&gt; instance</code> in the class and use it for the singleton object. This eliminates the need for a separate out-of-class definition of the static member. However, such an approach still requires careful handling for thread safety and the <em>static initialization order fiasco</em> (a situation where the initialization order of static objects across translation units is undefined). Using the function-local static as above bypasses the initialization order problem by constructing the object on first use (after program start) and is inherently thread-safe, which is why I favor it.</p>
+<p><strong>Pros:</strong> The Singleton ensures a single shared resource is easily accessible, and it can simplify access to global services or configurations. The implementation shown is straightforward in modern C++ and incurs minimal overhead for the first access (subsequent accesses are just a reference return, plus a trivial boolean check due to thread-safe static init).</p>
+<p><strong>Cons:</strong> Singleton can encourage <em>global state</em>. As a result, it can harm modular design and make unit testing difficult, since any code using the Singleton is hard-coded to that single instance. In my experience, excessive use of Singletons leads to code that is tightly coupled and tricky to maintain. Many experts advise limiting Singletons or using dependency injection and explicit wiring of components instead. If a Singleton is truly needed, one should document its usage and ensure it doesn’t become a hidden labyrinth of state shared across the codebase.</p>
+<p><em>(Personal perspective: I use Singletons very sparingly. When I do, I often combine them with other patterns – for example, a Singleton that is also a Factory – to keep design clean. I always ask myself if a singleton is truly necessary or if a well-managed global object (or function parameter) could suffice.)</em></p>
+<h2 id="factory-method-pattern">Factory Method Pattern</h2>
+<p>The <strong>Factory Method</strong> is another creational pattern, aimed at abstracting the object creation process. It “provides an interface for creating an object, but lets subclasses alter the type of object that will be created” (GoF). In simpler terms, a Factory Method helps construct product objects <strong>without specifying their exact concrete classes in the code that uses them</strong>. This is useful when a code section (the <em>client</em>) needs to work with abstract interfaces, and the decision of which concrete class to instantiate can be delegated to a factory. By using a factory, we encapsulate the creation logic in one place, making it easier to extend and modify. The pattern is widely used in C++ code to provide flexibility in evolving designs.</p>
+<p>There are a few variations of the factory concept in C++. The <em>factory method pattern</em>, in its classic form, usually involves a base “Creator” class with a virtual factory method that derived classes override to instantiate different products. Another approach is the <em>simple factory</em> (or <em>static factory function</em>), where a standalone function or static method creates objects based on input parameters. Here, I&rsquo;ll demonstrate a simple factory function in modern C++17, which is often sufficient for many use cases and avoids some boilerplate.</p>
+<p>Suppose we have an abstract interface <code>Shape</code> with concrete implementations like <code>Circle</code> and <code>Square</code>. We want a factory that can produce the right <code>Shape</code> object based on a parameter (for example, an enum or string). Using modern C++ smart pointers is prudent to manage memory, so our factory will return a <code>std::unique_ptr&lt;Shape&gt;</code> – a smart pointer owning the created object. (A <code>std::unique_ptr</code> automatically deletes the object when it goes out of scope, preventing memory leaks.)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;memory&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e"> </span><span style="color:#75715e">// Product interface
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Shape</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">virtual</span> <span style="color:#f92672">~</span>Shape() <span style="color:#f92672">=</span> <span style="color:#66d9ef">default</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">virtual</span> std<span style="color:#f92672">::</span>string draw() <span style="color:#66d9ef">const</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Pure virtual function
+</span></span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Concrete products
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Circle</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">public</span> Shape {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span> std<span style="color:#f92672">::</span>string draw() <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">override</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Drawing a Circle&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Square</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">public</span> Shape {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span> std<span style="color:#f92672">::</span>string draw() <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">override</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Drawing a Square&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Factory function to create shapes enum
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ShapeType</span> {
+</span></span><span style="display:flex;"><span>    CircleType, SquareType
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>unique_ptr<span style="color:#f92672">&lt;</span>Shape<span style="color:#f92672">&gt;</span> createShape(ShapeType type) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">switch</span> (type) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">case</span> ShapeType<span style="color:#f92672">::</span>CircleType: <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>make_unique<span style="color:#f92672">&lt;</span>Circle<span style="color:#f92672">&gt;</span>();
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// C++14/17 make_unique, returns unique_ptr&lt;Circle&gt; case ShapeType::SquareType: return std::make_unique&lt;Square&gt;();
+</span></span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">default</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">throw</span> std<span style="color:#f92672">::</span>invalid_argument(<span style="color:#e6db74">&#34;Unknown ShapeType&#34;</span>);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">auto</span> shape1 <span style="color:#f92672">=</span> createShape(ShapeType<span style="color:#f92672">::</span>CircleType);
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> shape1<span style="color:#f92672">-&gt;</span>draw() <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Outputs: Drawing a Circle auto shape2 = createShape(ShapeType::SquareType);
+</span></span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> shape2<span style="color:#f92672">-&gt;</span>draw() <span style="color:#f92672">&lt;&lt;</span> std<span style="color:#f92672">::</span>endl;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Outputs: Drawing a Square return 0;
+</span></span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In the <code>createShape</code> factory, we use an <code>enum class ShapeType</code> to decide which shape to create. The function uses <code>std::make_unique</code> (introduced in C++14) to construct a <code>Circle</code> or <code>Square</code> and return it as a <code>std::unique_ptr&lt;Shape&gt;</code> (automatically upcasting to the base class pointer type). The caller of <code>createShape</code> doesn’t need to know about the <code>Circle</code> or <code>Square</code> classes’ constructors – they simply request a shape by type. This decouples the object creation from usage. If later we add new shape types (say, <code>Triangle</code>), we can extend the factory without changing the client code that uses <code>Shape</code> objects.</p>
+<p>The benefit of this pattern is clearer when dealing with more complex creation logic or families of related products. For example, consider a GUI toolkit where <code>Shape</code> could be replaced with an abstract <code>Button</code> class, and we have different concrete <code>Button</code> subclasses for different platforms (Windows, macOS, etc.). A factory method could create the appropriate <code>Button</code> subclass depending on the current OS, without the higher-level code needing to have <code>#ifdef</code> or switch logic scattered around. The Factory Method thus promotes the <em>Open/Closed Principle</em> – allowing new types to be added with minimal changes to existing code.</p>
+<p><strong>Modern C++ considerations:</strong> By using smart pointers (<code>std::unique_ptr</code> here), we ensure that dynamically allocated objects are owned and freed automatically, preventing resource leaks. In older C++ code (pre-C++11), one often saw factories returning raw pointers that the caller had to delete, which was error-prone. C++17 doesn’t fundamentally change the factory pattern itself, but it provides convenience (like <code>make_unique</code>) and encourages safer memory management. Another modern twist is using <code>std::function</code> or templates to implement <em>callable factories</em>, but those are beyond the scope of this discussion.</p>
+<p><strong>Pros:</strong> The Factory pattern provides flexibility in choosing product implementations at runtime or configuration time. It decouples object creation from object usage; the client code only deals with interfaces or base classes. This results in code that is easier to extend (new products can be added without modifying the creator logic heavily). In my own projects, I often employ factories when I anticipate the need for swapping components (for instance, different algorithms or drivers) – it has saved me from refactoring when requirements change.</p>
+<p><strong>Cons:</strong> A potential downside is added complexity – the indirection of a factory can make code slightly harder to trace. If overused for simple cases, it may be over-engineering. Also, if many product types need to be supported, the factory logic (like the switch in <code>createShape</code>) might need updates for each new type, which is a maintenance consideration. Nonetheless, this pattern is generally considered beneficial rather than harmful; it’s commonly used in C++ frameworks and libraries. The key is to use it in scenarios where creation logic truly needs abstraction.</p>
+<p><em>(Personal perspective: I find the Factory Method pattern elegant for library and framework design. It lets me provide extension points – users can subclass and override a creation method to plug in custom objects. However, if all I need is a simple helper function to create an object, I might not introduce an entire class hierarchy for the factory. In C++, sometimes a free function as shown above is enough to reap the benefits of the pattern without ceremony.)</em></p>
+<h2 id="observer-pattern">Observer Pattern</h2>
+<p>The <strong>Observer</strong> is a behavioral design pattern that allows an object (called the <em>subject</em> or <em>publisher</em>) to maintain a list of dependents (<em>observers</em> or <em>subscribers</em>) and notify them automatically of any state changes, usually by calling one of their methods. It’s essentially a publish-subscribe mechanism: observers <em>subscribe</em> to a subject to receive updates, and can <em>unsubscribe</em> when they no longer want those updates. This pattern promotes loose coupling, as the subject doesn’t need to know the concrete classes of observers – only that they adhere to some observer interface. Observers can react to events in the subject without the subject depending on their implementation.</p>
+<p>In C++17, implementing the Observer pattern involves creating an interface (abstract class) for observers, which declares an update method (often called <code>update()</code> or <code>Notify()</code> with some relevant parameters). The subject (which can be any class we want to observe) maintains a collection (e.g., <code>std::vector</code> or <code>std::list</code>) of pointers or references to observers. When the subject’s state changes or some interesting event occurs, it iterates through the collection and calls the update method on each observer, typically passing along any necessary data. Observers can attach (subscribe) or detach (unsubscribe) themselves from the subject.</p>
+<p>Let&rsquo;s illustrate this with a simple example. Imagine we have a <code>Subject</code> that holds an integer state, and we have observers that print the state whenever it changes. We’ll implement a minimal Observer pattern in C++17:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;vector&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;algorithm&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e"> </span><span style="color:#75715e">// Observer interface declaring the update callback
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">IObserver</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">virtual</span> <span style="color:#f92672">~</span>IObserver() <span style="color:#f92672">=</span> <span style="color:#66d9ef">default</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">virtual</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">update</span>(<span style="color:#66d9ef">int</span> newState) <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Subject
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">which</span> observers can subscribe to
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Subject</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> attach(IObserver<span style="color:#f92672">*</span> obs) {
+</span></span><span style="display:flex;"><span>        observers_.push_back(obs);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">detach</span>(IObserver<span style="color:#f92672">*</span> obs) {
+</span></span><span style="display:flex;"><span>    observers_.erase(std<span style="color:#f92672">::</span>remove(observers_.begin(), observers_.end(), obs), observers_.end());
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">setState</span>(<span style="color:#66d9ef">int</span> value) {
+</span></span><span style="display:flex;"><span>state_ <span style="color:#f92672">=</span> value;
+</span></span><span style="display:flex;"><span>notify();
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// notify observers whenever state changes
+</span></span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">private</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> notify() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (IObserver<span style="color:#f92672">*</span> obs : observers_) {
+</span></span><span style="display:flex;"><span>        obs<span style="color:#f92672">-&gt;</span>update(state_);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">int</span> state_{<span style="color:#ae81ff">0</span>};
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>vector<span style="color:#f92672">&lt;</span>IObserver<span style="color:#f92672">*&gt;</span> observers_;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// A concrete observer that prints the state
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">PrintingObserver</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">public</span> IObserver {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">explicit</span> PrintingObserver(Subject<span style="color:#f92672">&amp;</span> subj) <span style="color:#f92672">:</span> subject_(subj) {
+</span></span><span style="display:flex;"><span>        subject_.attach(<span style="color:#66d9ef">this</span>);
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">update</span>(<span style="color:#66d9ef">int</span> newState) <span style="color:#66d9ef">override</span> {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;PrintingObserver: Subject state changed to &#34;</span> <span style="color:#f92672">&lt;&lt;</span> newState <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">unsubscribe</span>() {
+</span></span><span style="display:flex;"><span>subject_.detach(<span style="color:#66d9ef">this</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">private</span><span style="color:#f92672">:</span> Subject<span style="color:#f92672">&amp;</span> subject_;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    Subject subject;
+</span></span><span style="display:flex;"><span>    PrintingObserver obs1(subject);
+</span></span><span style="display:flex;"><span>    PrintingObserver obs2(subject);
+</span></span><span style="display:flex;"><span>    subject.setState(<span style="color:#ae81ff">42</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Output (order may vary): // PrintingObserver: Subject state changed to 42 // PrintingObserver: Subject state changed to 42 obs2.unsubscribe();
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Observer 2 unsubscribes subject.setState(7);
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Output: // PrintingObserver: Subject state changed to 7 return 0;
+</span></span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In this example, <code>Subject</code> manages a list of <code>IObserver*</code>. The <code>attach</code> method adds an observer, and <code>detach</code> removes an observer (using the erase-remove idiom on the vector). The <code>setState</code> method (representing a change in the subject’s state) assigns the new value and then calls <code>notify()</code>, which in turn calls each observer’s <code>update</code> function with the new state. The <code>PrintingObserver</code> is a simple concrete observer that subscribes to a <code>Subject</code> upon construction (storing a reference to the subject and attaching itself), and prints the new state in its <code>update</code> implementation. It also provides an <code>unsubscribe</code> method, which detaches itself from the subject.</p>
+<p>A few points to note in modern C++ context:</p>
+<ul>
+<li>
+<p>We used raw pointers to observers for simplicity. In real-world usage, one must ensure that observers detach themselves (or the subject removes them) before they are destroyed, to avoid dangling pointers. We demonstrated this with <code>obs2.unsubscribe()</code> before <code>obs2</code> goes out of scope. Smart pointers (like <code>std::weak_ptr</code> used in combination with <code>std::shared_ptr</code> subjects) can help manage lifetimes in a more robust way, but that introduces more complexity. The manual approach shown is clear for didactic purposes.</p>
+</li>
+<li>
+<p>The observer list is a <code>std::vector</code>. We could have used <code>std::list</code> as well (which might simplify removal if we had iterators to elements), but using a vector and <code>std::remove</code> is fine here. Performance-wise, notifying observers is O(n) in the number of observers – which is usually acceptable since the whole purpose is to update all observers.</p>
+</li>
+<li>
+<p>This pattern is very common in GUI frameworks and event systems. For example, a button (Subject) might allow observers to register for a &ldquo;onClick&rdquo; event, and when the button is clicked, it notifies all registered listeners. In modern C++ applications, the Observer pattern can be implemented using signals and slots (as in Qt framework) or with std::function callbacks. One modern approach is to have the subject keep a list of <code>std::function</code> callbacks instead of class observer objects – effectively a light-weight way to achieve the same result. That said, the classic implementation using an interface is still perfectly valid and clear in intent.</p>
+</li>
+</ul>
+<p><strong>Pros:</strong> The Observer pattern decouples the subject from the observers, allowing a flexible one-to-many notification system. Observers can be added or removed at runtime without modifying the subject’s code. In my experience, this leads to very extensible designs – you can add new reaction behaviors to events by simply writing new observer classes, without touching the subject. This pattern is essential in event-driven programming; as the refactoring.guru site notes, it&rsquo;s common in C++ especially in the context of GUI components where you want to react to user actions or other events. I often utilise observers for logging, monitoring, or UI updates in response to state changes in the core logic.</p>
+<p><strong>Cons:</strong> The primary drawback is potential complexity in managing observer lifetimes and ensuring they are properly synchronized with the subject. Memory leaks or crashes can occur if an observer is not unsubscribed and gets destroyed (dangling pointer in subject), or if the subject outlives observers in some unexpected way. It can also be harder to trace the flow of a program because observers react implicitly to state changes – which can sometimes lead to <em>spaghetti flow</em> if overused. Another consideration is performance: if a subject has many observers or notifications are very frequent, the updates could become a bottleneck, though for most cases this is not an issue. Overall, I find the benefits outweigh the downsides, especially with careful engineering. The pattern embodies the <em>Open/Closed Principle</em> by allowing new observers to be added without changing the subject, and improves <em>modularity</em> by removing direct dependencies between the subject and specific reaction code.</p>
+<p><em>(Personal perspective: I frequently apply the Observer pattern and its variants. For instance, I might use it to decouple a core simulation from a GUI display – the simulation (subject) notifies listeners when data changes, and the GUI (observer) updates the view. This keeps the simulation unaware of any UI, which is a clean separation of concerns. One piece of advice: document the observer relationships in your codebase; it helps others (and your future self) understand the event flow.)</em></p>
+<h2 id="visitor-pattern">Visitor Pattern</h2>
+<p>The <strong>Visitor</strong> is a behavioral design pattern that allows you to define new operations on a set of objects <em>without changing the classes of those objects</em>. In other words, Visitor lets you separate an algorithm from the object structure it operates on, by encapsulating the algorithm in a separate object (the <em>visitor</em>). This is useful when you have a stable set of classes (elements) and you need to perform various unrelated operations on them, which would clutter the classes themselves or violate single-responsibility if added directly. The classic example is an object structure like an Abstract Syntax Tree or a composite graphics scene: you might want to perform operations like pretty-printing, type-checking, evaluating, or exporting – tasks that are conceptually separate from the data structure itself. Using the Visitor pattern, you can add these operations without modifying the nodes of the tree; instead, you create new Visitor classes.</p>
+<p>The Visitor pattern involves multiple key components:</p>
+<ul>
+<li>
+<p><strong>Element (Visitable)</strong>: an interface or abstract class that declares an <code>accept(Visitor&amp;)</code> method. Concrete elements (the classes on which we want to perform operations) implement <code>accept</code> by calling the appropriate method on the Visitor (<code>visitor.visit(*this)</code>).</p>
+</li>
+<li>
+<p><strong>Visitor</strong>: an interface that declares a visit method for each type of concrete element. For example, if we have <code>Circle</code> and <code>Square</code> element classes, the Visitor interface will have <code>visitCircle(const Circle&amp;)</code> and <code>visitSquare(const Square&amp;)</code> (names can vary, but the idea is each overload handles a different type).</p>
+</li>
+<li>
+<p><strong>Concrete Visitors</strong>: classes that implement the Visitor interface, providing the specific operation logic for each element type.</p>
+</li>
+</ul>
+<p>This setup achieves a form of double dispatch: the call <code>element.accept(visitor)</code> results in <code>visitor.visitConcreteElement(element)</code>, thus the operation executed depends on both the visitor type and the element type. It’s more verbose than a simple virtual function call, but it allows adding <strong>new</strong> visitors (operations) without touching the element classes. The cost is that adding a new element class <em>does</em> require modifying all existing visitors (to add a new visit method), so the pattern is best when the set of element classes is fixed or changes infrequently, while new operations are expected to be added often.</p>
+<p>Let&rsquo;s illustrate the Visitor pattern with a simple example using shapes, where we want to perform multiple operations on those shapes. We will use two shape classes and two visitor implementations for demonstration:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;cmath&gt;</span><span style="color:#75715e"> </span><span style="color:#75715e">// Forward declarations of element classes for Visitor interface
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Circle</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Square</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Visitor interface with overloads for each concrete element type
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ShapeVisitor</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">virtual</span> <span style="color:#f92672">~</span>ShapeVisitor() <span style="color:#f92672">=</span> <span style="color:#66d9ef">default</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">virtual</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">visit</span>(<span style="color:#66d9ef">const</span> Circle<span style="color:#f92672">&amp;</span> c) <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">virtual</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">visit</span>(<span style="color:#66d9ef">const</span> Square<span style="color:#f92672">&amp;</span> s) <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Element interface with accept method
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Shape</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">virtual</span> <span style="color:#f92672">~</span>Shape() <span style="color:#f92672">=</span> <span style="color:#66d9ef">default</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">virtual</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">accept</span>(ShapeVisitor<span style="color:#f92672">&amp;</span> visitor) <span style="color:#66d9ef">const</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Concrete element: Circle
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Circle</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">public</span> Shape {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span> Circle(<span style="color:#66d9ef">double</span> radius) <span style="color:#f92672">:</span> radius_(radius) {} <span style="color:#66d9ef">double</span> <span style="color:#a6e22e">getRadius</span>() <span style="color:#66d9ef">const</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> radius_;
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">accept</span>(ShapeVisitor<span style="color:#f92672">&amp;</span> visitor) <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">override</span> {
+</span></span><span style="display:flex;"><span>    visitor.visit(<span style="color:#f92672">*</span><span style="color:#66d9ef">this</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">private</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">double</span> radius_;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Concrete element: Square
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Square</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">public</span> Shape {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span> Square(<span style="color:#66d9ef">double</span> side) <span style="color:#f92672">:</span> side_(side) {} <span style="color:#66d9ef">double</span> <span style="color:#a6e22e">getSide</span>() <span style="color:#66d9ef">const</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> side_;
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">accept</span>(ShapeVisitor<span style="color:#f92672">&amp;</span> visitor) <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">override</span> {
+</span></span><span style="display:flex;"><span>    visitor.visit(<span style="color:#f92672">*</span><span style="color:#66d9ef">this</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">private</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">double</span> side_;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Concrete Visitor 1: compute area of shapes
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">AreaVisitor</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">public</span> ShapeVisitor {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> visit(<span style="color:#66d9ef">const</span> Circle<span style="color:#f92672">&amp;</span> c) <span style="color:#66d9ef">override</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">double</span> area <span style="color:#f92672">=</span> M_PI <span style="color:#f92672">*</span> std<span style="color:#f92672">::</span>pow(c.getRadius(), <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;AreaVisitor: Area of circle = &#34;</span> <span style="color:#f92672">&lt;&lt;</span> area <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">visit</span>(<span style="color:#66d9ef">const</span> Square<span style="color:#f92672">&amp;</span> s) <span style="color:#66d9ef">override</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> area <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>pow(s.getSide(), <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;AreaVisitor: Area of square = &#34;</span> <span style="color:#f92672">&lt;&lt;</span> area <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Concrete Visitor 2: print shape type
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">TypeVisitor</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">public</span> ShapeVisitor {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">void</span> visit(<span style="color:#66d9ef">const</span> Circle<span style="color:#f92672">&amp;</span> c) <span style="color:#66d9ef">override</span> {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;TypeVisitor: This is a circle with radius &#34;</span> <span style="color:#f92672">&lt;&lt;</span> c.getRadius() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">visit</span>(<span style="color:#66d9ef">const</span> Square<span style="color:#f92672">&amp;</span> s) <span style="color:#66d9ef">override</span> {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;TypeVisitor: This is a square with side &#34;</span> <span style="color:#f92672">&lt;&lt;</span> s.getSide() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    Circle circle(<span style="color:#ae81ff">5.0</span>);
+</span></span><span style="display:flex;"><span>    Square square(<span style="color:#ae81ff">3.0</span>);
+</span></span><span style="display:flex;"><span>    AreaVisitor areaCalc;
+</span></span><span style="display:flex;"><span>    TypeVisitor typePrinter;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Use AreaVisitor circle.accept(areaCalc);
+</span></span></span><span style="display:flex;"><span>    square.accept(areaCalc);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Use TypeVisitor circle.accept(typePrinter);
+</span></span></span><span style="display:flex;"><span>    square.accept(typePrinter);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Output:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>AreaVisitor: Area of circle <span style="color:#f92672">=</span> <span style="color:#ae81ff">78.5398</span> AreaVisitor: Area of square <span style="color:#f92672">=</span> <span style="color:#ae81ff">9</span> TypeVisitor: This is a circle with radius <span style="color:#ae81ff">5</span> TypeVisitor: This is a square with side <span style="color:#ae81ff">3</span>
+</span></span></code></pre></div><p>In this code, <code>Shape</code> is the element base class with a pure virtual <code>accept</code> method. <code>Circle</code> and <code>Square</code> implement <code>accept</code> by calling the appropriate <code>visit</code> method on the visitor. The <code>ShapeVisitor</code> interface has two overloads <code>visit(const Circle&amp;)</code> and <code>visit(const Square&amp;)</code>. <code>AreaVisitor</code> and <code>TypeVisitor</code> are two different operations packaged as visitor objects – one computes and prints area, the other prints the type. Notice how <code>circle.accept(areaCalc)</code> ends up calling <code>AreaVisitor::visit(const Circle&amp;)</code> because the <code>Circle</code> class directs it to that overload, whereas <code>square.accept(areaCalc)</code> calls <code>AreaVisitor::visit(const Square&amp;)</code>. We have effectively separated the operations from the shape classes. Adding a new operation is as simple as writing a new visitor class (for instance, a <code>PerimeterVisitor</code> could be added without changing <code>Circle</code> or <code>Square</code> classes at all).</p>
+<p>A key aspect of Visitor is that it relies on all possible element types being known and handled in the Visitor interface. If we introduced a new class, say <code>Triangle</code>, we would need to add <code>virtual void visit(const Triangle&amp;)</code> to <code>ShapeVisitor</code> and implement it in all Concrete Visitors. This is why the pattern is ideal when your class hierarchy is stable. It trades off flexibility in extending classes for flexibility in adding operations.</p>
+<p><strong>Use cases:</strong> As mentioned, Visitors are handy for operations on complex object structures like abstract syntax trees (compilers often use visitors for traversing AST nodes), object serialization, UI component trees (applying an operation to all UI elements), etc. The pattern isn’t very common in everyday application code because it is somewhat complex and overkill unless you truly need that level of flexibility. Personally, I’ve used Visitor in scenarios like writing a compiler where multiple analyses and transformations had to be performed on a tree of nodes – implementing each analysis as a Visitor kept concerns separate.</p>
+<p><strong>Modern C++ considerations:</strong> C++17 did not change the Visitor pattern directly, but it introduced <code>std::variant</code> and <code>std::visit</code>, which provide an alternative for some use cases. A <code>std::variant</code> is a type-safe union that can hold one of several types, and <code>std::visit</code> can apply a callable to the currently held value. This can be seen as a <em>strategy for structuring code similar to a visitor</em>: instead of a class hierarchy with virtual dispatch, you use a variant and visitors in the form of function objects or lambdas. For example, rather than having <code>Shape</code> as a base class, one could have <code>using ShapeVar = std::variant&lt;Circle, Square&gt;;</code> and use <code>std::visit</code> with a lambda that handles each type. This approach leverages the compiler to generate the dispatch logic. In C++17, <code>std::visit</code> with variants allows implementing the visitor pattern in a type-safe and succinct way. It’s not a drop-in replacement for all scenarios (especially if the object set is open-ended or requires inheritance), but for closed sets of types it works brilliantly. The Modernes C++ blog points out that <code>std::visit</code> effectively acts as a visitor on a variant, with the visitor being any callable that has an overload for each variant alternative.</p>
+<p><strong>Pros:</strong> The Visitor pattern excels at adding new operations to existing object structures. It keeps operations outside of the objects, adhering to single responsibility (the objects manage their data, the visitors implement the algorithms). It also groups related operations into one visitor class, which can make the code more organized than scattering the logic across many classes. In scenarios where you frequently need to extend functionality, visitors provide a clear protocol for doing so. The double-dispatch mechanism is powerful – something not directly available in C++ without this pattern.</p>
+<p><strong>Cons:</strong> The pattern is considered one of the more complex GOF patterns. It introduces multiple classes and tight coupling between the Visitor and Element hierarchies (each knows about the other’s interface). Adding a new element type requires updating all existing visitors, so it’s not flexible in that dimension. If your set of types changes often, Visitor can become burdensome. Additionally, the boilerplate (like writing accept methods and visitor interfaces) can be tedious – though templates or code generators can help. Some in the C++ community avoid Visitor when possible, noting that modern C++ alternatives (like variants or even just virtual functions in the base class for each operation) may be simpler for a given problem. I share the view that Visitor should be used when it fits really well – otherwise simpler polymorphic or functional approaches might suffice. That said, when I have a scenario that matches the Visitor’s strengths (lots of operations, stable structure), I find it to be an elegant solution.</p>
+<p><em>(Personal perspective: I regard the Visitor pattern as a “power tool” – not needed often, but very useful in the right situation. My advice is to evaluate if the complexity is justified by your use case. If you foresee adding many operations over time and you cannot or prefer not to bake them into the classes (perhaps to keep those classes lightweight), Visitor is worth it. If not, you might keep things simple. C++17’s <code>std::variant</code> provides a nice middle ground for some problems; I&rsquo;ve enjoyed using it with <code>std::visit</code> and lambda overloads to handle multiple types without an explicit visitor class, which feels lighter-weight while achieving a similar outcome.)</em></p>
+<h2 id="conclusion">Conclusion</h2>
+<p>In this article, we examined four common design patterns and how to implement them in modern C++17: Singleton, Factory Method, Observer, and Visitor. Each pattern addresses a particular kind of design challenge – controlling object creation, abstracting instantiation, managing publish/subscribe relationships, and adding operations to class hierarchies without modifying them. The C++17 standard, while not altering these patterns’ core principles, provides language features (smart pointers, <code>inline</code> variables, <code>std::variant</code>, etc.) that make implementations safer, cleaner, or more expressive. For instance, C++’s guaranteed thread-safe static initialization makes Singleton easier to implement safely, and smart pointers like <code>unique_ptr</code> encourage better memory management in factories.</p>
+<p>It’s important to recognise that design patterns are abstractions that can sometimes be superseded by language features. There’s a well-known criticism that many GoF patterns are “workarounds for missing features” in the language. Indeed, modern C++ techniques (template metaprogramming, lambdas, <code>std::function</code>, variants, ranges, etc.) can simplify or eliminate some patterns. For example, some uses of Factory can be replaced with templates or object factories embedded in template parameters; simple Observers can be done with signals or event delegates; and as discussed, a <code>std::variant</code> with <code>std::visit</code> can handle some scenarios that might otherwise call for a Visitor. C++ is multi-paradigm, so sometimes a generic or functional approach obviates an OOP pattern solution.</p>
+<p>That said, I believe knowing these classic patterns is still extremely valuable. They teach fundamental design principles like encapsulation, separation of concerns, and polymorphism. In large codebases or team projects, communicating using pattern names (“Let’s use an Observer here” or “This class is a Singleton responsible for…”) provides a shared vocabulary that makes architectural discussions more efficient. The key is to apply patterns judiciously – understand the problem at hand and choose a pattern or modern C++ feature that best solves it with clarity and minimal complexity. As we’ve seen, each pattern comes with trade-offs. By critically analyzing those pros and cons (as we did above), one can make informed decisions.</p>
+<p>In conclusion, design patterns remain highly relevant in C++17 and beyond, even if the implementation details evolve. Modern C++ has empowered us to implement these patterns in cleaner and safer ways, and sometimes to even <em>avoid</em> a pattern with a direct language feature. My own approach is to use patterns as guidelines, not straightjackets: I adapt them to modern C++ idioms and only when they genuinely make the design better. By doing so, we can harness the wisdom of classic design patterns while writing code that is efficient, safe, and robust in C++17.</p>
+<h2 id="references">References</h2>
+<ol>
+<li>
+<p>Gamma, E., Helm, R., Johnson, R., &amp; Vlissides, J. <em>Design Patterns: Elements of Reusable Object-Oriented Software</em>. Addison-Wesley, 1994. (GoF book introducing Singleton, Factory Method, Observer, Visitor, etc.)</p>
+</li>
+<li>
+<p><strong>Refactoring.Guru</strong> – <em>Singleton Design Pattern</em> (Intent and overview)<a href="https://refactoring.guru/design-patterns/singleton#:~:text=Singleton%20is%20a%20creational%20design,global%20access%20point%20to%20this%C2%A0instance">refactoring.guru</a><a href="https://refactoring.guru/design-patterns/singleton/cpp/example#:~:text=Usage%20examples%3A%20A%20lot%20of,the%20decline%20in%20C%2B%2B%20code">refactoring.guru</a>.</p>
+</li>
+<li>
+<p><strong>Refactoring.Guru</strong> – <em>Factory Method in C++</em> (Intent and usage in C++)<a href="https://refactoring.guru/design-patterns/factory-method/cpp/example#:~:text=Factory%20method%20is%20a%20creational,without%20specifying%20their%20concrete%20classes">refactoring.guru</a><a href="https://refactoring.guru/design-patterns/factory-method/cpp/example#:~:text=Usage%20examples%3A%20The%20Factory%20Method,of%20flexibility%20for%20your%20code">refactoring.guru</a>.</p>
+</li>
+<li>
+<p><strong>Refactoring.Guru</strong> – <em>Observer Design Pattern in C++</em> (Concept and usage)<a href="https://refactoring.guru/design-patterns/observer/cpp/example#:~:text=Observer%20is%20a%20behavioral%20design,about%20changes%20in%20their%20state">refactoring.guru</a><a href="https://refactoring.guru/design-patterns/observer/cpp/example#:~:text=Usage%20examples%3A%20The%20Observer%20pattern,without%20coupling%20to%20their%20classes">refactoring.guru</a>.</p>
+</li>
+<li>
+<p><strong>Refactoring.Guru</strong> – <em>Visitor Design Pattern in C++</em> (Intent and usage)<a href="https://refactoring.guru/design-patterns/visitor/cpp/example#:~:text=Visitor%20is%20a%20behavioral%20design,without%20altering%20any%20existing%20code">refactoring.guru</a><a href="https://refactoring.guru/design-patterns/visitor/cpp/example#:~:text=Usage%20examples%3A%20Visitor%20isn%E2%80%99t%20a,its%20complexity%20and%20narrow%20applicability">refactoring.guru</a>.</p>
+</li>
+<li>
+<p>Krzaq (Stack Overflow answer) – <em>C++11 Thread-safe initialization of function-local static objects</em> (explains magic statics in C++11)<a href="https://stackoverflow.com/questions/40579224/c11-thread-safe-initialization-of-function-local-static-const-objects#:~:text=9">stackoverflow.com</a>.</p>
+</li>
+<li>
+<p><strong>cppreference.com</strong> – <em>std::unique_ptr</em> (smart pointer managing object lifetime)<a href="https://en.cppreference.com/w/cpp/memory/unique_ptr.html#:~:text=,goes%20out%20of%20scope">en.cppreference.com</a>.</p>
+</li>
+<li>
+<p>Richard Haar – <em>Using the Visitor pattern in C++17</em> (discussion of <code>std::variant</code> and <code>std::visit</code> as an implementation of Visitor)<a href="https://www.richhaar.com/visitor-pattern-in-cpp17#:~:text=In%20C%2B%2B17%2C%20the%20,fit%27s%20into%20the%20Visitor%20pattern">richhaar.com</a>.</p>
+</li>
+<li>
+<p><strong>Modernes C++</strong> (R. Grimm) – <em>C++17 Inline static in Singleton</em> (inlining static members in-class)<a href="https://www.modernescpp.com/index.php/creational-patterns-singleton/#:~:text=This%20implementation%20of%20the%20Singleton,directly%20done%20in%20the%20class">modernescpp.com</a>.</p>
+</li>
+<li>
+<p>Wikipedia (cited in Stack Overflow) – Critique of GoF Patterns as workarounds in less powerful languages<a href="https://stackoverflow.com/questions/51808990/to-what-extent-modern-c-obviate-the-need-for-design-patterns#:~:text=From%20Wikipedia%3A">stackoverflow.com</a>.</p>
+</li>
+</ol>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        4945 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-04-15
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f04%2fimplementing-common-design-patterns-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f04%2fimplementing-common-design-patterns-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Implementing%20Common%20Design%20Patterns%20in%20C%2b%2b17&amp;caption=Implementing%20Common%20Design%20Patterns%20in%20C%2b%2b17&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f04%2fimplementing-common-design-patterns-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Implementing%20Common%20Design%20Patterns%20in%20C%2b%2b17&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f04%2fimplementing-common-design-patterns-in-c-17%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f04%2fimplementing-common-design-patterns-in-c-17%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f04%2fimplementing-common-design-patterns-in-c-17%2f;description=Implementing%20Common%20Design%20Patterns%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f04%2fimplementing-common-design-patterns-in-c-17%2f&amp;title=Implementing%20Common%20Design%20Patterns%20in%20C%2b%2b17&amp;summary=Implementing%20Common%20Design%20Patterns%20in%20C%2b%2b17&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f04%2fimplementing-common-design-patterns-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f04%2fimplementing-common-design-patterns-in-c-17%2f&amp;resubmit=true&amp;title=Implementing%20Common%20Design%20Patterns%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f04%2fimplementing-common-design-patterns-in-c-17%2f;title=Implementing%20Common%20Design%20Patterns%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Implementing%20Common%20Design%20Patterns%20in%20C%2b%2b17%20https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f04%2fimplementing-common-design-patterns-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f04%2fimplementing-common-design-patterns-in-c-17%2f&amp;t=Implementing%20Common%20Design%20Patterns%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Implementing%20Common%20Design%20Patterns%20in%20C%2b%2b17&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f04%2fimplementing-common-design-patterns-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2026/03/custom-allocators-in-c-17-implementing-and-using-your-own-stl-allocator/">
+                    <span class="button__text">Custom Allocators in C&#43;&#43;17: Implementing and Using Your Own STL Allocator</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>
