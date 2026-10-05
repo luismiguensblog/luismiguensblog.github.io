@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Introduction When writing C&#43;&#43; templates, we often need to enforce certain conditions on template parameters or detect properties of types at compile time. Two key features that enable this are SFINAE (Substitution Failure Is Not An Error) and the newer Concepts (introduced in C&#43;&#43;20, after C&#43;&#43;17). In this post, I will explain what SFINAE means and how it has been used in C&#43;&#43;17-era template metaprogramming for type checking and constraints. I will then discuss C&#43;&#43;20 Concepts as a more modern approach to the same problems, providing code examples for both techniques.
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2026/07/sfinae-and-concepts-in-modern-c-template-programming/" />
+
+
+    <title>
+        
+            SFINAE and Concepts in Modern C&#43;&#43; Template Programming :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.ab5336003ba331300318b49292c672210905baf1ef5410a739f647e70c8808fa.css" integrity="sha256-q1M2ADujMTADGLSSksZyIQkFuvHvVBCnOfZH5wyICPo=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+	<meta itemprop="name" content="SFINAE and Concepts in Modern C&#43;&#43; Template Programming">
+	<meta itemprop="description" content="Introduction When writing C&#43;&#43; templates, we often need to enforce certain conditions on template parameters or detect properties of types at compile time. Two key features that enable this are SFINAE (Substitution Failure Is Not An Error) and the newer Concepts (introduced in C&#43;&#43;20, after C&#43;&#43;17). In this post, I will explain what SFINAE means and how it has been used in C&#43;&#43;17-era template metaprogramming for type checking and constraints. I will then discuss C&#43;&#43;20 Concepts as a more modern approach to the same problems, providing code examples for both techniques.">
+	<meta itemprop="datePublished" content="2026-07-24T00:00:00+00:00">
+	<meta itemprop="dateModified" content="2026-07-24T00:00:00+00:00">
+	<meta itemprop="wordCount" content="3409">
+	<meta itemprop="image" content="https://blog.miguens.one/">
+	<meta itemprop="keywords" content="C_cpp,Programming">
+
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="https://blog.miguens.one/">
+	<meta name="twitter:title" content="SFINAE and Concepts in Modern C&#43;&#43; Template Programming">
+	<meta name="twitter:description" content="Introduction When writing C&#43;&#43; templates, we often need to enforce certain conditions on template parameters or detect properties of types at compile time. Two key features that enable this are SFINAE (Substitution Failure Is Not An Error) and the newer Concepts (introduced in C&#43;&#43;20, after C&#43;&#43;17). In this post, I will explain what SFINAE means and how it has been used in C&#43;&#43;17-era template metaprogramming for type checking and constraints. I will then discuss C&#43;&#43;20 Concepts as a more modern approach to the same problems, providing code examples for both techniques.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2026/07/sfinae-and-concepts-in-modern-c-template-programming/">
+	<meta property="og:site_name" content="Luis Miguens Blog">
+	<meta property="og:title" content="SFINAE and Concepts in Modern C&#43;&#43; Template Programming">
+	<meta property="og:description" content="Introduction When writing C&#43;&#43; templates, we often need to enforce certain conditions on template parameters or detect properties of types at compile time. Two key features that enable this are SFINAE (Substitution Failure Is Not An Error) and the newer Concepts (introduced in C&#43;&#43;20, after C&#43;&#43;17). In this post, I will explain what SFINAE means and how it has been used in C&#43;&#43;17-era template metaprogramming for type checking and constraints. I will then discuss C&#43;&#43;20 Concepts as a more modern approach to the same problems, providing code examples for both techniques.">
+	<meta property="og:locale" content="en_us">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="posts">
+		<meta property="article:published_time" content="2026-07-24T00:00:00+00:00">
+		<meta property="article:modified_time" content="2026-07-24T00:00:00+00:00">
+		<meta property="article:tag" content="C_cpp">
+		<meta property="article:tag" content="Programming">
+		<meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2026-07-24 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( true ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        17 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2026/07/sfinae-and-concepts-in-modern-c-template-programming/">SFINAE and Concepts in Modern C++ Template Programming</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="introduction">Introduction</h2>
+<p>When writing C++ templates, we often need to enforce certain conditions on template parameters or detect properties of types at compile time. Two key features that enable this are SFINAE (Substitution Failure Is Not An Error) and the newer Concepts (introduced in C++20, after C++17). In this post, I will explain what SFINAE means and how it has been used in C++17-era template metaprogramming for type checking and constraints. I will then discuss C++20 Concepts as a more modern approach to the same problems, providing code examples for both techniques.</p>
+<p>SFINAE, famously coined by C++ expert David Vandevoorde, is the rule that an invalid substitution of template parameters does not immediately trigger a compilation error; instead, the compiler simply removes that template from the set of overloads to consider. In practice, this means if a template function or specialization becomes ill-formed for a given type, the compiler “discards” it and tries other candidates, rather than stopping with a hard error. This behavior might sound esoteric, but it is incredibly powerful. Over the years, C++ programmers have leveraged SFINAE for compile-time introspection, enabling templates to detect properties of types or choose different implementations based on those types.</p>
+<p>However, classic SFINAE tricks can be quite convoluted and often lead to cryptic error messages for users of your templates. This is where C++20 Concepts come into play: Concepts allow us to directly specify constraints on template parameters in a more readable way, and compilers can produce clearer diagnostic messages when those constraints aren’t met. In the following sections, I will dive deeper into how SFINAE works and show how Concepts provide a cleaner alternative for modern C++ development.</p>
+<h2 id="understanding-sfinae-in-template-metaprogramming">Understanding SFINAE in Template Metaprogramming</h2>
+<p>Substitution Failure Is Not An Error (SFINAE) is a core principle in C++ template resolution. In simple terms, SFINAE says: if substituting template arguments results in an invalid type or expression in the immediate context of a template, the compiler does not treat it as a fatal error. Instead, that particular template instantiation is discarded from overload resolution.</p>
+<p>This rule applies during function template overload resolution and during class template partial specialization matching. It was originally designed to make templates more robust, e.g. if you include a new template overload from another header that isn’t applicable to your types, it shouldn’t break your code. But developers soon realized that they could intentionally leverage this “failure without error” behavior to write templates that only participate in overload resolution when certain conditions are true. In my view, this was a turning point that transformed SFINAE from an obscure rule into a feature for creative template metaprogramming.</p>
+<p>Let’s break down a basic example to see SFINAE in action. Suppose we want to write a function <code>foo(T)</code> that should only exist for types <code>T</code> which have some property, say, being an integral type, and another overload for non-integral types.</p>
+<p>Using SFINAE, we can achieve this by crafting the templates such that one of them becomes ill-formed (and thus removed) when the condition is not met. A common way to do this is using the trait <code>std::is_integral</code> in combination with <code>std::enable_if</code>. The <code>std::enable_if</code> metafunction yields a valid type only if a boolean condition is <code>true</code>; otherwise it has no member type at all, which will cause a substitution failure (SFINAE) if used in a function signature.</p>
+<p>Here’s how we could implement our two foo overloads with SFINAE (using C++17 syntax):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;type_traits&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Overload #1: enabled only if T is an integral type
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> T<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>enable_if_t<span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>is_integral_v<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>, <span style="color:#66d9ef">void</span><span style="color:#f92672">&gt;</span> foo(T value) {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> value <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; is integral (SFINAE)</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Overload #2: enabled only if T is *not* an integral type
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span> <span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> T<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>enable_if_t<span style="color:#f92672">&lt;!</span>std<span style="color:#f92672">::</span>is_integral_v<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>, <span style="color:#66d9ef">void</span><span style="color:#f92672">&gt;</span> foo(T value) {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> value <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; is not integral (SFINAE)</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In the code above, <code>std::is_integral_v&lt;T&gt;</code> is a compile-time constant that is true for integral types (ints, long, etc.) and false for others. In <code>overload #1</code>, we use <code>std::enable_if_t&lt;condition, void&gt;</code> as the return type. If the condition is true (<code>T</code> is integral), <code>enable_if_t</code> yields the type void, so the function signature becomes <code>void foo(T)</code>. If the condition is false (T is not integral), <code>enable_if_t</code> has no type member, so the substitution fails and that overload is SFINAE-removed from consideration.</p>
+<p>Similarly for <code>overload #2</code>, but with the negated condition. The net effect is that for an int or long etc., only the first overload exists (the second is discarded), and for a <code>double</code> or <code>std::string</code>, only the second overload exists (the first is discarded). We’ve effectively constrained the template functions based on <code>T</code> without explicit language support – purely by exploiting SFINAE. If we call <code>foo(42)</code>, the compiler finds that the <code>foo(T)</code> instantiated from <code>overload #2</code> would require <code>std::enable_if_t&lt;!true&gt;</code> (since <code>std::is_integral_v&lt;int&gt;</code> is true) which doesn’t have a type, so <code>overload #2</code> is dropped; only <code>overload #1</code> remains viable and is called, printing <code>“42 is integral”</code>.</p>
+<p>Conversely, <code>foo(3.14)</code> would instantiate <code>overload #1</code> with condition false (<code>std::is_integral_v&lt;double&gt;</code> is false), causing that overload to disappear, leaving only <code>overload #2</code> to handle the call and print <code>“3.14 is not integral”</code>.</p>
+<p>This technique is a classic use of SFINAE for compile-time type checking and selective function inclusion.</p>
+<p>Under the hood, many utilities in the C++ standard library use SFINAE in a similar manner. For instance, the myriad of type traits (like <code>std::is_integral</code>, <code>std::is_constructible</code>, etc.) are often implemented using SFINAE tricks to detect properties of types. There’s even a helper template <code>std::void_t</code> (introduced in C++17) which simplifies writing trait templates by making it easier to conditionally detect valid types in partial specializations.</p>
+<p>A classic example of SFINAE-based introspection is the “detection idiom”, where one writes a templated struct that has two overloads of a helper function (test), one that is selected if a certain expression is well-formed, and a fallback that is selected otherwise.</p>
+<p>By checking which overload is chosen (often via <code>sizeof</code> trickery), the trait can set a value <code>boolean</code> indicating whether the type has the feature. This can determine, at compile time, things like “does type T have a nested typedef named foo?” or “can type T be called like a function?”. All of this is done by causing substitution to fail in the cases where the condition isn’t satisfied, but without causing a compile error.</p>
+<p>I find this both fascinating and daunting. Fascinating because it enables powerful compile-time logic, but daunting because it can be hard to write and even harder to decipher error messages when something goes wrong.</p>
+<p>The error messages resulting from unintended SFINAE failures tend to be verbose and not very user-friendly, as the compiler often just tells you that some substitution led to an invalid type or expression deep in your template. This is one reason the C++ community sought a better way to express template constraints, leading to the development of Concepts. Before moving on, it’s worth noting that newer C++ features (like if <code>constexpr</code> in C++17 or overloads via tag dispatch) can sometimes be used instead of SFINAE to simplify logic inside function bodies. But those don’t completely replace SFINAE’s ability to remove overloads from consideration. For truly constraining templates at the signature level, until C++17 our best tool was SFINAE (or highly disciplined use of <code>static_assert</code>).</p>
+<h2 id="concepts-a-more-expressive-way-to-constrain-templates">Concepts: A More Expressive Way to Constrain Templates</h2>
+<p>C++20 introduced Concepts as a first-class language feature to address the same goals that SFINAE-based tricks were used for: namely, restricting template arguments and improving compile-time type checking. A Concept in C++ is essentially a named compile-time predicate (boolean condition) on template parameters, representing a set of requirements those parameters must satisfy.</p>
+<p>You can think of a concept as a way to explicitly declare, “This template parameter must be an integral type” or “must support addition and subtraction” or even “must fulfill the requirements of a Container”. Concepts allow such conditions to be checked by the compiler upfront, producing clear errors if they aren’t met, rather than performing SFINAE-substitutions inside the template and letting overload resolution figure it out. Importantly, these constraints become part of the template’s interface, which helps both the compiler and the programmer.</p>
+<p>In my experience, switching to concepts makes intent much clearer and errors much easier to understand.</p>
+<p>Let’s illustrate the same example we did with SFINAE, but using Concepts (which are available in C++20). We want two overloads of a function <code>foo</code>, for integral and non-integral types. The standard library actually provides a concept for “integral type” in the <code>&lt;concepts&gt;</code> header:  <code>std::integral</code>.</p>
+<p>We can use that directly in our template parameter list or in a requires clause. Concepts offer a few different ways to apply constraints, all of which are equivalent in enforcement, you can constrain a template by placing a concept in angle brackets before the parameter, by using a requires clause after the template parameter list, or even with an abbreviated function template syntax. For example, all the following are valid (and essentially synonymous) ways to require a type <code>T</code> to satisfy a concept <code>Hashable</code> in a function template:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span>Hashable T<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> f(T arg);                <span style="color:#75715e">// concept used in template parameter list
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> T<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">requires</span> Hashable<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> f(T arg);                <span style="color:#75715e">// &#39;requires&#39; clause after template parameters
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> T<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> f(T arg) <span style="color:#66d9ef">requires</span> Hashable<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>; <span style="color:#75715e">// &#39;requires&#39; clause after function signature
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">f</span>(Hashable <span style="color:#66d9ef">auto</span> arg);    <span style="color:#75715e">// abbreviated function template (C++20)
+</span></span></span></code></pre></div><p>For our integral vs non-integral foo example, we can use the std::integral concept. Here’s how the two overloads look with concepts-based constraints:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;concepts&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Overload #1: only for integral types (using std::integral concept)
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span>std<span style="color:#f92672">::</span>integral T<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> fooConcept(T value) {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> value <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; is integral (Concept)</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Overload #2: only for types that are NOT integral
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">template</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">typename</span> T<span style="color:#f92672">&gt;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">requires</span> (<span style="color:#f92672">!</span>std<span style="color:#f92672">::</span>integral<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> fooConcept(T value) {
+</span></span><span style="display:flex;"><span>    std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> value <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; is not integral (Concept)</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This code is more self-explanatory than the SFINAE version: it literally reads as “fooConcept for integral T” and “fooConcept for T that is not integral”. The compiler will enforce these constraints. If you try to call fooConcept with a type that doesn’t meet either constraint, you’ll get a straightforward compile-time error indicating that no matching overload was found (since both overloads are excluded by their constraints).</p>
+<p>Notably, if a type fails a constraint, the compiler knows why (which concept was not satisfied) and can report that to you directly. This is a huge win for usability – it moves the failure from deep inside instantiation (where SFINAE would silently remove an overload) to the point of call with a clear message. For instance, consider if we had a sorting algorithm template that requires its iterator type to meet the <code>RandomAccessIterator</code> concept. If we accidentally call it with a list iterator (which is not random-access), a concept-enabled compiler error might say something like <code>“std::sort cannot be called with std::_List_iterator because RandomAccessIterator concept is not satisfied”</code>.</p>
+<p>Without concepts, the error would likely be a long, inscrutable template error about invalid operations, as was common in C++17. I have personally felt the difference here, when working with templates, seeing a clear statement of which constraint failed is infinitely more helpful than wading through a maze of SFINAE-induced errors.</p>
+<p>Concepts essentially shift the paradigm from “enable this overload if &hellip;” (SFINAE) to “require this condition for this template”, aligning the code with the programmer’s intent.</p>
+<p>Another advantage of concepts is that they allow overloading and partial specialization to work more cleanly when multiple constraints are involved. The compiler actually uses the constraints to guide overload resolution (this is known as constraint satisfaction and partial ordering of templates). In cases where two templates both could match, the one with more specific (stronger) constraints can be chosen as more specialized. This was possible with SFINAE as well, but often required tricky techniques. With concepts, the language explicitly supports it. Furthermore, concepts can be combined with boolean logic (&amp;&amp;, ||, !) in requires clauses, making complex requirements easier to express than the equivalent SFINAE code which might require nested enable_if conditions or multiple overloads. In my opinion, concepts greatly improve the clarity and correctness of template code by making the code say exactly what it means in terms of requirements.</p>
+<h2 id="sfinae-vs-concepts-a-critical-comparison">SFINAE vs. Concepts: A Critical Comparison</h2>
+<p>Both SFINAE and Concepts serve to impose constraints on templates, but they do so in markedly different ways and with different developer experiences. Let’s compare them on a few key points:</p>
+<ul>
+<li>
+<p><strong>Clarity of Intent:</strong> With SFINAE-based techniques (like <code>enable_if</code> or the detection idiom), the intent is implicit. For example, writing <code>typename std::enable_if&lt;std::is_floating_point&lt;T&gt;::value, T&gt;::type</code> in a template signature is really a hack to say “this template exists only if T is a floating-point type”. A reader (or the compiler) must interpret the meta-programming to deduce the intent. Concepts, on the other hand, make the intent explicit. Writing <code>template&lt;std::floating_point T&gt; void f(T);</code> immediately communicates that “T must be a floating_point type”. This improves code readability and maintainability tremendously, especially in large codebases. I have found that when I revisit template code I wrote using SFINAE tricks, it takes mental effort to recall why those tricks were needed; concept-constrained code is far more self-documenting.</p>
+</li>
+<li>
+<p><strong>Compile-time Errors and Diagnostics:</strong> Perhaps the most practical improvement of concepts is in error messaging. As mentioned, SFINAE failures typically result in either silently removed overloads or lengthy error messages if no overload succeeds. These messages often list template instantiation backtraces and can be hard to decipher for all but the most experienced template gurus. With concepts, if a constraint is not satisfied, the compiler stops at the point of template constraint checking (before even entering the template’s body or instantiating it fully) and emits a concise error about the unsatisfied constrain. It might even name the concept that was not satisfied, as GCC and Clang do. This immediate, targeted feedback is a game-changer for developers trying to use templated libraries correctly.</p>
+</li>
+<li>
+<p><strong>Granularity of Constraints:</strong> SFINAE operates by exclusion, you write templates such that they vanish when a condition isn’t met. This works, but it can get tricky when you have multiple overlapping conditions. For example, consider you want a function overload for all arithmetic types, and a more specific one for integral types. With SFINAE, you could give the integral version a stricter condition and rely on the floating-point one to catch the rest, but you must be careful that the conditions don’t overlap incorrectly (or you might get ambiguous overloads or one template shadowing another unexpectedly). Concepts provide a more declarative way to handle this, and the language defines how overload resolution works with constraints (the more constrained template can be considered “more specialized”). In practice, this means it’s often easier to manage multiple constrained overloads with concepts than with SFINAE. You can even use the logical operators in requires clauses to succinctly express combined requirements (e.g., <code>requires (std::integral&lt;T&gt; || std::floating_point&lt;T&gt;)</code> for “arithmetic types”) instead of juggling multiple <code>enable_if</code> conditions.</p>
+</li>
+<li>
+<p><strong>Ease of Use vs. Backward Compatibility:</strong> One downside to concepts is that they require using C++20 or later. If you are stuck on C++17 or earlier for some project, SFINAE and <code>static_assert</code> are still your go-to tools for template constraints. SFINAE is also more flexible in some metaprogramming scenarios outside of simple constraints, for instance, template metaprogrammers have used SFINAE to detect properties in contexts beyond just overload resolution (like SFINAE-friendly expressions inside <code>decltype</code> to conditionally produce or not produce types). Concepts cover most of those use cases, but extremely fine-grained introspection might still lean on trickery in rare cases. That said, in my opinion and experience, there are very few practical needs in C++20 that cannot be expressed more cleanly with concepts or other modern features. The committee has even provided a suite of standard concepts (in <code>&lt;concepts&gt;</code> header) for common requirements (e.g., <code>std::integral</code>, <code>std::ranges::range</code>, <code>std::assignable_from&lt;From,To&gt;</code>, etc.), which saves you from writing your own basic concepts in many cases.</p>
+</li>
+<li>
+<p><strong>Performance of Compilation:</strong> This is more of an anecdotal point, but worth noting. SFINAE-heavy code can sometimes lead to longer compile times, because the compiler might instantiate many templates only to discard them. Concepts potentially streamline this by checking constraints upfront without instantiating the whole template (in theory). In practice, compilers have gotten quite good at SFINAE, so the difference isn’t usually huge, but concept constraints could avoid some redundant instantiations. More importantly, they avoid the need to include heavy <code>&lt;type_traits&gt;</code> logic or write extensive trait structs for things that can be one-liner concept definitions.</p>
+</li>
+<li>
+<p><strong>Alternatives and Complements:</strong> It’s important to mention that SFINAE is not the only way to impose compile-time conditions pre-C++20. Developers also commonly used <code>static_assert</code> inside templates to produce errors when conditions aren’t met. For example, you might see <code>static_assert(std::is_integral_v&lt;T&gt;, &quot;T must be integral&quot;);</code> at the top of a template function. This doesn’t remove the overload; instead, if someone uses the template with a wrong type, it causes a clear compile error with a custom message. This is a valid alternative when you want to fail loudly rather than SFINAE-away the overload. In fact, <em>cppreference</em> notes that if a compile-time error is the desired outcome (as opposed to simply choosing another overload), a static assert is usually preferable to SFINAE tricks. Additionally, since C++17, we have if <code>constexpr</code> which allows us to conditionally compile code in a template’s body based on a constant condition, simplifying many scenarios that previously might have required partial specialization or SFINAE. And even before concepts, some programmers used tag dispatch (manually choosing overloads by passing type-tag objects) to achieve similar goals. However, these techniques each have their domains, and concepts stand out as a way to declare intent right where it matters: in the template’s interface.</p>
+</li>
+</ul>
+<p>Given these points, the general guidance in the modern C++ community (and in the standard itself) is to prefer concepts (and other newer features) over direct SFINAE when possible.</p>
+<p>Concepts were designed to solve the pain points of SFINAE, providing a cleaner syntax and better compile-time feedback. In my own code, I’ve found that replacing complicated SFINAE logic with concepts or constexpr if often makes the code shorter and clearer. There are still cases where SFINAE is the only tool (especially in older code or in certain metaprogramming libraries that support pre-C++20), and understanding it is definitely important for a C++ programmer at an advanced level. But moving forward, Concepts are likely to be the dominant paradigm for template constraints. The consensus is that they let us express “intent” rather than “trick the compiler”, which is a welcome evolution in C++.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Substitution Failure Is Not An Error (SFINAE) has been a cornerstone of advanced C++ template programming, allowing templates to gracefully handle or restrict certain types. We saw how SFINAE-based techniques (like using std::enable_if and traits) can selectively enable or disable template overloads based on compile-time conditions, effectively performing static type checks and constraints within the C++17 language framework. However, these techniques, while powerful, come at the cost of complexity and sometimes user-unfriendly compile errors.</p>
+<p>With the advent of Concepts in C++20, the landscape of template programming has become more expressive and robust. Concepts enable us to state the requirements on template parameters directly (e.g. “T must be Hashable” or “T must be Integral”) and have the compiler enforce those requirements early, yielding clear diagnostic messages when they aren’t met. This not only makes template code easier to write and reason about, but also easier for others to use correctly. In essence, concepts are a high-level, declarative approach, whereas SFINAE was a low-level, procedural trick. Both ensure that templates only apply to appropriate types, but concepts do it in a way that aligns with writing and understanding generic code (much like how we think in terms of concepts or interfaces in other languages).</p>
+<p>In my analysis, SFINAE remains an important technique – one should understand it to fully grasp template resolution and to maintain legacy code – but whenever I have the option (in C++20 and beyond), I reach for concepts or other modern features first. They let me express my intent more clearly and catch errors more cleanly. As cppreference succinctly notes, features like if constexpr and concepts are “usually preferred over use of SFINAE” in new code.</p>
+<p>The evolution from SFINAE to Concepts in C++ represents a shift from clever workaround to language-supported solution. It’s a great example of how C++ continues to improve developer experience without sacrificing the powerful zero-overhead abstractions we love.</p>
+<h2 id="references">References</h2>
+<ul>
+<li>Cppreference – “Substitution Failure Is Not An Error (SFINAE)”</li>
+<li>Cppreference – <code>std::enable_if</code> reference</li>
+<li>Wikipedia – “Substitution failure is not an error”</li>
+<li>Cppreference – “Constraints and Concepts”</li>
+<li>Cppreference – C++20 Features</li>
+<li>Cppreference – “SFINAE Alternatives”</li>
+<li>Cppreference – <code>&lt;concepts&gt;</code> library</li>
+</ul>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        3409 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-07-24
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f07%2fsfinae-and-concepts-in-modern-c-template-programming%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f07%2fsfinae-and-concepts-in-modern-c-template-programming%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=SFINAE%20and%20Concepts%20in%20Modern%20C%2b%2b%20Template%20Programming&amp;caption=SFINAE%20and%20Concepts%20in%20Modern%20C%2b%2b%20Template%20Programming&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f07%2fsfinae-and-concepts-in-modern-c-template-programming%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=SFINAE%20and%20Concepts%20in%20Modern%20C%2b%2b%20Template%20Programming&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f07%2fsfinae-and-concepts-in-modern-c-template-programming%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f07%2fsfinae-and-concepts-in-modern-c-template-programming%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f07%2fsfinae-and-concepts-in-modern-c-template-programming%2f;description=SFINAE%20and%20Concepts%20in%20Modern%20C%2b%2b%20Template%20Programming" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f07%2fsfinae-and-concepts-in-modern-c-template-programming%2f&amp;title=SFINAE%20and%20Concepts%20in%20Modern%20C%2b%2b%20Template%20Programming&amp;summary=SFINAE%20and%20Concepts%20in%20Modern%20C%2b%2b%20Template%20Programming&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f07%2fsfinae-and-concepts-in-modern-c-template-programming%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f07%2fsfinae-and-concepts-in-modern-c-template-programming%2f&amp;resubmit=true&amp;title=SFINAE%20and%20Concepts%20in%20Modern%20C%2b%2b%20Template%20Programming" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f07%2fsfinae-and-concepts-in-modern-c-template-programming%2f;title=SFINAE%20and%20Concepts%20in%20Modern%20C%2b%2b%20Template%20Programming" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=SFINAE%20and%20Concepts%20in%20Modern%20C%2b%2b%20Template%20Programming%20https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f07%2fsfinae-and-concepts-in-modern-c-template-programming%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f07%2fsfinae-and-concepts-in-modern-c-template-programming%2f&amp;t=SFINAE%20and%20Concepts%20in%20Modern%20C%2b%2b%20Template%20Programming" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=SFINAE%20and%20Concepts%20in%20Modern%20C%2b%2b%20Template%20Programming&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f07%2fsfinae-and-concepts-in-modern-c-template-programming%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2026/06/move-semantics-and-rvalue-references-in-c-17/">
+                    <span class="button__text">Move Semantics and Rvalue References in C&#43;&#43;17</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

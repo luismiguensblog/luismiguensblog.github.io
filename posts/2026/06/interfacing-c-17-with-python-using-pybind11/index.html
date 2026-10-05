@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Introduction: Bridging C&#43;&#43; and Python Python and C&#43;&#43; are both powerful in their domains: Python excels in ease of use and rapid development, while C&#43;&#43; offers high performance and fine-grained control. In many projects, it is desirable to combine the two, leveraging C&#43;&#43; for performance-critical components and Python for high-level orchestration. Pybind11 is a modern solution that makes this integration straightforward by allowing developers to expose C&#43;&#43;17 code to Python with minimal boilerplate. It is a lightweight, header-only library inspired by Boost.Python but without the heavy dependency on Boost. In this post, I will share how to create Python bindings for C&#43;&#43;17 code using Pybind11, focusing on its simplicity and illustrating with examples of binding custom data structures and dummy APIs (without diving into performance details).
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2026/06/interfacing-c-17-with-python-using-pybind11/" />
+
+
+    <title>
+        
+            Interfacing C&#43;&#43;17 with Python Using Pybind11 :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.ab5336003ba331300318b49292c672210905baf1ef5410a739f647e70c8808fa.css" integrity="sha256-q1M2ADujMTADGLSSksZyIQkFuvHvVBCnOfZH5wyICPo=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+	<meta itemprop="name" content="Interfacing C&#43;&#43;17 with Python Using Pybind11">
+	<meta itemprop="description" content="Introduction: Bridging C&#43;&#43; and Python Python and C&#43;&#43; are both powerful in their domains: Python excels in ease of use and rapid development, while C&#43;&#43; offers high performance and fine-grained control. In many projects, it is desirable to combine the two, leveraging C&#43;&#43; for performance-critical components and Python for high-level orchestration. Pybind11 is a modern solution that makes this integration straightforward by allowing developers to expose C&#43;&#43;17 code to Python with minimal boilerplate. It is a lightweight, header-only library inspired by Boost.Python but without the heavy dependency on Boost. In this post, I will share how to create Python bindings for C&#43;&#43;17 code using Pybind11, focusing on its simplicity and illustrating with examples of binding custom data structures and dummy APIs (without diving into performance details).">
+	<meta itemprop="datePublished" content="2026-06-03T00:00:00+00:00">
+	<meta itemprop="dateModified" content="2026-06-03T00:00:00+00:00">
+	<meta itemprop="wordCount" content="2654">
+	<meta itemprop="image" content="https://blog.miguens.one/">
+	<meta itemprop="keywords" content="C_cpp,Programming">
+
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="https://blog.miguens.one/">
+	<meta name="twitter:title" content="Interfacing C&#43;&#43;17 with Python Using Pybind11">
+	<meta name="twitter:description" content="Introduction: Bridging C&#43;&#43; and Python Python and C&#43;&#43; are both powerful in their domains: Python excels in ease of use and rapid development, while C&#43;&#43; offers high performance and fine-grained control. In many projects, it is desirable to combine the two, leveraging C&#43;&#43; for performance-critical components and Python for high-level orchestration. Pybind11 is a modern solution that makes this integration straightforward by allowing developers to expose C&#43;&#43;17 code to Python with minimal boilerplate. It is a lightweight, header-only library inspired by Boost.Python but without the heavy dependency on Boost. In this post, I will share how to create Python bindings for C&#43;&#43;17 code using Pybind11, focusing on its simplicity and illustrating with examples of binding custom data structures and dummy APIs (without diving into performance details).">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2026/06/interfacing-c-17-with-python-using-pybind11/">
+	<meta property="og:site_name" content="Luis Miguens Blog">
+	<meta property="og:title" content="Interfacing C&#43;&#43;17 with Python Using Pybind11">
+	<meta property="og:description" content="Introduction: Bridging C&#43;&#43; and Python Python and C&#43;&#43; are both powerful in their domains: Python excels in ease of use and rapid development, while C&#43;&#43; offers high performance and fine-grained control. In many projects, it is desirable to combine the two, leveraging C&#43;&#43; for performance-critical components and Python for high-level orchestration. Pybind11 is a modern solution that makes this integration straightforward by allowing developers to expose C&#43;&#43;17 code to Python with minimal boilerplate. It is a lightweight, header-only library inspired by Boost.Python but without the heavy dependency on Boost. In this post, I will share how to create Python bindings for C&#43;&#43;17 code using Pybind11, focusing on its simplicity and illustrating with examples of binding custom data structures and dummy APIs (without diving into performance details).">
+	<meta property="og:locale" content="en_us">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="posts">
+		<meta property="article:published_time" content="2026-06-03T00:00:00+00:00">
+		<meta property="article:modified_time" content="2026-06-03T00:00:00+00:00">
+		<meta property="article:tag" content="C_cpp">
+		<meta property="article:tag" content="Programming">
+		<meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2026-06-03 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( true ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        13 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2026/06/interfacing-c-17-with-python-using-pybind11/">Interfacing C++17 with Python Using Pybind11</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="introduction-bridging-c-and-python">Introduction: Bridging C++ and Python</h2>
+<p>Python and C++ are both powerful in their domains: Python excels in ease of use and rapid development, while C++ offers high performance and fine-grained control. In many projects, it is desirable to <strong>combine the two</strong>, leveraging C++ for performance-critical components and Python for high-level orchestration. <em>Pybind11</em> is a modern solution that makes this integration straightforward by allowing developers to expose C++17 code to Python with minimal boilerplate. It is a <strong>lightweight, header-only library</strong> inspired by Boost.Python but without the heavy dependency on Boost. In this post, I will share how to create Python bindings for C++17 code using Pybind11, focusing on its simplicity and illustrating with examples of binding custom data structures and dummy APIs (without diving into performance details).</p>
+<h2 id="why-pybind11-simplicity-and-key-features">Why Pybind11? Simplicity and Key Features</h2>
+<p>Pybind11’s design philosophy emphasises <strong>ease-of-use</strong> and succinctness. Unlike writing a Python C extension from scratch or using older tools, Pybind11 dramatically reduces the amount of glue code required. In my experience, the following benefits make Pybind11 stand out:</p>
+<ul>
+<li>
+<p><strong>Minimal Boilerplate:</strong> Pybind11 infers function signatures and types at compile time using template metaprogramming. This means you write very little explicit code to expose a function or class – the library deduces argument and return types automatically. As the official docs note, “notice how little code was needed to expose our function to Python” because Pybind11 handles the details for you.</p>
+</li>
+<li>
+<p><strong>Header-Only and Easy Build:</strong> Being header-only, <strong>no separate linking step</strong> is needed against a Pybind11 library. You include the headers and compile your C++ code into a Python module. Pybind11 works with modern C++ standards (C++11 and up) and leverages new language features for simplicity. This compact implementation avoids the complexity of Boost and keeps compile times and binary sizes small. For example, without any special build system, one can compile a Pybind11 module on Linux with a single command using g++ and Python’s build flags.</p>
+</li>
+<li>
+<p><strong>Automatic Conversions:</strong> Pybind11 automatically converts many C++ types to Python types and vice versa. It has built-in support for standard types (numbers, strings), STL containers, and more. For instance, if a C++ function returns a <code>std::set&lt;std::pair&lt;std::string, std::vector&lt;int&gt;&gt;&gt;</code>, Pybind11 will present it in Python as a <code>set</code> of tuples (<code>str</code>, <code>list[int]</code>) without extra work from the developer. This seamless mapping between C++ STL and Python data structures (and support for NumPy arrays, etc.) greatly simplifies integration.</p>
+</li>
+<li>
+<p><strong>Modern C++17 Features:</strong> Since we target <strong>C++17</strong>, it’s worth noting Pybind11 supports and benefits from C++17 features. It can, for example, handle <code>std::optional</code>, structured bindings, and other modern types via its type caster system. The library’s newer cousin <em>Nanobind</em> (by the same author) even takes C++17 further for efficiency, but Pybind11 itself is fully capable with C++17 and widely used.</p>
+</li>
+<li>
+<p><strong>No External Dependencies:</strong> Aside from Python development headers, Pybind11 doesn’t require linking against libpython or Boost. It simply needs a C++ compiler and Python’s API. This makes integration less error-prone. As the PyPI description highlights, Pybind11 aims to “minimize boilerplate code… by inferring type information using compile-time introspection”, essentially automating the hard parts of extension writing.</p>
+</li>
+</ul>
+<p><strong>Alternatives:</strong> It’s useful to be aware of other binding tools. <em>Boost.Python</em> is the historic predecessor to Pybind11, offering similar functionality but with the heavy Boost dependency and older design. <em>SWIG</em> can generate bindings for multiple languages (including Python) but introduces an extra interface file and can be more cumbersome for modern C++ features. <em>Cython</em> allows writing Python-like syntax that gets compiled to C, which is great for gradually optimising Python code, but it’s less straightforward when you have an existing C++ codebase. <em>Nanobind</em>, as mentioned, is a newer project by Pybind11’s creator that uses C++17 to achieve even more efficient bindings in terms of speed and memory footprint. Each of these has its use cases, but for <strong>simplicity and quick integration</strong>, Pybind11 is often my go-to choice.</p>
+<h2 id="setting-up-pybind11-integration-linux">Setting Up Pybind11 Integration (Linux)</h2>
+<p>Setting up Pybind11 is relatively straightforward. For this demonstration, I’ll assume a Linux environment with <strong>GCC</strong> and Python 3.10. (Compiling on Windows is equally trivial using Visual Studio or MinGW, but here we focus on Linux steps for brevity.)</p>
+<p><strong>Prerequisites:</strong> You need Python’s development headers and Pybind11 available. On Linux, this can be done by installing the <code>python3-dev</code> package and the Pybind11 library (e.g. via <code>pip install pybind11</code>). The Pybind11 headers will be accessible either in your Python’s site-packages or from an include directory if installed system-wide.</p>
+<p>Once you have the environment ready, you can write your C++ code and compile it into a Python extension module:</p>
+<ol>
+<li>
+<p><strong>Write the C++ Code with Pybind11:</strong> Create a C++ source file (e.g. <code>mymodule.cpp</code>). This will contain your C++ functions/classes and the Pybind11 binding code. We’ll see an example in the next section.</p>
+</li>
+<li>
+<p><strong>Compile the code into a Python module:</strong> Use a <strong>compiler command</strong> that includes Python and Pybind11 headers and produces a shared library (<code>.so</code> file). Pybind11 provides a convenient way to get the necessary compiler flags. For instance, the following command compiles <code>mymodule.cpp</code> into a Python 3.10 module on Linux:</p>
+</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>c++ -O3 -Wall -shared -std<span style="color:#f92672">=</span>c++17 -fPIC <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">$(</span>python3.10 -m pybind11 --includes<span style="color:#66d9ef">)</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span>    mymodule.cpp -o mymodule<span style="color:#66d9ef">$(</span>python3.10-config --extension-suffix<span style="color:#66d9ef">)</span>
+</span></span></code></pre></div><pre><code>Let’s break this down:
+
+- `-std=c++17` enables C++17 standard (Pybind11 works with C++11 and above; here we use C++17 features).
+    
+- `-fPIC` and `-shared` are needed to create a shared library object.
+    
+- `$(python3.10 -m pybind11 --includes)` calls Python to retrieve the include paths for Pybind11 and Python headers, saving you from manually specifying `-I` paths. (If Pybind11 is installed via pip, this ensures the compiler knows where to find `&lt;pybind11/pybind11.h&gt;` and `&lt;Python.h&gt;`.)
+    
+- `mymodule.cpp -o mymodule$(python3.10-config --extension-suffix)` specifies the input file and output file. `python3.10-config --extension-suffix` will produce the appropriate extension for Python modules (e.g. `.cpython-310-x86_64-linux-gnu.so` or similar). This ensures your compiled module has the correct name for Python to import.
+    
+
+This one-liner is essentially the same approach suggested in Pybind11’s documentation for building modules on Linux. After running it, you should get a file like `mymodule.cpython-310-x86_64-linux-gnu.so`.
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong> On Windows, you would compile to a <code>.pyd</code> file (Python’s DLL equivalent) using MSVC with the appropriate flags (and no <code>-fPIC</code>). The Pybind11 docs cover cross-platform builds, and using a CMake script or Python’s setuptools can simplify multi-platform compilation. For example, Pybind11 provides a CMake function <code>pybind11_add_module</code> that abstracts these details. But using GCC on Linux as above is a quick way to get started.</p>
+</blockquote>
+<h2 id="example-binding-a-c-function-and-a-custom-class">Example: Binding a C++ Function and a Custom Class</h2>
+<p>Let’s walk through a concrete example. Suppose we have a simple C++17 class and function we want to use from Python. We’ll define:</p>
+<ul>
+<li>
+<p>A free function <code>add(int, int)</code> that returns the sum of two integers.</p>
+</li>
+<li>
+<p>A custom data structure <code>DataCounter</code> that stores an integer count and provides methods to manipulate it (a dummy API: incrementing the count, retrieving the value, etc.), as well as a static method to demonstrate exposing class methods.</p>
+</li>
+</ul>
+<p>Here’s the C++ code (<code>mymodule.cpp</code>):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;pybind11/pybind11.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">namespace</span> py <span style="color:#f92672">=</span> pybind11;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// A free function to add two numbers int add(int a, int b) {
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">+</span> b;
+</span></span><span style="display:flex;"><span>} <span style="color:#75715e">// A custom data structure with a dummy API
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DataCounter</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span><span style="color:#f92672">:</span> DataCounter(<span style="color:#66d9ef">int</span> initial) <span style="color:#f92672">:</span> count(initial) {} <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">increment</span>(<span style="color:#66d9ef">int</span> value) {
+</span></span><span style="display:flex;"><span>        count <span style="color:#f92672">+=</span> value;
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">value</span>() <span style="color:#66d9ef">const</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> count;
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">static</span> std<span style="color:#f92672">::</span>string greet() {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;Hello from C++&#34;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">private</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">int</span> count;
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Pybind11 module definition PYBIND11_MODULE(mymodule, m) {
+</span></span></span><span style="display:flex;"><span>    m.doc() <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Example Pybind11 module (C++17)&#34;</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Optional module docstring // Bind the free function m.def(&#34;add&#34;, &amp;add, &#34;Add two integers&#34;);
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Bind the DataCounter
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">py</span><span style="color:#f92672">::</span>class_<span style="color:#f92672">&lt;</span>DataCounter<span style="color:#f92672">&gt;</span>(m, <span style="color:#e6db74">&#34;DataCounter&#34;</span>) .def(py<span style="color:#f92672">::</span>init<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>(), py<span style="color:#f92672">::</span>arg(<span style="color:#e6db74">&#34;initial&#34;</span>)) <span style="color:#75715e">// bind constructor taking int .def(&#34;increment&#34;, &amp;DataCounter::increment, py::arg(&#34;value&#34;)) .def(&#34;value&#34;, &amp;DataCounter::value) .def_static(&#34;greet&#34;, &amp;DataCounter::greet);
+</span></span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Let’s unpack what’s happening in the <code>PYBIND11_MODULE</code> block:</p>
+<ul>
+<li>
+<p><code>PYBIND11_MODULE(mymodule, m)</code> is a macro that declares the entry-point of the Python module. The first argument <code>mymodule</code> is the name of the module as Python will see it (so Python will do <code>import mymodule</code>). The second argument <code>m</code> is a <code>py::module_</code> object which we use to add our bindings.</p>
+</li>
+<li>
+<p><code>m.doc()</code> sets a docstring for the module (optional but good practice).</p>
+</li>
+<li>
+<p><code>m.def(&quot;add&quot;, &amp;add, &quot;Add two integers&quot;)</code> exposes the C++ function <code>add</code> to Python. The first argument is the name Python will use (<code>add</code>), the second is the function pointer, and the third is an optional documentation string. Pybind11 uses the function pointer to infer the argument and return types, automatically creating a Python callable. After this, in Python we can call <code>mymodule.add(1, 2)</code> and get <code>3</code> as result.</p>
+</li>
+<li>
+<p><code>py::class_&lt;DataCounter&gt;(m, &quot;DataCounter&quot;)</code> begins the binding of the <code>DataCounter</code> class. The string <code>&quot;DataCounter&quot;</code> is the name of the Python class that will be created. We then chain methods to define how the class works in Python:</p>
+<ul>
+<li>
+<p><code>.def(py::init&lt;int&gt;(), py::arg(&quot;initial&quot;))</code> says that <code>DataCounter</code> can be constructed in Python by calling <code>DataCounter(initial)</code> with an <code>int</code> argument. We use <code>py::init&lt;int&gt;()</code> to select the constructor, and <code>py::arg(&quot;initial&quot;)</code> to name the parameter (so Python knows the parameter name for introspection).</p>
+</li>
+<li>
+<p><code>.def(&quot;increment&quot;, &amp;DataCounter::increment, py::arg(&quot;value&quot;))</code> exposes the <code>increment()</code> method. After binding, Python code can call <code>obj.increment(5)</code> to execute the C++ method, which will add 5 to the internal count. We provide the parameter name for clarity.</p>
+</li>
+<li>
+<p><code>.def(&quot;value&quot;, &amp;DataCounter::value)</code> binds the <code>value()</code> method, which returns the current count. This allows Python to do <code>obj.value()</code> to retrieve the internal state.</p>
+</li>
+<li>
+<p><code>.def_static(&quot;greet&quot;, &amp;DataCounter::greet)</code> binds the static method <code>greet()</code>. This shows how to expose static class methods; Python can call <code>DataCounter.greet()</code> directly on the class to get a greeting string from C++.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Note that we didn’t explicitly mention anything about data types beyond using them in function signatures. Pybind11 automatically knows how to convert the C++ <code>int</code> and <code>std::string</code> types to Python integers and strings. If we had more complex types (like <code>std::vector&lt;int&gt;</code> or custom structs), we might include extra Pybind11 headers (e.g. <code>&lt;pybind11/stl.h&gt;</code>) or write custom type casters, but basic types and many STL containers are supported out-of-the-box.</p>
+</li>
+</ul>
+<p>This example demonstrates a <strong>dummy API</strong>: we can increment a counter and fetch its value. It’s “dummy” in the sense that it’s simple, but in a real scenario <code>DataCounter</code> could represent some complex C++ object whose methods perform computationally heavy tasks. The Python user wouldn’t need to know the details – they just call <code>increment()</code> or <code>value()</code> as if it were a normal Python object method, but behind the scenes, C++ is doing the work.</p>
+<h2 id="building-and-using-the-python-module">Building and Using the Python Module</h2>
+<p>After writing the C++ code, you compile it as described earlier. For instance, running the g++ command shown in the setup section will produce <code>mymodule.cpython-310-x86_64-linux-gnu.so</code> (the exact filename may vary). Make sure this compiled file is either in your current working directory or in Python’s <code>sys.path</code>.</p>
+<p>Now, let’s see how we use this module from Python:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#f92672">import</span> mymodule
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Use the bound C++ function</span>
+</span></span><span style="display:flex;"><span>result <span style="color:#f92672">=</span>mymodule<span style="color:#f92672">.</span>add(<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>print(<span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;3 + 4 = </span><span style="color:#e6db74">{</span>result<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>)  <span style="color:#75715e"># Expected output: 3 + 4 = 7</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Use the bound C++ class</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>counter <span style="color:#f92672">=</span>mymodule<span style="color:#f92672">.</span>DataCounter(initial<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>) <span style="color:#75715e"># Create a DataCounter object with initial value 10</span>
+</span></span><span style="display:flex;"><span>counter<span style="color:#f92672">.</span>increment(<span style="color:#ae81ff">5</span>)
+</span></span><span style="display:flex;"><span>print(counter<span style="color:#f92672">.</span>value())  <span style="color:#75715e"># Expected output: 15 # Call the static method</span>
+</span></span><span style="display:flex;"><span>print(mymodule<span style="color:#f92672">.</span>DataCounter<span style="color:#f92672">.</span>greet())  <span style="color:#75715e"># Expected output: Hello from C++</span>
+</span></span></code></pre></div><p>When you run a Python script like the above (in the same folder as the <code>.so</code> module, or after installing the module), you should see the expected outputs. The <code>mymodule.add</code> function behaves like a normal Python function that adds numbers, and <code>DataCounter</code> behaves like a normal Python class (you can even use Python’s <code>help(mymodule.DataCounter)</code> to see its docstring and methods). However, all the heavy lifting is being done in C++ under the hood. This means you could, for example, implement complex algorithms inside <code>increment</code> or other methods in C++ for efficiency, and still call them from Python naturally.</p>
+<p>One of the great things I find with Pybind11 is that the <strong>integration feels seamless</strong>. In Python, the objects are full-fledged Python objects (you can print them, inspect them, etc.), but they are actually backed by C++ implementations. The simplicity of the binding code does not mean it’s a toy – you can expose very sophisticated C++ library code in the same manner, with classes, exceptions, overloads, and more, and Pybind11 will handle most of the translation work for you.</p>
+<h2 id="discussion-simplicity-vs-performance-trade-off">Discussion: Simplicity vs. Performance Trade-off</h2>
+<p>Pybind11’s ease-of-use does come with some overhead, but it’s generally a worthwhile trade-off. By design, Pybind11 provides <em>zero-cost abstractions</em> where possible, meaning it tries not to add runtime cost beyond what the Python C API requires. In fact, it’s advertised as having “minimal overhead, designed for zero-cost abstractions that keep C++ speed intact”. In practice, calling a C++ function through Pybind11 is very fast – the conversion of arguments and return values is quite efficient. If your C++ function does a significant amount of work (e.g. heavy computations on an array), the call overhead is negligible compared to the computation time.</p>
+<p>However, if you were to call a trivial C++ function millions of times from Python (e.g. a tight loop calling an addition function), the overhead of crossing the language boundary could become noticeable. This is not a limitation of Pybind11 alone but of any approach that interfaces Python with C++ – each call has to go through the Python C API. Tools like Cython can sometimes achieve lower overhead for <em>very fine-grained</em> interactions by embedding C logic more directly, but they require a different development approach. In my experience, for the majority of use cases (where each C++ call does non-trivial work), Pybind11’s performance is more than sufficient. It lets you write <strong>high-performance extensions</strong> while maintaining a high level of code clarity.</p>
+<p>For those extreme scenarios where you need to squeeze out every bit of performance (or reduce binary size), one might consider <strong>Nanobind</strong> or even writing custom CPython extensions. Nanobind, created by Pybind11’s author, uses C++17 and some new techniques to reduce overhead and memory usage, offering “more efficient bindings in space and speed”. The trade-off is that it’s a bit more opinionated (for example, it encourages a specific CMake build setup and has a slightly different API). Boost.Python is another alternative, but it’s largely superseded by Pybind11 due to Pybind11’s lighter weight and the fact that it doesn’t require linking against Boost. For most intermediate to advanced developers, Pybind11 hits a sweet spot between <strong>developer productivity and runtime performance</strong>, especially when integrating with C++17 codebases that can fully benefit from modern C++ features.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Interfacing C++17 with Python is no longer an arcane art reserved for CPython gurus – Pybind11 makes it accessible and even <em>enjoyable</em>. In this post, we demonstrated how to expose a C++ function and a custom data structure to Python using Pybind11, with only a few lines of straightforward code. We discussed how Pybind11’s approach prioritises simplicity and leverages modern C++ techniques to automatically handle type conversions and minimise boilerplate. The example with <code>DataCounter</code> and the <code>add</code> function shows the basics, but Pybind11 can handle much more complex scenarios (multiple classes, inheritance, overloaded functions, custom types, etc.) with similar elegance.</p>
+<p>In my experience, using Pybind11 allows one to <strong>write C++ and Python side by side</strong>, using each for what it does best: compute-intensive tasks in C++, and high-level logic or scripting in Python. The result is often the “best of both worlds” – you get Python’s ease of use without sacrificing the performance of critical sections of code. By following the steps outlined (and consulting Pybind11’s excellent documentation for advanced needs), you can integrate C++17 code into your Python projects confidently. This opens up possibilities to reuse existing C++ libraries in Python, accelerate Python code by moving bottlenecks to C++, or simply to <strong>share data structures and algorithms between the two languages</strong> in a clean way.</p>
+<h2 id="references">References</h2>
+<ul>
+<li>
+<p>Pybind11 Official Documentation – <em>Basics and Introduction</em><a href="https://pybind11.readthedocs.io/en/stable/basics.html#:~:text=Notice%20how%20little%20code%20was,underlying%20implementation%20is%20very%20different">pybind11.readthedocs.io</a><a href="https://pybind11.readthedocs.io/en/stable/basics.html#:~:text=pybind11%20is%20a%20header,compiled%20using%20the%20following%20command">pybind11.readthedocs.io</a></p>
+</li>
+<li>
+<p>Pybind11 PyPI Description – <em>Project Goals and Comparison to Boost.Python</em><a href="https://pypi.org/project/pybind11/2.0.1/#:~:text=pybind11%20is%20a%20lightweight%20header,time%20introspection">pypi.org</a></p>
+</li>
+<li>
+<p>Lena’s DEV Community Article – <em>Creating Python Bindings with Pybind11 (mentions alternatives like Boost.Python &amp; Nanobind)</em><a href="https://dev.to/baduit/create-python-bindings-for-my-c-code-with-pybind11-2pck#:~:text=Note%20that%20PyBind11%20is%20not,and%20Python%2C%20there%20is%20also">dev.to</a></p>
+</li>
+<li>
+<p>Dan Vanderkam, <em>Python and C++ with pybind11: A Great Combination</em> – <em>Blog post illustrating Pybind11 usage and STL conversion example</em><a href="https://www.danvk.org/2025/09/11/pybind11.html#:~:text=pybind11%20automates%20the%20process%20of,int%5D%5D%5D%60%20in%20Python">danvk.org</a></p>
+</li>
+<li>
+<p>Hacker News Discussion – <em>Comment on Pybind11 ease-of-use vs runtime performance trade-off</em><a href="https://news.ycombinator.com/item?id=34664012#:~:text=TkTech%20%20%2016%20">news.ycombinator.com</a></p>
+</li>
+<li>
+<p>Ahmed Gad, <em>Pybind11 Tutorial</em> – <em>Tutorial demonstrating class binding and concluding remarks on combining C++ performance with Python simplicity</em><a href="https://medium.com/@ahmedfgad/pybind11-tutorial-binding-c-code-to-python-337da23685dc#:~:text=Pybind11%20simplifies%20bridging%20the%20gap,Happy%20coding">medium.com</a></p>
+</li>
+</ul>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        2654 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-06-03
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2finterfacing-c-17-with-python-using-pybind11%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2finterfacing-c-17-with-python-using-pybind11%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Interfacing%20C%2b%2b17%20with%20Python%20Using%20Pybind11&amp;caption=Interfacing%20C%2b%2b17%20with%20Python%20Using%20Pybind11&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2finterfacing-c-17-with-python-using-pybind11%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Interfacing%20C%2b%2b17%20with%20Python%20Using%20Pybind11&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2finterfacing-c-17-with-python-using-pybind11%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2finterfacing-c-17-with-python-using-pybind11%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2finterfacing-c-17-with-python-using-pybind11%2f;description=Interfacing%20C%2b%2b17%20with%20Python%20Using%20Pybind11" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2finterfacing-c-17-with-python-using-pybind11%2f&amp;title=Interfacing%20C%2b%2b17%20with%20Python%20Using%20Pybind11&amp;summary=Interfacing%20C%2b%2b17%20with%20Python%20Using%20Pybind11&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2finterfacing-c-17-with-python-using-pybind11%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2finterfacing-c-17-with-python-using-pybind11%2f&amp;resubmit=true&amp;title=Interfacing%20C%2b%2b17%20with%20Python%20Using%20Pybind11" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2finterfacing-c-17-with-python-using-pybind11%2f;title=Interfacing%20C%2b%2b17%20with%20Python%20Using%20Pybind11" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Interfacing%20C%2b%2b17%20with%20Python%20Using%20Pybind11%20https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2finterfacing-c-17-with-python-using-pybind11%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2finterfacing-c-17-with-python-using-pybind11%2f&amp;t=Interfacing%20C%2b%2b17%20with%20Python%20Using%20Pybind11" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Interfacing%20C%2b%2b17%20with%20Python%20Using%20Pybind11&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2finterfacing-c-17-with-python-using-pybind11%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2026/06/move-semantics-and-rvalue-references-in-c-17/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">Move Semantics and Rvalue References in C&#43;&#43;17</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2026/05/bridging-c-17-and-other-languages-a-comprehensive-interface-guide/">
+                    <span class="button__text">Bridging C&#43;&#43;17 and Other Languages: A Comprehensive Interface Guide</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>
