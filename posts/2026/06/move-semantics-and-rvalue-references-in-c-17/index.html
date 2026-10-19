@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Introduction Modern C&#43;&#43; (since C&#43;&#43;11 and beyond) provides move semantics and rvalue references as powerful features to improve the efficiency of object handling. These features address the performance pitfalls of traditional copy semantics by allowing us to transfer resources between objects rather than always duplicating them. In my experience, this has drastically reduced the overhead of passing and returning large objects, and it simplifies ownership management in complex systems.
+In this post, I explain what move semantics and rvalue references are, how they work in C&#43;&#43;17, and how they optimise resource management and improve performance in real-world code. I also walk through examples of defining move constructors and move assignment operators, using an analytical approach to illustrate their benefits. Throughout, I draw on authoritative sources and practical observations to show why embracing move semantics is essential for intermediate and advanced C&#43;&#43; developers.
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2026/06/move-semantics-and-rvalue-references-in-c-17/" />
+
+
+    <title>
+        
+            Move Semantics and Rvalue References in C&#43;&#43;17 :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.ab5336003ba331300318b49292c672210905baf1ef5410a739f647e70c8808fa.css" integrity="sha256-q1M2ADujMTADGLSSksZyIQkFuvHvVBCnOfZH5wyICPo=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+	<meta itemprop="name" content="Move Semantics and Rvalue References in C&#43;&#43;17">
+	<meta itemprop="description" content="Introduction Modern C&#43;&#43; (since C&#43;&#43;11 and beyond) provides move semantics and rvalue references as powerful features to improve the efficiency of object handling. These features address the performance pitfalls of traditional copy semantics by allowing us to transfer resources between objects rather than always duplicating them. In my experience, this has drastically reduced the overhead of passing and returning large objects, and it simplifies ownership management in complex systems.
+In this post, I explain what move semantics and rvalue references are, how they work in C&#43;&#43;17, and how they optimise resource management and improve performance in real-world code. I also walk through examples of defining move constructors and move assignment operators, using an analytical approach to illustrate their benefits. Throughout, I draw on authoritative sources and practical observations to show why embracing move semantics is essential for intermediate and advanced C&#43;&#43; developers.">
+	<meta itemprop="datePublished" content="2026-06-29T00:00:00+00:00">
+	<meta itemprop="dateModified" content="2026-06-29T00:00:00+00:00">
+	<meta itemprop="wordCount" content="3022">
+	<meta itemprop="image" content="https://blog.miguens.one/">
+	<meta itemprop="keywords" content="C_cpp,Programming">
+
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="https://blog.miguens.one/">
+	<meta name="twitter:title" content="Move Semantics and Rvalue References in C&#43;&#43;17">
+	<meta name="twitter:description" content="Introduction Modern C&#43;&#43; (since C&#43;&#43;11 and beyond) provides move semantics and rvalue references as powerful features to improve the efficiency of object handling. These features address the performance pitfalls of traditional copy semantics by allowing us to transfer resources between objects rather than always duplicating them. In my experience, this has drastically reduced the overhead of passing and returning large objects, and it simplifies ownership management in complex systems.
+In this post, I explain what move semantics and rvalue references are, how they work in C&#43;&#43;17, and how they optimise resource management and improve performance in real-world code. I also walk through examples of defining move constructors and move assignment operators, using an analytical approach to illustrate their benefits. Throughout, I draw on authoritative sources and practical observations to show why embracing move semantics is essential for intermediate and advanced C&#43;&#43; developers.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2026/06/move-semantics-and-rvalue-references-in-c-17/">
+	<meta property="og:site_name" content="Luis Miguens Blog">
+	<meta property="og:title" content="Move Semantics and Rvalue References in C&#43;&#43;17">
+	<meta property="og:description" content="Introduction Modern C&#43;&#43; (since C&#43;&#43;11 and beyond) provides move semantics and rvalue references as powerful features to improve the efficiency of object handling. These features address the performance pitfalls of traditional copy semantics by allowing us to transfer resources between objects rather than always duplicating them. In my experience, this has drastically reduced the overhead of passing and returning large objects, and it simplifies ownership management in complex systems.
+In this post, I explain what move semantics and rvalue references are, how they work in C&#43;&#43;17, and how they optimise resource management and improve performance in real-world code. I also walk through examples of defining move constructors and move assignment operators, using an analytical approach to illustrate their benefits. Throughout, I draw on authoritative sources and practical observations to show why embracing move semantics is essential for intermediate and advanced C&#43;&#43; developers.">
+	<meta property="og:locale" content="en_us">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="posts">
+		<meta property="article:published_time" content="2026-06-29T00:00:00+00:00">
+		<meta property="article:modified_time" content="2026-06-29T00:00:00+00:00">
+		<meta property="article:tag" content="C_cpp">
+		<meta property="article:tag" content="Programming">
+		<meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2026-06-29 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( true ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        15 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2026/06/move-semantics-and-rvalue-references-in-c-17/">Move Semantics and Rvalue References in C++17</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <h2 id="introduction">Introduction</h2>
+<p>Modern C++ (since C++11 and beyond) provides move semantics and rvalue references as powerful features to improve the efficiency of object handling. These features address the performance pitfalls of traditional copy semantics by allowing us to transfer resources between objects rather than always duplicating them. In my experience, this has drastically reduced the overhead of passing and returning large objects, and it simplifies ownership management in complex systems.</p>
+<p>In this post, I explain what move semantics and rvalue references are, how they work in C++17, and how they optimise resource management and improve performance in real-world code. I also walk through examples of defining move constructors and move assignment operators, using an analytical approach to illustrate their benefits. Throughout, I draw on authoritative sources and practical observations to show why embracing move semantics is essential for intermediate and advanced C++ developers.</p>
+<h2 id="the-cost-of-copying-and-the-need-for-moves">The Cost of Copying and the Need for Moves</h2>
+<p>Before move semantics, copying objects was often the only way to transfer data, which could be expensive for resource-heavy objects. A copy operation typically entails allocating new memory and duplicating the contents of the source object. For example, consider a class managing a dynamic array of integers: a copy constructor would allocate a new array and copy every element, a costly procedure for large arrays. Such deep copies not only consume CPU time, but also may fragment memory or exhaust resources if done excessively.</p>
+<p>A notable pain point was returning large objects by value. In C++98, returning a <code>std::vector</code> or other large container could invoke multiple copy operations: one to create a temporary return value and another to copy it into the caller, only to then destroy the temporary. Although compilers could sometimes elide copies, many scenarios still incurred needless copying overhead.</p>
+<p>Move semantics were introduced to tackle this inefficiency. The core idea is straightforward: if an object is about to be destroyed or is a temporary rvalue, transfer ownership of its resources to the target instead of cloning them. In other words, move the resource rather than copy it. This approach avoids allocating new memory or duplicating data. The source is left in a safe but otherwise indeterminate state and can be destroyed or reassigned without affecting the moved resource.</p>
+<p>Importantly, the program&rsquo;s logic remains correct. We have not created new data, but simply reused the existing data in a new location.</p>
+<h2 id="understanding-rvalue-references">Understanding Rvalue References</h2>
+<p>Move semantics in C++ are enabled by rvalue references, a new kind of reference introduced in C++11. To understand their role, it helps to recall the concept of value categories in C++:</p>
+<ul>
+<li><strong>Lvalues</strong> are expressions that have a persistent address in memory. They represent a specific location, and you can take the address of an lvalue with the <code>&amp;</code> operator. Variables and named objects are lvalues.</li>
+<li><strong>Rvalues</strong> are temporary values or objects that do not have a persistent memory address accessible to the program. They typically arise from literals or temporary objects returned by functions. They are ephemeral and will be cleaned up soon, such as the result of <code>x + y</code> or a function returning a new object.</li>
+</ul>
+<p>In pre-C++11 code, one could bind a <code>const</code> lvalue reference to a temporary, for example <code>const T&amp; temp = T();</code>, but that did not allow modifying the temporary. C++11 introduced rvalue references, denoted by <code>&amp;&amp;</code>, which can bind to temporaries and allow modification of them.</p>
+<p>An rvalue reference is essentially a reference that explicitly targets rvalues. This new reference type is the linchpin of move semantics: it lets us distinguish in function overloading and class interfaces whether a parameter is a transient object that we can safely pilfer resources from. If a function has two overloads, <code>foo(const T&amp;)</code> and <code>foo(T&amp;&amp;)</code>, calls with lvalues will match the former, whereas calls with rvalues or explicitly moved lvalues will match the latter. That distinction enables optimal handling for temporaries.</p>
+<p>A quick illustration of rvalue references in action:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#f92672">::</span>string s1 <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Hello &#34;</span>;
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>string s2 <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;World&#34;</span>;
+</span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>string<span style="color:#f92672">&amp;&amp;</span> temp <span style="color:#f92672">=</span> s1 <span style="color:#f92672">+</span> s2;  <span style="color:#75715e">// s1 + s2 produces a temporary (rvalue)
+</span></span></span><span style="display:flex;"><span>temp <span style="color:#f92672">+=</span> <span style="color:#e6db74">&#34;!&#34;</span>;                   <span style="color:#75715e">// Modify the temporary through an rvalue reference
+</span></span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> temp <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;     <span style="color:#75715e">// Outputs &#34;Hello World!&#34;
+</span></span></span></code></pre></div><p>In the snippet above, <code>s1 + s2</code> creates a temporary <code>std::string</code> containing <code>&quot;Hello World&quot;</code>. We bind this temporary to <code>std::string&amp;&amp; temp</code>. Unlike an lvalue reference, an rvalue reference to a temporary allows us to modify it even though it has no name of its own in the program&rsquo;s original code.</p>
+<p>We successfully append <code>&quot;!&quot;</code> to the rvalue via <code>temp</code>. This would not be possible with a regular <code>const std::string&amp;</code> binding, which is read-only. While this ability to manipulate temporaries might seem like a curiosity, it paves the way for implementing move operations that efficiently transfer resources from these short-lived objects.</p>
+<h2 id="stdmove-and-casting-to-rvalue"><code>std::move</code> and Casting to Rvalue</h2>
+<p>How do we trigger move semantics on an object that we have an lvalue for, meaning a named variable? This is where the utility function <code>std::move</code> comes in. Despite its name, <code>std::move</code> does not move anything by itself. It is a cast that converts an lvalue into an rvalue reference, signalling that we are treating this object as a temporary that can be safely pilfered.</p>
+<p>For example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#f92672">::</span>string a <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Large string...&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// std::string b = a;           // Would invoke copy constructor (a is lvalue)
+</span></span></span><span style="display:flex;"><span>std<span style="color:#f92672">::</span>string b <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>move(a);   <span style="color:#75715e">// Invokes move constructor, transferring data
+</span></span></span></code></pre></div><p>After this code, <code>b</code> obtains the contents that originally belonged to <code>a</code>, and <code>a</code> is left in an empty but valid state. The expression <code>std::move(a)</code> yields an rvalue reference to <code>a</code>, allowing the move constructor of <code>std::string</code> to be called.</p>
+<p>Without <code>std::move</code>, the assignment <code>b = a</code> would have called the copy constructor, making a full duplicate of the string data. By contrast, <code>b = std::move(a)</code> calls the move constructor, which typically just swaps pointers or lengths and nulls out <code>a</code>&rsquo;s data pointer instead of copying characters. This is far cheaper, especially for large strings or containers.</p>
+<p>It is important to note that after moving, we should not use <code>a</code> in any way that depends on its old contents. It is essentially an empty shell now. But we can assign a new value to <code>a</code> or let it go out of scope safely, because the move constructor guaranteed that <code>a</code>&rsquo;s state is harmless.</p>
+<h2 id="implementing-move-constructors-and-move-assignment-operators">Implementing Move Constructors and Move Assignment Operators</h2>
+<p>To take full advantage of move semantics in our own classes, we need to implement a move constructor and a move assignment operator. These are special member functions, analogous to the copy constructor and copy assignment operator, but they accept an rvalue reference to the class type. Their job is to transfer the internal resources from the source object to the target object.</p>
+<p>Consider a minimal dynamic array class managing an integer buffer:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;algorithm&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;utility&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyArray</span> {
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Constructor: allocate resources
+</span></span></span><span style="display:flex;"><span>    MyArray(size_t length)
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">:</span> length(length), data(<span style="color:#66d9ef">new</span> <span style="color:#66d9ef">int</span>[length]) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Constructing MyArray of size &#34;</span> <span style="color:#f92672">&lt;&lt;</span> length <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Copy constructor: deep copy resources
+</span></span></span><span style="display:flex;"><span>    MyArray(<span style="color:#66d9ef">const</span> MyArray<span style="color:#f92672">&amp;</span> other)
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">:</span> length(other.length), data(<span style="color:#66d9ef">new</span> <span style="color:#66d9ef">int</span>[other.length]) {
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>copy(other.data, other.data <span style="color:#f92672">+</span> length, data);
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Copying MyArray of size &#34;</span> <span style="color:#f92672">&lt;&lt;</span> length <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Move constructor: steal resources from rvalue
+</span></span></span><span style="display:flex;"><span>    MyArray(MyArray<span style="color:#f92672">&amp;&amp;</span> other) <span style="color:#66d9ef">noexcept</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#f92672">:</span> length(other.length), data(other.data) {
+</span></span><span style="display:flex;"><span>        other.length <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        other.data <span style="color:#f92672">=</span> <span style="color:#66d9ef">nullptr</span>;
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Moving MyArray of size &#34;</span> <span style="color:#f92672">&lt;&lt;</span> length <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Copy assignment: deep copy resources
+</span></span></span><span style="display:flex;"><span>    MyArray<span style="color:#f92672">&amp;</span> <span style="color:#66d9ef">operator</span><span style="color:#f92672">=</span>(<span style="color:#66d9ef">const</span> MyArray<span style="color:#f92672">&amp;</span> other) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span> <span style="color:#f92672">!=</span> <span style="color:#f92672">&amp;</span>other) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">delete</span>[] data;  <span style="color:#75715e">// free existing data
+</span></span></span><span style="display:flex;"><span>            length <span style="color:#f92672">=</span> other.length;
+</span></span><span style="display:flex;"><span>            data <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#66d9ef">int</span>[length];
+</span></span><span style="display:flex;"><span>            std<span style="color:#f92672">::</span>copy(other.data, other.data <span style="color:#f92672">+</span> length, data);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Copy-assigning MyArray of size &#34;</span> <span style="color:#f92672">&lt;&lt;</span> length <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">this</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Move assignment: transfer resources from rvalue
+</span></span></span><span style="display:flex;"><span>    MyArray<span style="color:#f92672">&amp;</span> <span style="color:#66d9ef">operator</span><span style="color:#f92672">=</span>(MyArray<span style="color:#f92672">&amp;&amp;</span> other) <span style="color:#66d9ef">noexcept</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span> <span style="color:#f92672">!=</span> <span style="color:#f92672">&amp;</span>other) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">delete</span>[] data;  <span style="color:#75715e">// free current resource
+</span></span></span><span style="display:flex;"><span>            length <span style="color:#f92672">=</span> other.length;
+</span></span><span style="display:flex;"><span>            data <span style="color:#f92672">=</span> other.data;
+</span></span><span style="display:flex;"><span>            other.length <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>            other.data <span style="color:#f92672">=</span> <span style="color:#66d9ef">nullptr</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Move-assigning MyArray of size &#34;</span> <span style="color:#f92672">&lt;&lt;</span> length <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">this</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Destructor: release resources
+</span></span></span><span style="display:flex;"><span>    <span style="color:#f92672">~</span>MyArray() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">delete</span>[] data;
+</span></span><span style="display:flex;"><span>        std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;Destructing MyArray of size &#34;</span> <span style="color:#f92672">&lt;&lt;</span> length <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">private</span><span style="color:#f92672">:</span>
+</span></span><span style="display:flex;"><span>    size_t length;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span><span style="color:#f92672">*</span> data;
+</span></span><span style="display:flex;"><span>};
+</span></span></code></pre></div><p>In this code, <code>MyArray</code> manages a raw heap-allocated array through <code>data</code>. We provide:</p>
+<ul>
+<li>A copy constructor that performs a deep copy of the array.</li>
+<li>A move constructor that takes <code>MyArray&amp;&amp;</code> and steals the pointer and length from <code>other</code>, then nullifies <code>other.data</code> to avoid double deletion.</li>
+<li>A copy assignment operator that also does a deep copy after freeing existing data in the target.</li>
+<li>A move assignment operator that frees current data and then appropriates <code>other</code>&rsquo;s data pointer, again setting <code>other.data = nullptr</code> to relinquish ownership.</li>
+<li>A destructor that frees the allocated memory, if any.</li>
+</ul>
+<p>We mark the move constructor and move assignment operator as <code>noexcept</code>. This is a best practice because standard containers such as <code>std::vector</code> rely on that guarantee to safely move elements during reallocation. If a move constructor might throw, some container operations will fall back to copying instead to preserve strong exception safety. Typically, move operations should be written in a way that they cannot fail, since they usually just swap pointers and set nulls.</p>
+<p>Now consider how the class behaves in practice:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>MyArray <span style="color:#a6e22e">a</span>(<span style="color:#ae81ff">5</span>);
+</span></span><span style="display:flex;"><span>MyArray b <span style="color:#f92672">=</span> a;            <span style="color:#75715e">// Uses copy constructor
+</span></span></span><span style="display:flex;"><span>MyArray c <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>move(a); <span style="color:#75715e">// Uses move constructor
+</span></span></span><span style="display:flex;"><span>MyArray <span style="color:#a6e22e">d</span>(<span style="color:#ae81ff">5</span>);
+</span></span><span style="display:flex;"><span>d <span style="color:#f92672">=</span> c;                    <span style="color:#75715e">// Uses copy assignment
+</span></span></span><span style="display:flex;"><span>d <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>move(b);         <span style="color:#75715e">// Uses move assignment
+</span></span></span></code></pre></div><ul>
+<li><code>MyArray b = a;</code> invokes the copy constructor. A new allocation occurs and the data is copied.</li>
+<li><code>MyArray c = std::move(a);</code> invokes the move constructor. Instead of allocating new memory, <code>c</code> takes over <code>a</code>&rsquo;s buffer. After this, <code>a</code> is still valid, but effectively empty.</li>
+<li><code>d = c;</code> calls copy assignment to duplicate <code>c</code>&rsquo;s data into <code>d</code>.</li>
+<li><code>d = std::move(b);</code> calls the move assignment operator, transferring <code>b</code>&rsquo;s data to <code>d</code>. After this, <code>b</code> becomes an empty shell, and <code>d</code> now owns the data.</li>
+</ul>
+<p>Observing the sequence of operations makes it clear how moves avoid unnecessary work. Every time we move instead of copy, we save an allocation and a bulk copy of data. The savings become far more significant with larger buffers, where copying could mean millions of elements. Moves simply adjust a few pointers and integers, a constant-time operation.</p>
+<p>Because we delete any old data in the target and nullify the source, we maintain proper resource ownership without leaks or double-free errors.</p>
+<h2 id="the-rule-of-five">The Rule of Five</h2>
+<p>One important guideline in modern C++ is the Rule of Five, an extension of the classic Rule of Three. It states that if your class needs any custom special member function to manage resources, such as a destructor, copy constructor, or copy assignment operator, it likely needs all of the following:</p>
+<ul>
+<li>Destructor</li>
+<li>Copy constructor</li>
+<li>Copy assignment operator</li>
+<li>Move constructor</li>
+<li>Move assignment operator</li>
+</ul>
+<p>In the <code>MyArray</code> example above, we defined all five. Following this rule helps ensure that your class handles copy and move semantics correctly and safely. If you neglect to implement move operations in a class that owns a resource, you may end up with inefficient code that falls back to copies, or even subtle ownership bugs.</p>
+<p>Conversely, if a class can rely on compiler-generated special member functions, the Rule of Zero suggests defining none of them and letting the compiler do the work. But for classes managing raw resources, being explicit and following the Rule of Five is the robust approach.</p>
+<h2 id="performance-and-resource-management-benefits">Performance and Resource Management Benefits</h2>
+<p>By now, it is evident that move semantics can eliminate a lot of redundant copying. The most important performance and resource-management benefits show up in a few recurring scenarios.</p>
+<h3 id="returning-large-objects-from-functions">Returning Large Objects from Functions</h3>
+<p>In older C++ standards, returning a large object such as a <code>std::vector</code> or <code>std::string</code> by value could be expensive. With move semantics, the returned temporary can be moved into the caller instead of copied, significantly reducing overhead.</p>
+<p>In fact, C++17 goes even further by guaranteeing copy elision in many return scenarios. The object is constructed directly in the caller&rsquo;s space with no copy or move at all. This means writing functions that return large containers by value is now not only convenient, but also efficient. You get essentially zero-cost transfer of large results thanks to moves and copy elision combined.</p>
+<h3 id="transferring-ownership-of-resources">Transferring Ownership of Resources</h3>
+<p>Move semantics shine when an object holds a resource such as memory, a file handle, or a socket and you want to transfer that ownership. A prime example is <code>std::unique_ptr</code>. A <code>unique_ptr</code> cannot be copied, because that would duplicate ownership of the heap object. But it can be moved, transferring the ownership safely:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>std<span style="color:#f92672">::</span>unique_ptr<span style="color:#f92672">&lt;</span>Foo<span style="color:#f92672">&gt;</span> p1 <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>make_unique<span style="color:#f92672">&lt;</span>Foo<span style="color:#f92672">&gt;</span>();
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">auto</span> p2 <span style="color:#f92672">=</span> std<span style="color:#f92672">::</span>move(p1);
+</span></span></code></pre></div><p>After this, <code>p2</code> owns the <code>Foo</code> and <code>p1</code> becomes <code>nullptr</code>. No memory was copied; only ownership was transferred. This pattern is far safer and clearer than manually managing raw pointers.</p>
+<p>Many modern C++ patterns use move-only types such as <code>std::unique_ptr</code> and other RAII wrappers to represent exclusive ownership of resources, relying on move semantics to transfer that ownership when needed. In practice, move-only types force clearer thinking about ownership, and <code>std::move</code> makes ownership transfer explicit, efficient, and semantically clean.</p>
+<h3 id="optimising-container-operations">Optimising Container Operations</h3>
+<p>The C++ standard library containers have been retrofitted to take advantage of move semantics. When you insert elements into a container or resize it, the container will prefer moving elements if it can.</p>
+<p>For example, when a <code>std::vector&lt;T&gt;</code> grows and needs to reallocate its storage, it will move each element of type <code>T</code> into the new storage if <code>T</code> has a move constructor that is <code>noexcept</code>. This is much faster than copying each element, especially if <code>T</code> holds large data or is non-trivially copyable.</p>
+<p>Another example is <code>std::vector::push_back</code>, which has an overload that takes <code>T&amp;&amp;</code>. If you call <code>v.push_back(std::move(x))</code>, it can use <code>T</code>&rsquo;s move constructor to construct the new element efficiently. Standard algorithms such as <code>std::swap</code> also rely heavily on move operations.</p>
+<p>Overall, the STL ensures that your code benefits from moves automatically in C++11 and later. To maximise performance, however, you should enable moves for your own types and use <code>std::move</code> when you intentionally want to transfer resources from named objects.</p>
+<h3 id="avoiding-temporary-allocations-and-redundant-destruction">Avoiding Temporary Allocations and Redundant Destruction</h3>
+<p>A more nuanced benefit is that moving often results in fewer allocations and deallocations overall. A moved-from object often does not need to free its resource in its destructor because the resource was passed on.</p>
+<p>For instance, when we moved <code>a</code> into <code>c</code> in the earlier <code>MyArray</code> example, <code>a</code>&rsquo;s destructor found <code>data == nullptr</code>, so it did nothing. Likewise, <code>c</code> did not allocate new memory when it took ownership of the existing pointer. Fewer allocate and free operations means less work for the memory allocator and often better cache usage. In high-performance systems, those savings add up.</p>
+<h2 id="c17-guaranteed-copy-elision-and-more">C++17: Guaranteed Copy Elision and More</h2>
+<p>Because this discussion is focused on C++17, it is worth noting how C++17 further solidified the efficiency story around moves. C++17 introduced mandatory copy elision in certain situations, which can make even moves unnecessary in those cases.</p>
+<p>For example, when you return a local object from a function, the compiler is required in many cases to construct that object directly in the caller&rsquo;s storage without invoking either a copy or move constructor. This was an optimisation compilers often performed anyway through return value optimisation (RVO) and named return value optimisation (NRVO), but in C++17 parts of that behaviour are guaranteed by the language.</p>
+<p>The practical effect is that you can write functions that return big objects and trust that no superfluous copying or moving will occur when guaranteed elision applies. The object materialises directly in the destination.</p>
+<p>Does this make move constructors less important? Not really. Copy elision covers specific scenarios, such as returning objects, but move semantics remain crucial for all the other cases: passing function arguments, handling intermediate results, transferring ownership, and container operations that cannot always be elided.</p>
+<p>A common question is: if C++17 elides copies, why bother with move constructors at all? The answer is that return value optimisation only handles some returns, not the general problem of moving objects around. If you insert an existing object into a container with <code>std::move</code>, or if you explicitly want to transfer ownership of something like <code>std::unique_ptr</code>, you still need move semantics.</p>
+<p>Another C++17 improvement is that certain uses of temporaries are more straightforward than before. Prior to C++17, even if a temporary could be elided, the object&rsquo;s class still needed to be movable or copyable in principle because the standard only permitted, but did not require, elision. Since C++17 guarantees elision in specific cases, you can even return some non-copyable, non-movable types from functions. This change underscores how central efficient object transfer has become in modern C++.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Move semantics and rvalue references have revolutionised the way we write high-performance C++ code. By enabling ownership transfer of resources, they eliminate costly deep copies and make resource management more explicit and safe.</p>
+<p>In my own development practice, embracing moves has led to cleaner and faster code. Large data structures can be returned or passed around without worry, and resource-owning objects such as smart pointers or custom RAII classes can be designed to transfer ownership with ease. We have seen how to implement move constructors and move assignment operators, and how following the Rule of Five helps our classes behave correctly in a world with move semantics.</p>
+<p>Thanks to these features, C++ programs can achieve zero-overhead abstraction goals more effectively. We can write intuitive code, such as returning a big object from a function, and trust that the compiler will do the efficient thing behind the scenes by moving or eliding copies as appropriate.</p>
+<p>As we continue into the era of C++20 and C++23, move semantics remain a cornerstone of performant C++ code. Mastering them is essential for any intermediate or advanced C++ developer striving to write robust and efficient systems. In summary, by moving instead of copying, we optimise both runtime performance and resource usage, unlocking the full potential of modern C++ in demanding applications.</p>
+<h2 id="references">References</h2>
+<ul>
+<li>Obregon, A. <em>Exploring C++ Move Semantics and Rvalue References</em>. <code>medium.com</code>.</li>
+<li>cppreference. <em>Move constructors</em>. <code>en.cppreference.com</code>.</li>
+<li>Internal Pointers. <em>C++ rvalue references and move semantics for beginners</em>. <code>internalpointers.com</code>.</li>
+<li>GrammaTech. <em>New Features of C++: Move Semantics</em>. <code>grammatech.com</code>.</li>
+<li>GeeksforGeeks. <em>unique_ptr in C++</em>. <code>geeksforgeeks.org</code>.</li>
+<li>cppreference. <em>Rule of three/five/zero</em>. <code>en.cppreference.com</code>.</li>
+</ul>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        3022 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-06-29
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2fmove-semantics-and-rvalue-references-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2fmove-semantics-and-rvalue-references-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Move%20Semantics%20and%20Rvalue%20References%20in%20C%2b%2b17&amp;caption=Move%20Semantics%20and%20Rvalue%20References%20in%20C%2b%2b17&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2fmove-semantics-and-rvalue-references-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Move%20Semantics%20and%20Rvalue%20References%20in%20C%2b%2b17&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2fmove-semantics-and-rvalue-references-in-c-17%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2fmove-semantics-and-rvalue-references-in-c-17%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2fmove-semantics-and-rvalue-references-in-c-17%2f;description=Move%20Semantics%20and%20Rvalue%20References%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2fmove-semantics-and-rvalue-references-in-c-17%2f&amp;title=Move%20Semantics%20and%20Rvalue%20References%20in%20C%2b%2b17&amp;summary=Move%20Semantics%20and%20Rvalue%20References%20in%20C%2b%2b17&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2fmove-semantics-and-rvalue-references-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2fmove-semantics-and-rvalue-references-in-c-17%2f&amp;resubmit=true&amp;title=Move%20Semantics%20and%20Rvalue%20References%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2fmove-semantics-and-rvalue-references-in-c-17%2f;title=Move%20Semantics%20and%20Rvalue%20References%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Move%20Semantics%20and%20Rvalue%20References%20in%20C%2b%2b17%20https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2fmove-semantics-and-rvalue-references-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2fmove-semantics-and-rvalue-references-in-c-17%2f&amp;t=Move%20Semantics%20and%20Rvalue%20References%20in%20C%2b%2b17" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Move%20Semantics%20and%20Rvalue%20References%20in%20C%2b%2b17&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f06%2fmove-semantics-and-rvalue-references-in-c-17%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2026/07/sfinae-and-concepts-in-modern-c-template-programming/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">SFINAE and Concepts in Modern C&#43;&#43; Template Programming</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2026/06/interfacing-c-17-with-python-using-pybind11/">
+                    <span class="button__text">Interfacing C&#43;&#43;17 with Python Using Pybind11</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

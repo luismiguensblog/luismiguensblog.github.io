@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="GitLab CI pipelines usually run on a remote GitLab instance. However, a local tool can give faster feedback during development. Two tools are available for this task: glci and gitlab-ci-local.
+The tools have a similar purpose, but they use different designs. This difference affects what each tool can verify. In this article, I compare the tools, explain their limitations, and recommend where to use each one.
+Versions checked This comparison uses the latest releases that were available on 15 October 2026. In this article, glci means the experimental project in GitLab&rsquo;s gitlab-org/ci-cd/runner-tools namespace. It does not mean the older, unrelated project with the same name. See the glci README.
+" />
+<meta name="keywords" content=", devops, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2026/10/glci-vs-gitlab-ci-local-which-tool-should-you-use/" />
+
+
+    <title>
+        
+            glci vs gitlab-ci-local: Which Tool Should You Use? :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.ab5336003ba331300318b49292c672210905baf1ef5410a739f647e70c8808fa.css" integrity="sha256-q1M2ADujMTADGLSSksZyIQkFuvHvVBCnOfZH5wyICPo=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+	<meta itemprop="name" content="glci vs gitlab-ci-local: Which Tool Should You Use?">
+	<meta itemprop="description" content="GitLab CI pipelines usually run on a remote GitLab instance. However, a local tool can give faster feedback during development. Two tools are available for this task: glci and gitlab-ci-local.
+The tools have a similar purpose, but they use different designs. This difference affects what each tool can verify. In this article, I compare the tools, explain their limitations, and recommend where to use each one.
+Versions checked This comparison uses the latest releases that were available on 15 October 2026. In this article, glci means the experimental project in GitLab’s gitlab-org/ci-cd/runner-tools namespace. It does not mean the older, unrelated project with the same name. See the glci README.">
+	<meta itemprop="datePublished" content="2026-10-19T00:00:00+00:00">
+	<meta itemprop="dateModified" content="2026-10-19T00:00:00+00:00">
+	<meta itemprop="wordCount" content="2313">
+	<meta itemprop="image" content="https://blog.miguens.one/">
+	<meta itemprop="keywords" content="Devops,Programming">
+
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="https://blog.miguens.one/">
+	<meta name="twitter:title" content="glci vs gitlab-ci-local: Which Tool Should You Use?">
+	<meta name="twitter:description" content="GitLab CI pipelines usually run on a remote GitLab instance. However, a local tool can give faster feedback during development. Two tools are available for this task: glci and gitlab-ci-local.
+The tools have a similar purpose, but they use different designs. This difference affects what each tool can verify. In this article, I compare the tools, explain their limitations, and recommend where to use each one.
+Versions checked This comparison uses the latest releases that were available on 15 October 2026. In this article, glci means the experimental project in GitLab’s gitlab-org/ci-cd/runner-tools namespace. It does not mean the older, unrelated project with the same name. See the glci README.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2026/10/glci-vs-gitlab-ci-local-which-tool-should-you-use/">
+	<meta property="og:site_name" content="Luis Miguens Blog">
+	<meta property="og:title" content="glci vs gitlab-ci-local: Which Tool Should You Use?">
+	<meta property="og:description" content="GitLab CI pipelines usually run on a remote GitLab instance. However, a local tool can give faster feedback during development. Two tools are available for this task: glci and gitlab-ci-local.
+The tools have a similar purpose, but they use different designs. This difference affects what each tool can verify. In this article, I compare the tools, explain their limitations, and recommend where to use each one.
+Versions checked This comparison uses the latest releases that were available on 15 October 2026. In this article, glci means the experimental project in GitLab’s gitlab-org/ci-cd/runner-tools namespace. It does not mean the older, unrelated project with the same name. See the glci README.">
+	<meta property="og:locale" content="en_us">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="posts">
+		<meta property="article:published_time" content="2026-10-19T00:00:00+00:00">
+		<meta property="article:modified_time" content="2026-10-19T00:00:00+00:00">
+		<meta property="article:tag" content="Devops">
+		<meta property="article:tag" content="Programming">
+		<meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2026-10-19 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( true ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        11 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2026/10/glci-vs-gitlab-ci-local-which-tool-should-you-use/">glci vs gitlab-ci-local: Which Tool Should You Use?</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <p>GitLab CI pipelines usually run on a remote GitLab instance. However, a local tool can give faster feedback during development. Two tools are available for this task: <strong><code>glci</code></strong> and <strong><code>gitlab-ci-local</code></strong>.</p>
+<p>The tools have a similar purpose, but they use different designs. This difference affects what each tool can verify. In this article, I compare the tools, explain their limitations, and recommend where to use each one.</p>
+<h2 id="versions-checked">Versions checked</h2>
+<p>This comparison uses the latest releases that were available on <strong>15 October 2026</strong>. In this article, <code>glci</code> means the experimental project in GitLab&rsquo;s <code>gitlab-org/ci-cd/runner-tools</code> namespace. It does not mean the older, unrelated project with the same name. See the <a href="https://gitlab.com/gitlab-org/ci-cd/runner-tools/glci/-/raw/v0.8.0/README.md"><code>glci</code> README</a>.</p>
+<table>
+	<thead>
+			<tr>
+					<th>Tool</th>
+					<th>Latest release</th>
+					<th>Release date</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong><code>glci</code></strong></td>
+					<td><strong>v0.8.0</strong></td>
+					<td>15 September 2026. See the <a href="https://gitlab.com/api/v4/projects/gitlab-org%2Fci-cd%2Frunner-tools%2Fglci/releases">GitLab releases API</a>.</td>
+			</tr>
+			<tr>
+					<td><strong><code>gitlab-ci-local</code></strong></td>
+					<td><strong>4.76.1</strong></td>
+					<td>7 October 2026. See the <a href="https://github.com/firecow/gitlab-ci-local/releases/tag/4.76.1">GitHub release</a>.</td>
+			</tr>
+	</tbody>
+</table>
+<p><code>glci</code> v0.8.0 adds several important functions. These functions include the <code>glci merged</code> command, structured JSON output, more mock Git and submodule support, infrastructure-image overrides, and fixes for rules and the parser. <code>gitlab-ci-local</code> 4.76.1 is mainly a maintenance release. It fixes variable-file validation and nested <code>!reference</code> and <code>extends</code> resolution. See the <a href="https://gitlab.com/gitlab-org/ci-cd/runner-tools/glci/-/raw/v0.8.0/site/content/changelog/v0.8.0.md"><code>glci</code> v0.8.0 change log</a>.</p>
+<p>This comparison uses the documentation and the released source code. It does not use performance benchmarks or execution tests.</p>
+<h2 id="1-the-primary-difference">1. The primary difference</h2>
+<p><strong><code>glci</code> uses the actual GitLab Runner with a local mock GitLab service.</strong> It starts containers that supply the APIs and services that the runner needs. The runner uses its Docker executor to run the jobs. You do not have to install GitLab Runner on the host. See the <a href="https://glci-e20136.gitlab.io/architecture/"><code>glci</code> architecture documentation</a>.</p>
+<p><strong><code>gitlab-ci-local</code> implements pipeline parsing, scheduling, and job execution.</strong> It does not use GitLab Runner. It can run a job in a container or directly in a local shell. See the <a href="https://raw.githubusercontent.com/firecow/gitlab-ci-local/4.76.1/src/job.ts"><code>gitlab-ci-local</code> job source</a>.</p>
+<p>This design difference gives each tool a different advantage:</p>
+<table>
+	<thead>
+			<tr>
+					<th>What you must verify</th>
+					<th>Tool with an advantage</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Does this build or test script work?</td>
+					<td>Either tool. <code>gitlab-ci-local</code> also supplies direct shell execution.</td>
+			</tr>
+			<tr>
+					<td>Does this job operate correctly in GitLab Runner?</td>
+					<td><code>glci</code>, because the actual runner runs the job.</td>
+			</tr>
+			<tr>
+					<td>Will GitLab create exactly this pipeline with these rules, permissions, and variables?</td>
+					<td><strong>Neither tool is authoritative.</strong> Both tools replace some GitLab server functions.</td>
+			</tr>
+	</tbody>
+</table>
+<p>The last point is important. The use of the actual runner does not make <code>glci</code> a local GitLab installation. The <code>glci</code> documentation describes differences in configuration, variable precedence, and simulated contexts. See the <a href="https://gitlab.com/gitlab-org/ci-cd/runner-tools/glci/-/raw/v0.8.0/site/content/user-guide/variables.md"><code>glci</code> variables documentation</a>.</p>
+<h2 id="2-capability-comparison">2. Capability comparison</h2>
+<p>Both tools do more than run the <code>script:</code> section of a job. For example, <code>gitlab-ci-local</code> supports component and project includes, inputs, and parallel or matrix jobs. Thus, it is not only a basic script runner. See the <a href="https://raw.githubusercontent.com/firecow/gitlab-ci-local/4.76.1/src/parser-includes.ts"><code>gitlab-ci-local</code> include parser</a>.</p>
+<table>
+	<thead>
+			<tr>
+					<th>Area</th>
+					<th><code>glci</code> v0.8.0</th>
+					<th><code>gitlab-ci-local</code> 4.76.1</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong>Execution environments</strong></td>
+					<td>It uses the Docker executor through the actual GitLab Runner. Docker or Podman can supply the container engine. It does not support a host-shell or Kubernetes executor. See the <a href="https://gitlab.com/gitlab-org/ci-cd/runner-tools/glci/-/raw/v0.8.0/site/content/getting-started/prerequisites.md"><code>glci</code> prerequisites</a>.</td>
+					<td>It uses its own container execution with Docker or Podman. It also supports direct shell execution.</td>
+			</tr>
+			<tr>
+					<td><strong>Selected work</strong></td>
+					<td>It can run complete pipelines, selected jobs, or selected stages. It can also reuse artifacts between runs. See the <a href="https://glci-e20136.gitlab.io/user-guide/running-pipelines/"><code>glci</code> pipeline documentation</a>.</td>
+					<td>It can run complete pipelines, selected jobs, or selected stages. Options such as <code>--needs</code> and <code>--only-needs</code> select dependencies.</td>
+			</tr>
+			<tr>
+					<td><strong>Developer interface</strong></td>
+					<td>It supplies a terminal user interface, pipeline visualisation, watch mode, run history, and rerun workflows. See the <a href="https://gitlab.com/gitlab-org/ci-cd/runner-tools/glci/-/raw/v0.8.0/README.md"><code>glci</code> README</a>.</td>
+					<td>It is mainly a command-line tool. It supplies job lists, expanded YAML through <code>--preview</code>, logs, and execution summaries.</td>
+			</tr>
+			<tr>
+					<td><strong>Machine-readable output</strong></td>
+					<td>It supplies structured execution and state data in JSON. It also supplies JUnit reports. See the <a href="https://glci-e20136.gitlab.io/user-guide/structured-output/"><code>glci</code> structured-output documentation</a>.</td>
+					<td>It supplies job lists in JSON or CSV. These lists are not equal to the structured run events and JUnit run reports from <code>glci</code>.</td>
+			</tr>
+			<tr>
+					<td><strong>Child and cross-project pipelines</strong></td>
+					<td>It supports local child pipelines, child configurations from artifacts, and cross-project pipelines. It can map a project to a local repository. See the <a href="https://gitlab.com/gitlab-org/ci-cd/runner-tools/glci/-/raw/v0.8.0/site/content/user-guide/cross-project-pipelines.md"><code>glci</code> cross-project documentation</a>.</td>
+					<td>Child and downstream pipeline support is experimental. Important trigger-include types are not implemented.</td>
+			</tr>
+			<tr>
+					<td><strong>Container registry workflows</strong></td>
+					<td>It has an integrated registry with persistent storage, pull-through caching, and optional upstream push-through. See the <a href="https://glci-e20136.gitlab.io/architecture/embedded-registry/"><code>glci</code> registry documentation</a>.</td>
+					<td>It has a <code>--registry</code> option and a Docker-in-Docker build and push example. Registry support is not exclusive to <code>glci</code>.</td>
+			</tr>
+			<tr>
+					<td><strong>Variables and secrets</strong></td>
+					<td>It can get instance, group, and project CI variables through the GitLab API. It can also show the origin of a variable. See the <a href="https://gitlab.com/gitlab-org/ci-cd/runner-tools/glci/-/raw/v0.8.0/site/content/user-guide/variables.md"><code>glci</code> variables documentation</a>.</td>
+					<td>It uses command-line variables and local or scoped variable files. These files can come from Git. It does not automatically import variables from the GitLab API.</td>
+			</tr>
+			<tr>
+					<td><strong>Uncommitted files</strong></td>
+					<td>By default, it includes modified files and untracked files that Git does not ignore. The <code>--no-dirty</code> option disables this behaviour. See the <a href="https://glci-e20136.gitlab.io/user-guide/running-pipelines/"><code>glci</code> pipeline documentation</a>.</td>
+					<td>Isolated workspaces synchronise tracked files and their local changes. Usually, you must use <code>git add</code> for a new file. You do not have to commit the file.</td>
+			</tr>
+	</tbody>
+</table>
+<h3 id="installation-and-platform-support">Installation and platform support</h3>
+<p><code>glci</code> supplies Linux and macOS binaries for AMD64 and ARM64. The v0.8 documentation lists Windows with Podman as a source-build option only. It does not supply a Windows binary. You need Go to build <code>glci</code> from source, but you do not need Go to use a prebuilt binary. See the <a href="https://gitlab.com/api/v4/projects/gitlab-org%2Fci-cd%2Frunner-tools%2Fglci/releases">GitLab releases API</a>.</p>
+<p><code>gitlab-ci-local</code> supplies installation methods for npm or Bun, Homebrew, and standalone binaries. On Windows, its instructions use Git Bash and <code>rsync</code>. On macOS, it requires Bash 4 or later. Node.js is not always necessary because standalone binaries are available. See the <a href="https://raw.githubusercontent.com/firecow/gitlab-ci-local/4.76.1/README.md"><code>gitlab-ci-local</code> README</a>.</p>
+<h2 id="3-when-to-use-gitlab-ci-local">3. When to use <code>gitlab-ci-local</code></h2>
+<h3 id="routine-local-development">Routine local development</h3>
+<p>I recommend <code>gitlab-ci-local</code> for routine lint, test, build, and job-debug tasks. Its choice of shell or container execution is useful. You can use a container when a job needs isolation. You can use the local shell when the development environment already has the necessary tools.</p>
+<p>You can also select one job and its dependencies. Thus, you do not have to run the complete pipeline. See the <a href="https://raw.githubusercontent.com/firecow/gitlab-ci-local/4.76.1/src/index.ts"><code>gitlab-ci-local</code> command source</a>.</p>
+<p>A pipeline can contain a build job, unit tests, and a database service for integration tests. This pipeline does not always need <code>glci</code>. <code>gitlab-ci-local</code> supports containers, services, artifacts, and dependency scheduling. First, decide if you must test the exact runner implementation. Do not select a tool only because the pipeline uses Docker. See the <a href="https://raw.githubusercontent.com/firecow/gitlab-ci-local/4.76.1/src/job.ts"><code>gitlab-ci-local</code> job source</a>.</p>
+<h3 id="ci-jobs-as-local-commands">CI jobs as local commands</h3>
+<p>Direct shell execution is useful when <code>.gitlab-ci.yml</code> also defines local development tasks. However, the host tools, file system, and isolation can differ from the CI environment. The <code>--shell-isolation</code> option gives each job a separate workspace. See the <a href="https://raw.githubusercontent.com/firecow/gitlab-ci-local/4.76.1/README.md"><code>gitlab-ci-local</code> README</a>.</p>
+<h2 id="4-limitations-of-gitlab-ci-local">4. Limitations of <code>gitlab-ci-local</code></h2>
+<h3 id="it-does-not-use-gitlab-runner">It does not use GitLab Runner</h3>
+<p>A successful local run does not prove that runner-specific behaviour is correct. Open compatibility issues include <code>GIT_STRATEGY</code>, <code>cache:untracked</code>, and the runner&rsquo;s <code>FF_ENABLE_BASH_EXIT_CODE_CHECK</code> behaviour. I did not reproduce these problems in version 4.76.1. They are findings from the issue tracker. See <a href="https://github.com/firecow/gitlab-ci-local/issues/1819">GitHub issue 1819</a>.</p>
+<p>This limitation is important when a failure depends on checkout behaviour, runner-generated shell code, or a runner feature flag. It is less important when you only must test the business logic in a script.</p>
+<h3 id="workflowrules-does-not-give-full-pipeline-creation-fidelity"><code>workflow:rules</code> does not give full pipeline-creation fidelity</h3>
+<p>In the source for version 4.76.1, the parser evaluates <code>workflow:rules</code>. It also merges variables from the matching rule. However, it does not use the result to reject pipeline creation. The execution path then filters jobs with each job-level <code>when</code> value.</p>
+<p>From this source, I conclude that the tool supports workflow variables. However, whole-pipeline gating is not equal to GitLab behaviour. Thus, do not use this tool alone to prove that GitLab will never create a pipeline for an event. See the <a href="https://raw.githubusercontent.com/firecow/gitlab-ci-local/4.76.1/src/parser.ts"><code>gitlab-ci-local</code> parser source</a>.</p>
+<h3 id="downstream-pipelines-are-incomplete">Downstream pipelines are incomplete</h3>
+<p>The current implementation identifies downstream pipelines as experimental. It supports child configurations from local files and generated artifacts. It does not implement <code>trigger:include:project</code> or <code>trigger:include:template</code>, and it gives a warning for these types.</p>
+<p>This limitation does not apply to ordinary top-level <code>include:project</code> and <code>include:template</code> entries. The include parser supports those entries. For a large multi-project pipeline, this limitation is a good reason to select <code>glci</code>. See the <a href="https://raw.githubusercontent.com/firecow/gitlab-ci-local/4.76.1/src/job.ts"><code>gitlab-ci-local</code> job source</a>.</p>
+<h3 id="workspace-and-include-caches-can-cause-incorrect-conclusions">Workspace and include caches can cause incorrect conclusions</h3>
+<p>An isolated job cannot usually see a new untracked file until you add it to Git. A non-isolated shell job can see shared host-workspace data. Also, the tool caches external includes. Use <code>--fetch-includes</code> when you must get new upstream configuration. See the <a href="https://raw.githubusercontent.com/firecow/gitlab-ci-local/4.76.1/README.md"><code>gitlab-ci-local</code> README</a>.</p>
+<p>These defaults can cause a difference between a local run and a remote run. The job scripts can be the same while the input files are different.</p>
+<h2 id="5-when-to-use-glci">5. When to use <code>glci</code></h2>
+<h3 id="runner-specific-behaviour">Runner-specific behaviour</h3>
+<p>I recommend <code>glci</code> when you must investigate GitLab Runner behaviour. The actual runner gets jobs from the mock service. Thus, <code>glci</code> is a better architectural match for problems in runner script handling, services, artifacts, or cache endpoints. You must still use the correct runner version and configuration. See the <a href="https://glci-e20136.gitlab.io/architecture/"><code>glci</code> architecture documentation</a>.</p>
+<h3 id="integrated-pipeline-development">Integrated pipeline development</h3>
+<p><code>glci</code> is also the better option when you need a terminal user interface, watch mode, saved run history, reusable artifacts, or structured output. Its JSON and JUnit outputs are useful when another program must examine local run results. See the <a href="https://glci-e20136.gitlab.io/user-guide/running-pipelines/"><code>glci</code> pipeline documentation</a>.</p>
+<h3 id="child-pipelines-and-related-repositories">Child pipelines and related repositories</h3>
+<p><code>glci</code> supports generated child configurations and cross-project pipelines. It can also map another project to a local checkout. This function is useful when you develop related changes in multiple repositories.</p>
+<p>This feature is a more important difference than basic Docker builds or registry pushes. Both tools can do those tasks. See the <a href="https://gitlab.com/gitlab-org/ci-cd/runner-tools/glci/-/raw/v0.8.0/site/content/user-guide/cross-project-pipelines.md"><code>glci</code> cross-project documentation</a>.</p>
+<p>Cross-project behaviour still has local-resolution limitations. For example, <code>glci</code> can skip a project include when it does not have a usable token. The remaining configuration can continue without an error. As a result, jobs can be absent without an obvious configuration failure. Check the resolved configuration before you run the pipeline.</p>
+<h2 id="6-limitations-of-glci">6. Limitations of <code>glci</code></h2>
+<h3 id="it-is-experimental-and-uses-more-local-infrastructure">It is experimental and uses more local infrastructure</h3>
+<p>The project identifies itself as experimental. It needs containers for the runner and mock services. It does not have a simple host-shell mode. Podman is supported, but it must supply a Docker-compatible API socket. This design gives more integrated behaviour, but it also gives you more components to configure and diagnose. See the <a href="https://gitlab.com/gitlab-org/ci-cd/runner-tools/glci/-/raw/v0.8.0/README.md"><code>glci</code> README</a>.</p>
+<h3 id="rule-evaluation-and-job-execution-can-use-different-variable-values">Rule evaluation and job execution can use different variable values</h3>
+<p>The v0.8 documentation describes an important variable-precedence limitation. During rule evaluation, a supplied high-priority variable can override a job YAML variable. During job execution, the job YAML variable has the final override.</p>
+<p>Thus, a rule can use one value while the job script receives a different value. Also, static commands such as <code>glci show</code>, <code>glci jobs</code>, and <code>glci variables</code> do not get API variables. Their results can differ from an actual run. See the <a href="https://gitlab.com/gitlab-org/ci-cd/runner-tools/glci/-/raw/v0.8.0/site/content/user-guide/variables.md"><code>glci</code> variables documentation</a>.</p>
+<h3 id="a-run-is-not-a-lint-check">A run is not a lint check</h3>
+<p>The v0.8 documentation gives an important example. <code>glci lint</code> finds invalid non-string entries in a script. <code>glci run</code> does not enforce this diagnostic. It can remove the invalid entry and report a successful job. GitLab rejects this configuration.</p>
+<p>Always lint an edited CI configuration before you run it. See the <a href="https://gitlab.com/gitlab-org/ci-cd/runner-tools/glci/-/raw/v0.8.0/site/content/troubleshooting/_index.md"><code>glci</code> troubleshooting documentation</a>.</p>
+<h3 id="simulated-contexts-and-git-history-are-not-exact">Simulated contexts and Git history are not exact</h3>
+<p>By default, <code>glci</code> simulates a merge-request pipeline. It does not simulate a push pipeline by default. Rules and repository history can differ from the data in GitLab. For example, the mock default branch can point to the same synthetic commit as <code>HEAD</code>. This condition gives an empty comparison with the default branch.</p>
+<p>Select the correct context when you test context-sensitive rules. See the <a href="https://gitlab.com/gitlab-org/ci-cd/runner-tools/glci/-/raw/v0.8.0/site/content/troubleshooting/_index.md"><code>glci</code> troubleshooting documentation</a>.</p>
+<h3 id="local-secrets-do-not-keep-all-gitlab-protection-rules">Local secrets do not keep all GitLab protection rules</h3>
+<p><code>glci</code> can get protected variables without regard to branch protection. Also, the forwarded <code>CI_JOB_TOKEN</code> uses a host token. Its permissions can differ from the permissions of an actual job token.</p>
+<p>Use <code>--secrets none</code> when you do not want remote variables. Use <code>--no-token</code> when you do not want token forwarding. See the <a href="https://gitlab.com/gitlab-org/ci-cd/runner-tools/glci/-/raw/v0.8.0/site/content/troubleshooting/_index.md"><code>glci</code> troubleshooting documentation</a>.</p>
+<h2 id="7-performance">7. Performance</h2>
+<p>There is no universal performance winner. You must measure the tools with your pipeline before you make a speed claim.</p>
+<p>The shell mode in <code>gitlab-ci-local</code> does not start a container for a suitable job. This can reduce start time. <code>glci</code> starts more infrastructure, but its daemon and saved state support repeated runs. It does not have to create all components again for each run.</p>
+<p>For a pipeline that uses many containers, other factors can have a larger effect. These factors include local images, service start time, build caches, and the set of selected jobs. The difference between shell mode and daemon mode is useful information. It is not proof that one tool is always faster. See the <a href="https://raw.githubusercontent.com/firecow/gitlab-ci-local/4.76.1/src/index.ts"><code>gitlab-ci-local</code> command source</a>.</p>
+<h2 id="summary-which-tool-is-better">Summary: which tool is better?</h2>
+<p>For routine local CI development, I recommend <strong><code>gitlab-ci-local</code></strong>. For runner-specific diagnosis and integrated pipeline orchestration, I recommend <strong><code>glci</code></strong>.</p>
+<table>
+	<thead>
+			<tr>
+					<th>Primary requirement</th>
+					<th>Recommended tool</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Run lint, test, and build jobs with shell or container execution</td>
+					<td><strong><code>gitlab-ci-local</code></strong></td>
+			</tr>
+			<tr>
+					<td>Use CI jobs as local development commands without containers</td>
+					<td><strong><code>gitlab-ci-local</code></strong></td>
+			</tr>
+			<tr>
+					<td>Investigate behaviour in the GitLab Runner Docker executor</td>
+					<td><strong><code>glci</code></strong></td>
+			</tr>
+			<tr>
+					<td>Develop cross-project pipelines</td>
+					<td><strong><code>glci</code></strong></td>
+			</tr>
+			<tr>
+					<td>Use a terminal user interface, watch mode, or structured run reports</td>
+					<td><strong><code>glci</code></strong></td>
+			</tr>
+			<tr>
+					<td>Prove exact GitLab pipeline creation, credentials, or deployment behaviour</td>
+					<td><strong>Neither tool alone</strong></td>
+			</tr>
+	</tbody>
+</table>
+<p>Start with <code>gitlab-ci-local</code> when you need a flexible tool for routine development. It uses less infrastructure, and it can run jobs in a shell or a container. This recommendation does not mean that it reproduces all GitLab behaviour.</p>
+<p>Select <code>glci</code> when actual GitLab Runner execution is a requirement. Its design is a better match for runner-specific problems. However, it is experimental, and its documented configuration and variable differences prevent it from being a complete GitLab replacement.</p>
+<p>The final rule is simple: use <strong><code>gitlab-ci-local</code> to run CI work locally</strong>, and use <strong><code>glci</code> to investigate how that work operates in GitLab Runner</strong>. In both cases, use real GitLab CI for the final validation.</p>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/devops/">devops</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        2313 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-10-19
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f10%2fglci-vs-gitlab-ci-local-which-tool-should-you-use%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f10%2fglci-vs-gitlab-ci-local-which-tool-should-you-use%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=glci%20vs%20gitlab-ci-local%3a%20Which%20Tool%20Should%20You%20Use%3f&amp;caption=glci%20vs%20gitlab-ci-local%3a%20Which%20Tool%20Should%20You%20Use%3f&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f10%2fglci-vs-gitlab-ci-local-which-tool-should-you-use%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=glci%20vs%20gitlab-ci-local%3a%20Which%20Tool%20Should%20You%20Use%3f&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f10%2fglci-vs-gitlab-ci-local-which-tool-should-you-use%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f10%2fglci-vs-gitlab-ci-local-which-tool-should-you-use%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f10%2fglci-vs-gitlab-ci-local-which-tool-should-you-use%2f;description=glci%20vs%20gitlab-ci-local%3a%20Which%20Tool%20Should%20You%20Use%3f" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f10%2fglci-vs-gitlab-ci-local-which-tool-should-you-use%2f&amp;title=glci%20vs%20gitlab-ci-local%3a%20Which%20Tool%20Should%20You%20Use%3f&amp;summary=glci%20vs%20gitlab-ci-local%3a%20Which%20Tool%20Should%20You%20Use%3f&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f10%2fglci-vs-gitlab-ci-local-which-tool-should-you-use%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f10%2fglci-vs-gitlab-ci-local-which-tool-should-you-use%2f&amp;resubmit=true&amp;title=glci%20vs%20gitlab-ci-local%3a%20Which%20Tool%20Should%20You%20Use%3f" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f10%2fglci-vs-gitlab-ci-local-which-tool-should-you-use%2f;title=glci%20vs%20gitlab-ci-local%3a%20Which%20Tool%20Should%20You%20Use%3f" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=glci%20vs%20gitlab-ci-local%3a%20Which%20Tool%20Should%20You%20Use%3f%20https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f10%2fglci-vs-gitlab-ci-local-which-tool-should-you-use%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f10%2fglci-vs-gitlab-ci-local-which-tool-should-you-use%2f&amp;t=glci%20vs%20gitlab-ci-local%3a%20Which%20Tool%20Should%20You%20Use%3f" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=glci%20vs%20gitlab-ci-local%3a%20Which%20Tool%20Should%20You%20Use%3f&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f10%2fglci-vs-gitlab-ci-local-which-tool-should-you-use%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2026/07/sfinae-and-concepts-in-modern-c-template-programming/">
+                    <span class="button__text">SFINAE and Concepts in Modern C&#43;&#43; Template Programming</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>

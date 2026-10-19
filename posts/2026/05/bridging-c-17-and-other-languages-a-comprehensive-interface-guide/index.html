@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Interfacing C&#43;&#43;17 code with other programming languages allows developers to combine the performance and system-level control of C&#43;&#43; with the flexibility, libraries, or platform capabilities of languages like Python, C, and Java. In my experience, achieving this interoperability can be complex, but it is highly rewarding when done correctly. In this blog post, I will critically examine various techniques for language interfacing, discuss their advantages and drawbacks, and provide example code snippets for clarity. The focus will be on C&#43;&#43;17 calling or being called by Python, C, and Java (mostly C&#43;&#43; invoking code in those languages), using a formal yet approachable tone. I’ll draw on authoritative sources and my own observations to guide intermediate to advanced developers through this topic.
+" />
+<meta name="keywords" content=", c_cpp, programming" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://blog.miguens.one/posts/2026/05/bridging-c-17-and-other-languages-a-comprehensive-interface-guide/" />
+
+
+    <title>
+        
+            Bridging C&#43;&#43;17 and Other Languages: A Comprehensive Interface Guide :: Luis Miguens Blog 
+        
+    </title>
+
+
+
+
+
+  <link rel="stylesheet" href="https://blog.miguens.one/main.min.ab5336003ba331300318b49292c672210905baf1ef5410a739f647e70c8808fa.css" integrity="sha256-q1M2ADujMTADGLSSksZyIQkFuvHvVBCnOfZH5wyICPo=" crossorigin="anonymous">
+
+
+
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="https://blog.miguens.one/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://blog.miguens.one/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://blog.miguens.one/favicon-16x16.png">
+    <link rel="manifest" href="https://blog.miguens.one/site.webmanifest">
+    <link rel="mask-icon" href="https://blog.miguens.one/safari-pinned-tab.svg" color="">
+    <link rel="shortcut icon" href="https://blog.miguens.one/favicon.ico">
+    <meta name="msapplication-TileColor" content="">
+
+
+
+	<meta itemprop="name" content="Bridging C&#43;&#43;17 and Other Languages: A Comprehensive Interface Guide">
+	<meta itemprop="description" content="Interfacing C&#43;&#43;17 code with other programming languages allows developers to combine the performance and system-level control of C&#43;&#43; with the flexibility, libraries, or platform capabilities of languages like Python, C, and Java. In my experience, achieving this interoperability can be complex, but it is highly rewarding when done correctly. In this blog post, I will critically examine various techniques for language interfacing, discuss their advantages and drawbacks, and provide example code snippets for clarity. The focus will be on C&#43;&#43;17 calling or being called by Python, C, and Java (mostly C&#43;&#43; invoking code in those languages), using a formal yet approachable tone. I’ll draw on authoritative sources and my own observations to guide intermediate to advanced developers through this topic.">
+	<meta itemprop="datePublished" content="2026-05-08T00:00:00+00:00">
+	<meta itemprop="dateModified" content="2026-05-08T00:00:00+00:00">
+	<meta itemprop="wordCount" content="6777">
+	<meta itemprop="image" content="https://blog.miguens.one/">
+	<meta itemprop="keywords" content="C_cpp,Programming">
+
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="https://blog.miguens.one/">
+	<meta name="twitter:title" content="Bridging C&#43;&#43;17 and Other Languages: A Comprehensive Interface Guide">
+	<meta name="twitter:description" content="Interfacing C&#43;&#43;17 code with other programming languages allows developers to combine the performance and system-level control of C&#43;&#43; with the flexibility, libraries, or platform capabilities of languages like Python, C, and Java. In my experience, achieving this interoperability can be complex, but it is highly rewarding when done correctly. In this blog post, I will critically examine various techniques for language interfacing, discuss their advantages and drawbacks, and provide example code snippets for clarity. The focus will be on C&#43;&#43;17 calling or being called by Python, C, and Java (mostly C&#43;&#43; invoking code in those languages), using a formal yet approachable tone. I’ll draw on authoritative sources and my own observations to guide intermediate to advanced developers through this topic.">
+
+
+
+    <meta property="og:url" content="https://blog.miguens.one/posts/2026/05/bridging-c-17-and-other-languages-a-comprehensive-interface-guide/">
+	<meta property="og:site_name" content="Luis Miguens Blog">
+	<meta property="og:title" content="Bridging C&#43;&#43;17 and Other Languages: A Comprehensive Interface Guide">
+	<meta property="og:description" content="Interfacing C&#43;&#43;17 code with other programming languages allows developers to combine the performance and system-level control of C&#43;&#43; with the flexibility, libraries, or platform capabilities of languages like Python, C, and Java. In my experience, achieving this interoperability can be complex, but it is highly rewarding when done correctly. In this blog post, I will critically examine various techniques for language interfacing, discuss their advantages and drawbacks, and provide example code snippets for clarity. The focus will be on C&#43;&#43;17 calling or being called by Python, C, and Java (mostly C&#43;&#43; invoking code in those languages), using a formal yet approachable tone. I’ll draw on authoritative sources and my own observations to guide intermediate to advanced developers through this topic.">
+	<meta property="og:locale" content="en_us">
+	<meta property="og:type" content="article">
+		<meta property="article:section" content="posts">
+		<meta property="article:published_time" content="2026-05-08T00:00:00+00:00">
+		<meta property="article:modified_time" content="2026-05-08T00:00:00+00:00">
+		<meta property="article:tag" content="C_cpp">
+		<meta property="article:tag" content="Programming">
+		<meta property="og:image" content="https://blog.miguens.one/">
+
+
+
+
+    <meta property="article:section" content="technical" />
+
+
+
+    <meta property="article:published_time" content="2026-05-08 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+
+
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZHDRD7M8H9"></script>
+      <script>
+        var doNotTrack = false;
+        if ( true ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-ZHDRD7M8H9');
+        }
+      </script>
+
+
+
+    </head>
+
+    
+        <body>
+    
+    
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://blog.miguens.one/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">&gt;</span>
+            <span class="logo__text ">
+                $ cd /home/</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://blog.miguens.one/about/">About</a></li><li><a href="https://blog.miguens.one/categories/">Categories</a></li><li><a href="https://blog.miguens.one/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+  <main class="post">
+
+    <div class="post-info">
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        32 minutes
+
+        
+      </p>
+    </div>
+
+    <article>
+      <h1 class="post-title">
+        <a href="https://blog.miguens.one/posts/2026/05/bridging-c-17-and-other-languages-a-comprehensive-interface-guide/">Bridging C++17 and Other Languages: A Comprehensive Interface Guide</a>
+      </h1>
+
+      
+
+      
+
+      
+
+      <div class="post-content">
+        <p>Interfacing C++17 code with other programming languages allows developers to combine the performance and system-level control of C++ with the flexibility, libraries, or platform capabilities of languages like Python, C, and Java. In my experience, achieving this interoperability can be complex, but it is highly rewarding when done correctly. In this blog post, I will critically examine various techniques for language interfacing, discuss their advantages and drawbacks, and provide example code snippets for clarity. The focus will be on <strong>C++17</strong> calling or being called by <strong>Python, C, and Java</strong> (mostly C++ invoking code in those languages), using a formal yet approachable tone. I’ll draw on authoritative sources and my own observations to guide intermediate to advanced developers through this topic.</p>
+<h2 id="why-interface-c-with-other-languages">Why Interface C++ with Other Languages?</h2>
+<p>In modern software projects, it’s common to use the best-suited language for each task. Sometimes I need to call <strong>native C++ code from a high-level language</strong> (for performance-critical sections or to reuse an existing C++ library), and other times I may want to <strong>invoke higher-level language code from C++</strong> (for scripting, rapid development, or leveraging platform-specific features). Key reasons to bridge C++ with other languages include:</p>
+<ul>
+<li>
+<p><strong>Performance and Low-Level Access:</strong> C++ excels at high-performance tasks and direct hardware manipulation. Calling C++ from languages like Python or Java can speed up bottlenecks or enable low-level operations. Conversely, from C++ you might call into another language if it provides a specialized library or API (e.g. a Python machine learning library or Java’s platform APIs).</p>
+</li>
+<li>
+<p><strong>Library Reuse:</strong> Large ecosystems of libraries exist for languages like Python (e.g. scientific computing libraries) and Java. Instead of rewriting those in C++, it’s often preferable to interface with them.</p>
+</li>
+<li>
+<p><strong>Platform Integration:</strong> Some system or platform features are only accessible via a certain language’s runtime (for example, Java’s Android APIs or CPython-specific modules). Bridging allows a C++ application to utilise those features.</p>
+</li>
+<li>
+<p><strong>Rapid Development and Scripting:</strong> Embedding a high-level language interpreter (like Python) into a C++ application provides a built-in scripting mechanism for user customisation or faster development of certain components.</p>
+</li>
+</ul>
+<p>Each language pairing (C++ with C, Python, or Java) requires different interface mechanisms, which I’ll discuss in turn. The overarching challenge is to cross the boundaries between different runtimes, type systems, and memory management models, all while maintaining performance and stability.</p>
+<h2 id="interfacing-c-and-c">Interfacing C++ and C</h2>
+<p>C++ was designed with C compatibility in mind, and in fact <strong>most C code can be directly compiled or linked with C++</strong>. The C++17 standard is nearly a superset of the C language (with some minor incompatibilities), which makes integration relatively straightforward. The primary consideration is <strong>name mangling</strong>: C++ compilers mangle function names (encode parameter types into the symbol name) to support function overloading, whereas C symbols are not mangled. This can lead to linking errors if C++ tries to link against C functions using C++ naming conventions. The solution is to use <code>extern &quot;C&quot;</code> in C++ declarations of C functions, which tells the C++ compiler <em>not</em> to mangle those names. By doing so, the linker can correctly resolve references to C functions or vice versa:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">// C header (legacy_c_api.h) to be used in C++ code #ifdef __cplusplus extern &#34;C&#34; {
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">#endif </span><span style="color:#75715e">// A simple C function to add two integers int add_numbers(int a, int b);
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">#ifdef __cplusplus
+</span></span></span><span style="display:flex;"><span>} <span style="color:#960050;background-color:#1e0010">#</span>endif
+</span></span><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">```</span>cpp
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// C++ code calling a C function from the header above
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;legacy_c_api.h&#34;</span><span style="color:#75715e"> </span><span style="color:#75715e">// contains extern &#34;C&#34; declarations
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> main() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> result <span style="color:#f92672">=</span> add_numbers(<span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">4</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// call the C function std::cout &lt;&lt; &#34;Result from C function: &#34; &lt;&lt; result &lt;&lt; std::endl;
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>In this example, the <code>extern &quot;C&quot;</code> block in the header ensures the C++ compiler emits an unmangled symbol for <code>add_numbers</code> (the same symbol name a C compiler would use). As a result, the C++ object code can link against a C library defining <code>add_numbers</code> without conflict. In fact, the C++ standard library headers use this technique internally – for example, C headers like <code>&lt;stdio.h&gt;</code> or <code>&lt;string.h&gt;</code> are included in <code>extern &quot;C&quot;</code> blocks in C++ implementations so that functions like <code>printf</code> are linked properly when used in C++.</p>
+<p><strong>C++ calling C</strong>: With the above in place, calling C functions from C++ is seamless. You simply include the C library’s header (wrapped in <code>extern &quot;C&quot;</code> as needed) and link against the C library at compile/link time. C’s simpler type system (no classes, etc.) means most data types (ints, structs, char buffers) are directly usable in C++. One must still be mindful of differences in memory management and error handling – for example, C doesn’t support exceptions, so error codes must be checked in C-style. If the C code uses <code>malloc</code>/<code>free</code>, it’s usually safe for C++ to use those as well (ensuring that any memory allocated in one language is freed in the same runtime to avoid heap mismatches).</p>
+<p><strong>C calling C++</strong>: Conversely, if you need to call C++ code from C, the typical approach is to expose C++ functions or classes through a C-compatible interface. This means declaring C++ functions with <code>extern &quot;C&quot;</code> (and using only C-compatible types in the function signature) when compiling the library. For instance, a C++ library could provide <code>extern &quot;C&quot; double compute_value(int x)</code> as an entry point. The <code>extern &quot;C&quot;</code> prevents C++ name mangling, and then a C program can link against that function as if it were a regular C function. Note that inside such a function, one could then call into C++ code or objects as needed – the extern &ldquo;C&rdquo; function acts as a bridge. Also, <strong>no special tool or foreign function interface is needed for C and C++ integration</strong> aside from respecting these linkage conventions, because <strong>the C++ compiler’s ABI can be made to match C’s ABI for compatible data types</strong>.</p>
+<blockquote>
+<p><strong>Note:</strong> The C++17 standard (like its predecessors) specifies that the C++ standard library provides C headers and that the Python/C API, Java JNI, and many other interfaces use C-linkage for compatibility. For example, the Python C API documentation states that <em>“the header files properly declare the entry points to be <code>extern &quot;C&quot;</code>. As a result, there is no need to do anything special to use the API from C++”</em>. This principle extends to many C APIs – <strong>using <code>extern &quot;C&quot;</code> is usually all it takes to make a C API usable from C++</strong>.</p>
+</blockquote>
+<p>In summary, interfacing C++ with C is usually the least complicated scenario: it often “just works” with minimal fuss. I recommend carefully reading the documentation of any C library to see if they already provide C++ usage notes (many do). Common pitfalls include remembering to compile C sources as C (or with <code>extern &quot;C&quot;</code> if compiling in C++ mode) and ensuring that if you <strong>mix memory management or runtime library usage, you do so consistently</strong> (especially on Windows, where C and C++ runtime libraries might differ). By following these guidelines, one can leverage decades’ worth of C libraries directly in C++17 applications with full compatibility.</p>
+<h2 id="interfacing-c-and-python">Interfacing C++ and Python</h2>
+<p>Python is a dynamically-typed, high-level language with a rich ecosystem, and C++ can interface with Python in two primary ways: <strong>extending</strong> Python (writing C++ code that Python code can call, typically as a Python <em>extension module</em> or library), or <strong>embedding</strong> Python (running a Python interpreter inside a C++ application so that the C++ code can execute Python scripts or call Python functions). The official Python documentation notes these two use cases: <em>“The API gives C and C++ programmers access to the Python interpreter at a variety of levels&hellip; The first reason is to write extension modules &hellip; The second reason is to use Python as a component in a larger application (embedding Python)”</em>. C++17 does not fundamentally change how this is done compared to earlier C++ versions, but modern C++ features (smart pointers, better <code>constexpr</code>, etc.) can be used to write cleaner binding code.</p>
+<h3 id="using-the-pythonc-api-extending-or-embedding-via-c-interfaces">Using the Python/C API (Extending or Embedding via C Interfaces)</h3>
+<p>The lowest-level approach is to use Python’s C API (Application Programmer’s Interface), which is <strong>extern &ldquo;C&rdquo;</strong> and accessible from C++. This API allows you to create Python modules in C/C++ or to initialize and control a Python interpreter from your program. The Python/C API is very powerful: you can manipulate Python objects, call Python functions, define new built-in types, etc., but it is also quite complex and requires careful management of Python’s memory (reference counts) and error states.</p>
+<p><strong>Extending Python with C++:</strong> In this scenario, one writes a C++ function and exposes it to Python as if it were a Python function or module. A simple example is writing a C++ function that adds two numbers and making it available in Python:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">// Example: a simple Python extension module in C++
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;Python.h&gt;</span><span style="color:#75715e"> </span><span style="color:#75715e">// C++ function to add two numbers static PyObject* py_add(PyObject* self, PyObject* args) {
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> a, b;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>PyArg_ParseTuple(args, <span style="color:#e6db74">&#34;ii&#34;</span>, <span style="color:#f92672">&amp;</span>a, <span style="color:#f92672">&amp;</span>b)) {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// parse Python arguments as two ints return nullptr;
+</span></span></span><span style="display:flex;"><span>        <span style="color:#75715e">// if parsing fails, return NULL to indicate error
+</span></span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">int</span> sum <span style="color:#f92672">=</span> a <span style="color:#f92672">+</span> b;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">PyLong_FromLong</span>(sum);
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// return a Python integer object
+</span></span></span><span style="display:flex;"><span>} <span style="color:#75715e">// Define methods in the module static PyMethodDef ModuleMethods[] = {
+</span></span></span><span style="display:flex;"><span>{<span style="color:#e6db74">&#34;add&#34;</span>, py_add, METH_VARARGS, <span style="color:#e6db74">&#34;Add two integers.&#34;</span>}, {<span style="color:#66d9ef">nullptr</span>, <span style="color:#66d9ef">nullptr</span>, <span style="color:#ae81ff">0</span>, <span style="color:#66d9ef">nullptr</span>}
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Module definition structure static
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">PyModuleDef</span> ModuleDef <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    PyModuleDef_HEAD_INIT, <span style="color:#e6db74">&#34;my_cpp_module&#34;</span>, <span style="color:#75715e">// name of module &#34;Example module that adds two numbers using C++&#34;, // module documentation -1, ModuleMethods
+</span></span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Initialization function called on Python import PyMODINIT_FUNC PyInit_my_cpp_module(void) {
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">PyModule_Create</span>(<span style="color:#f92672">&amp;</span>ModuleDef);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This code defines a new Python module named <code>my_cpp_module</code> with a function <code>add(a, b)</code>. After compiling this code into a shared library (e.g., <code>my_cpp_module.so</code> on Linux or <code>my_cpp_module.pyd</code> on Windows), it can be imported in Python like a regular module. The Python runtime will call <code>PyInit_my_cpp_module</code> to initialize the module and make the <code>add</code> function available. This is the essence of writing a Python extension: using C functions (wrapped in the Python API calls) to create Python-callable functionalities.</p>
+<p>Writing such extensions <em>without</em> assistance from third-party tools is doable (the above example is relatively simple), but for larger interfaces it becomes laborious. One must handle <strong>type conversions, reference counting, and error checking</strong> manually at every step. The Python documentation even admits that the bare C API approach is intended more for tool-builders and recommends higher-level tools for general use. I personally find that for anything beyond a few functions, it’s better to use dedicated binding libraries or generators.</p>
+<p><strong>Embedding Python in C++:</strong> If your C++ application needs to execute Python code or otherwise integrate a Python interpreter, the Python/C API allows that as well. You can initialize the interpreter with <code>Py_Initialize()</code>, execute Python code using functions like <code>PyRun_SimpleString()</code> or the richer <code>PyRun_*</code> APIs, and finalize the interpreter with <code>Py_Finalize()</code>. For example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#75715e">#include &lt;Python.h&gt; int main() { Py_Initialize(); // start the Python interpreter // Run a simple Python command PyRun_SimpleString(&#34;import math\nprint(&#39;sqrt(2) =&#39;, math.sqrt(2))&#34;); Py_Finalize(); // shut down the interpreter return 0; }</span>
+</span></span></code></pre></div><p>When this C++ program is run, it will print out the result of a Python computation. In an embedded scenario, C++ can also build Python objects and call into Python functions using the C API (for instance, using <code>PyObject_CallObject</code> to call a Python callable). The embedded Python shares the same process and memory, so data can be exchanged by converting C++ values to Python objects and vice versa using API functions (e.g., <code>PyLong_FromLong</code> for integers, as seen above, or <code>PyUnicode_FromString</code> for strings).</p>
+<p>One must be careful with the <strong>Global Interpreter Lock (GIL)</strong> if using threads – any C++ thread that wants to interact with Python must hold the GIL (acquire it via <code>PyGILState_Ensure()</code> and release when done). Additionally, the <strong>Python runtime must be initialized in a single thread</strong> (usually the main thread) before use. These considerations aside, embedding Python turns out to be a robust way to give a C++ application scripting capabilities. Many game engines and applications embed Python to allow end-user scripting.</p>
+<h3 id="high-level-binding-tools-boostpython-pybind11-swig-etc">High-Level Binding Tools (Boost.Python, pybind11, SWIG, etc.)</h3>
+<p>Given the complexity of direct Python/C API usage, several <strong>higher-level tools and libraries</strong> exist to simplify the task of interfacing C++ and Python. The goal of these tools is to reduce boilerplate and automate the conversion of C++ types to Python and vice versa. I’ve used a few of these in practice and found them extremely helpful for maintaining clean and modern C++ code while exposing functionality to Python.</p>
+<ul>
+<li>
+<p><strong>Boost.Python:</strong> Part of the Boost libraries, Boost.Python was one of the first mature solutions for wrapping C++ classes and functions into Python. It provides a C++ API to declare which functions/classes to expose. Boost.Python handles the reference counting and conversions internally. The downside is that it pulls in Boost (which is a large dependency) and supports older C++ standards, which means it carries some complexity. It works well, but as a developer I found the compile times and binary size overhead noticeable, and the syntax, while expressive, can be verbose. Boost.Python is still a good choice if you are already using Boost and need to support older C++98 code. However, for C++11 and later, a more lightweight alternative emerged: <strong>pybind11</strong>.</p>
+</li>
+<li>
+<p><strong>pybind11:</strong> This is a modern header-only library inspired by Boost.Python, but designed for C++11/14/17 and later. By being C++11-only, pybind11 can leverage advanced metaprogramming and variadic templates to simplify the interface and reduce overhead. In my experience, pybind11 is very <strong>“Pythonic” from the C++ side</strong> – you write C++ code that almost looks like you’re writing Python module definitions. For example, using pybind11, the earlier extension module example could be written as:</p>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;pybind11/pybind11.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">namespace</span> py <span style="color:#f92672">=</span> pybind11;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> <span style="color:#a6e22e">add</span>(<span style="color:#66d9ef">int</span> a, <span style="color:#66d9ef">int</span> b) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> a <span style="color:#f92672">+</span> b;
+</span></span><span style="display:flex;"><span>} PYBIND11_MODULE(my_cpp_module, m) {
+</span></span><span style="display:flex;"><span>m.doc() <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Example module created with pybind11&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// optional module docstring m.def(&#34;add&#34;, &amp;add, &#34;A function that adds two numbers&#34;);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// expose function
+</span></span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><pre><code>This code, when compiled as a Python module, automatically converts types and builds the necessary C API under the hood. The `PYBIND11_MODULE` macro creates the entry-point function (similar to `PyInit_my_cpp_module` earlier) for Python. The `m.def` line exports the C++ function `add` to Python with the name `add`. Pybind11 handles converting Python arguments to `int` and the returned int back to a Python integer. **No manual parsing or reference counting is needed** in user code. Pybind11 also supports classes, allowing you to expose C++ classes to Python (including methods, constructors, etc.) with a straightforward API.
+
+Pybind11 has become a de facto standard for C++/Python interfacing in projects that want to avoid the weight of Boost. It’s worth noting that pybind11 is extremely similar in capabilities to Boost.Python (in fact, its documentation acknowledges it was modeled after Boost.Python). The key difference is that _pybind11 requires C++11 or newer and thereby can be more efficient and succinct, whereas Boost.Python supports older C++ standards but with more complexity_. In practice, I only consider Boost.Python nowadays if I’m stuck on an older compiler that lacks C++11 support.
+</code></pre>
+<ul>
+<li>
+<p><strong>SWIG (Simplified Wrapper and Interface Generator):</strong> SWIG is a tool rather than a library, and it takes a different approach. You write an interface file describing the functions or classes you want to expose, and SWIG will <em>generate</em> the binding code for you, targeting multiple languages. SWIG has been around since 1995 and supports interfacing C/C++ with <strong>Python, Perl, Tcl, Ruby, Java, JavaScript, C#, and more</strong>. Essentially, SWIG automates the tedious part of writing those C glue functions by producing a wrapper in C or C++ that the target language can call. For Python, SWIG generates a C extension module behind the scenes. A major advantage of SWIG is that you can write one set of interface definitions and get multiple language bindings for your library (e.g., Python and Java) from it. It also supports advanced features like C++ class inheritance mapping to Python classes, etc., and allows customization via interface file directives.</p>
+<p>Using SWIG involves an extra build step (running the SWIG tool to produce code, then compiling that). For example, you might create <code>example.i</code> to describe what to expose, then run <code>swig -python -c++ example.i</code> to generate <code>example_wrap.cxx</code>, which you compile into a module. After building, you can import <code>example</code> in Python and use the functions which internally call into your C++ code. The upside is <strong>automation and multi-language support</strong>; the downside can be <strong>debugging complexity</strong> – when things go wrong in the generated code, it’s another layer to dive into. SWIG has improved its C++ support over the years, but historically there were limitations and sometimes obscure issues, especially with advanced C++ features (templates, overloads, etc.). Still, it remains a powerful option. I would consider SWIG if I needed bindings to many languages or wanted to avoid writing any binding code by hand. Otherwise, for a Python-only focus, pybind11 is often more convenient for C++17 projects.</p>
+</li>
+<li>
+<p><strong>ctypes and CFFI (Foreign Function Interface):</strong> These are Python-side technologies that allow Python to call <em>C functions in shared libraries</em> without writing a C extension module. They are worth mentioning as an alternative approach: rather than writing a special wrapper library, you compile your C++ code as a regular shared library with a C-compatible API, and then use Python’s <code>ctypes</code> module or the third-party <code>cffi</code> to call into it. For example, <code>ctypes</code> can load a <code>.dll</code> or <code>.so</code> and call functions by name, given you describe their signatures. This approach can be very quick for simple cases – no custom Python module needed, just ensure the C++ library exports C-style functions. However, for complex interactions (especially involving complex data types or callbacks), writing a proper extension or using pybind11 might be easier. The <strong>strength of <code>ctypes</code> is that it’s part of Python’s standard library</strong> and requires no extra build steps, but its weakness is that you manually manage conversions and it’s limited to C-style interfaces (it can’t directly work with C++ classes, for instance, only opaque pointers to them). <code>cffi</code> provides a bit more automation (you can feed it C header declarations and it generates the linkage), and it’s another viable alternative for C interfaces.</p>
+</li>
+<li>
+<p><strong>Cython:</strong> Cython is a language (a superset of Python with static typing hints) that allows you to write code that is compiled to C (or C++) extension modules. While not an interface library per se, it’s an approach to integrating C++ – you can call C++ functions or use C++ classes directly in Cython code by declaring them, and Cython will handle the conversion. This is often used in scientific computing to wrap C/C++ libraries with a Python-friendly layer written in a Python-like syntax. It can be very efficient, but it requires learning the Cython language and building a Cython module. I mention it for completeness: if one is more comfortable writing Python than C++, Cython can achieve similar goals by generating the binding code for you.</p>
+</li>
+</ul>
+<p>Each of these tools has its niche. <strong>In my view, the choice depends on the project’s requirements</strong>: If I need maximum performance and control and don’t mind writing some glue code, I might use the Python/C API directly for critical sections. If I want to expose a rich C++ library to Python with minimal fuss, pybind11 is my go-to due to its clean syntax and modern C++ support. If I already have Boost in the project or need compatibility, Boost.Python is an option. For bridging to multiple languages or a very large API surface, SWIG can save a lot of time by generating the bulk of the wrappers automatically. It’s also possible to mix approaches (for instance, use pybind11 for some parts and ctypes for a quick call into a simple function, etc.), but one must carefully manage not to load multiple incompatible versions of a library.</p>
+<p>Finally, a <strong>critical consideration</strong> when interfacing C++ and Python is <strong>managing lifetimes and error states across the language boundary</strong>. Python uses garbage collection and reference counting, while C++ uses deterministic destructors and manual memory management. When you share objects, ensure that both sides know who owns what. For example, if a C++ object is created and passed into Python, you might wrap it in a capsule or a custom Python object type that will free it when garbage-collected. Libraries like pybind11 handle a lot of this by mapping C++ smart pointers to Python object lifetimes and vice versa, which is another reason they are very helpful. Exceptions are another point: if a C++ exception is thrown and not caught in a Python extension, it could terminate the program or leave Python in an inconsistent state. Typically, one should catch C++ exceptions at the boundary and convert them to Python exceptions (again, pybind11 and Boost do this automatically for std::exceptions). Likewise, if a Python error occurs in embedded code, the C++ code should check for it (via <code>PyErr_Occurred()</code> etc.) and handle it appropriately. Being <strong>evidence-based and careful</strong> at these boundaries ensures robust integration.</p>
+<h2 id="interfacing-c-and-java">Interfacing C++ and Java</h2>
+<p>Java, unlike Python and C, runs on a managed virtual machine (the JVM), which means interfacing with C++ (a native language) involves a different paradigm. Java provides the Java Native Interface (<strong>JNI</strong>) for this purpose. JNI is a standard mechanism that allows Java code to call native C/C++ functions and vice versa. With JNI, one can, for example, write performance-critical portions of code in C++ or access system-specific resources, and call those from Java as if they were regular Java methods. Alternatively, a C++ program can start a Java Virtual Machine and invoke Java methods through JNI, though this is less common. The typical scenario is Java calling into C++.</p>
+<p>To use JNI, you generally follow these steps (assuming Java calling C++):</p>
+<ol>
+<li><strong>Declare native methods in Java:</strong> In a Java class, declare a method with the <code>native</code> keyword and no body. This serves as a placeholder that tells the JVM a native implementation will be provided. For example:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">JNIDemo</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">native</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">addNumbers</span>(<span style="color:#66d9ef">int</span> a, <span style="color:#66d9ef">int</span> b);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> {
+</span></span><span style="display:flex;"><span>        System.<span style="color:#a6e22e">loadLibrary</span>(<span style="color:#e6db74">&#34;nativeLib&#34;</span>);
+</span></span><span style="display:flex;"><span>    } <span style="color:#75715e">// load the shared library // ... (rest of class, possibly a main method)</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><pre><code>Here, `addNumbers` is a method that Java expects to be implemented in C/C++. The `System.loadLibrary(&quot;nativeLib&quot;)` call is crucial – it loads the shared library (DLL/.so) named &quot;nativeLib&quot; at runtime, so that the native method implementation becomes available to the JVM. Without loading the library, calling `addNumbers` would result in an unsatisfied link error.
+</code></pre>
+<ol start="2">
+<li><strong>Compile the Java code and generate a header:</strong> Use <code>javac</code> to compile the Java class. Then use the <code>javac -h . JNIDemo.java</code> command (or the older <code>javah</code> tool) to generate a C header file. This header contains the C function signature that corresponds to the Java native method, following a naming convention. For our example, <code>javac -h</code> will produce a <code>JNIDemo.h</code> with a function declaration like:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">/* Header generated from JNIDemo.java */</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;jni.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#ifdef __cplusplus extern &#34;C&#34; {
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">#endif JNIEXPORT jint JNICALL Java_JNIDemo_addNumbers(JNIEnv *, jobject, jint, jint);
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">#ifdef __cplusplus
+</span></span></span><span style="display:flex;"><span>} <span style="color:#960050;background-color:#1e0010">#</span>endif
+</span></span></code></pre></div><pre><code>The function name is mangled in a predictable way: `Java_&lt;PackageName&gt;_&lt;ClassName&gt;_&lt;MethodName&gt;` (with underscores for package separators). In this case, the class had no package and is `JNIDemo`, so we see `Java_JNIDemo_addNumbers`. The parameters of the function include a `JNIEnv*` and a `jobject` (which is the Java `this` object, since `addNumbers` is an instance method) followed by the method arguments. The return type is `jint` because a Java `int` maps to a C `jint` (usually a 32-bit int). These types (`JNIEnv`, `jint`, etc.) are defined in `&lt;jni.h&gt;`.
+</code></pre>
+<ol start="3">
+<li><strong>Implement the C++ function using the JNI signature:</strong> Now, in a C++ source file, you provide the implementation of that function. For example:</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;jni.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;JNIDemo.h&#34;</span><span style="color:#75715e"> </span><span style="color:#75715e">// header generated by javac -h JNIEXPORT jint JNICALL Java_JNIDemo_addNumbers(JNIEnv *env, jobject obj, jint a, jint b) {
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Simply add the two numbers and return the result return a + b;
+</span></span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><pre><code>This C++ function will be the one called when Java’s `JNIDemo.addNumbers()` is invoked. Notice we don’t typically use C++ features like classes or overloads here – it’s effectively a C-style API (though you can of course call into other C++ code from within this function). The `JNIEnv *env` parameter provides a pointer to the JNI environment, which has function pointers to many JNI functions for manipulating Java objects. In this simple case we don’t use `env` or `obj`, since adding two numbers doesn’t require any interaction with the Java side beyond the passed arguments.
+</code></pre>
+<ol start="4">
+<li>
+<p><strong>Compile the C++ code into a shared library:</strong> This step depends on your platform. On Windows, you’d compile to a DLL (e.g., using a command that includes <code>-LD</code> for MSVC or <code>-shared</code> for MinGW). On Linux, compile to a <code>.so</code> with <code>-shared -fPIC</code>. You must ensure the include path contains the JDK’s include directory (and platform-specific subdir, like <code>.../include/linux</code> or <code>.../include/win32</code>) so that <code>&lt;jni.h&gt;</code> and friends are found. The output should be a library file named <code>libnativeLib.so</code> (on Linux) or <code>nativeLib.dll</code> (on Windows) etc., matching the name you provided in <code>System.loadLibrary</code>. This library will export the <code>Java_JNIDemo_addNumbers</code> symbol.</p>
+</li>
+<li>
+<p><strong>Run the Java program:</strong> When the Java program runs and calls <code>addNumbers(5,7)</code>, the JVM will load the native library (if not already loaded), find the symbol for <code>Java_JNIDemo_addNumbers</code>, and call it. The two integers 5 and 7 will be passed as <code>jint</code> (which are basically <code>int</code> in the native code) and the return value will be converted back to a Java <code>int</code>. The result in this case would be 12, returned to the Java side.</p>
+</li>
+</ol>
+<p>This workflow demonstrates <strong>Java calling C++</strong>. The JNI interface is quite low-level: one has to manage conversions to Java types, handle errors (the JNI environment provides functions to throw Java exceptions from native code if needed), and ensure thread safety when needed. Also, any C++ static data or global state in the native library needs to be carefully handled since the library might be loaded and used by the JVM in a specific way.</p>
+<p>From a developer’s perspective, JNI code can be <strong>verbose and prone to errors</strong>, especially when dealing with more complex tasks like calling back into Java from C++ or working with Java strings (UTF-16) and arrays. For example, if you want to call a Java method from within C++, you would use <code>env-&gt;CallMethod(..., jobject, ...)</code> functions, and there’s a whole section of the JNI API for that. It works, but it’s not something I’d call “fun” to write for large interactions. Still, it <em>is</em> very powerful: virtually anything you can do in Java, you can trigger via JNI from C++, including creating objects, accessing fields, etc., as long as you have a <code>JNIEnv*</code> context. It’s how the Java standard library itself is implemented for things like I/O and threading – many of those are just thin Java APIs over native (often C) implementations under the hood.</p>
+<p><strong>Modern Alternatives and Helpers for JNI:</strong> Over time, developers have created some abstractions to simplify JNI usage, akin to how Boost.Python/pybind11 simplify Python extensions. One example is <strong>Java Native Access (JNA)</strong>, which takes a approach more like Python’s <code>ctypes</code>. With JNA, you <em>don’t write any C++ code at all</em>; instead, you write a Java class that describes the native library’s functions (using method signatures and annotations), and JNA uses reflection and library loading to call the C++ functions at runtime. JNA is <em>easier to use</em> (no compiling JNI code, no dealing with <code>JNIEnv</code> manually) but typically has worse performance than JNI – calls go through additional layers and use reflection. In fact, benchmarks indicate JNA calls can be an order of magnitude slower than direct JNI calls. For many use cases (like occasional calls to a system API) that overhead might be fine, and the benefit is rapid development. JNA is widely used for accessing OS libraries from Java because you can just map a C library function to a Java static method and call it, and JNA handles all the conversion of basic types.</p>
+<p>Another approach is <strong>JavaCPP</strong> or similar libraries, which generate JNI wrappers (somewhat like SWIG but specifically for C++). There’s also ongoing work in the OpenJDK project (Project Panama) to introduce a new foreign function interface that may eventually obviate JNI for many tasks, by allowing Java to call native libraries in a more direct way (as of Java 18 and 19, an incubating Foreign Linker API exists). But as of now (Java 17+), JNI remains the primary officially supported method to integrate C++ and Java at a low level.</p>
+<p>To decide between raw JNI and alternatives, I consider the following: If maximum performance and control is needed – for instance, a high-frequency call in a tight loop, or complex native interactions – <strong>JNI is the way to go</strong> despite the complexity. It gives fine-grained control and has minimal overhead beyond the call itself. On the other hand, if I just need to call a few native functions and don’t want to maintain a lot of glue code, <strong>JNA can be a quicker solution</strong>. The price is some overhead and the requirement that your data types be simple or you put in effort to map complex structs. For many typical scenarios (like calling a C++ library that computes something heavy where the call overhead is negligible), JNA is a perfectly valid approach.</p>
+<p>It’s worth noting that <strong>JNI vs JNA is analogous to the earlier discussion of direct API vs high-level wrappers</strong>: one gives more performance and control (but more code to write), the other gives convenience (at some cost to efficiency). There is also <strong>Java Native Runtime (JNR)</strong> and <strong>JNI NewBridge</strong> in discussions, but those are more niche. The mainstream choices are JNI and JNA, and they are not mutually exclusive – JNA itself is built on JNI internally.</p>
+<p><strong>C++ calling Java:</strong> Before leaving the C++/Java topic, I will touch on the reverse direction. It is less common, but you <em>can</em> embed a JVM in a C++ application. The JNI API provides functions like <code>JNI_CreateJavaVM</code> that allow your C++ code to spawn a Java Virtual Machine within the process. Once running, you can obtain a <code>JNIEnv*</code> and use it to call Java methods. For example, a C++ app could use this to leverage a Java library (perhaps one that provides some service or UI) without the user even knowing a JVM is involved. This is advanced and one must package a JDK/JRE with the application typically. But it is the mirror image of Java calling C++: here C++ is in control and Java is the “embedded” part. One must still write JNI code to interact with Java objects and methods. In practice, unless you have a specific Java library you must use, this route is rare because running a whole JVM from C++ has overhead and complexity (garbage collection, classpath handling, etc.). Yet, it’s a testament to JNI’s design that it supports full bi-directional interoperation.</p>
+<h3 id="example-java-and-c-integration-via-jni">Example: Java and C++ Integration via JNI</h3>
+<p>To solidify these ideas, let’s go through a concrete (if simplified) example as a recap. Suppose I have some C++ code to compute a result (say, a complex calculation) and I want to call it from Java.</p>
+<p><strong>Java side (in file <code>CalcDemo.java</code>):</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-java" data-lang="java"><span style="display:flex;"><span><span style="color:#66d9ef">public</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CalcDemo</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Declare native method public static native double computeValue(int x);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">static</span> {
+</span></span><span style="display:flex;"><span>        System.<span style="color:#a6e22e">loadLibrary</span>(<span style="color:#e6db74">&#34;calc_native&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// loads libcalc_native.so or calc_native.dll</span>
+</span></span><span style="display:flex;"><span>    } <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">main</span>(String<span style="color:#f92672">[]</span> args) {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int</span> input <span style="color:#f92672">=</span> 42;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">double</span> result <span style="color:#f92672">=</span> computeValue(input);
+</span></span><span style="display:flex;"><span>    System.<span style="color:#a6e22e">out</span>.<span style="color:#a6e22e">println</span>(<span style="color:#e6db74">&#34;Computed result for &#34;</span> <span style="color:#f92672">+</span> input <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; is &#34;</span> <span style="color:#f92672">+</span> result);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><strong>C++ side (in file <code>calc_native.cpp</code>):</strong></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;jni.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;CalcDemo.h&#34;</span><span style="color:#75715e"> </span><span style="color:#75715e">// header generated by javac -h JNIEXPORT jdouble JNICALL Java_CalcDemo_computeValue(JNIEnv* env, jclass cls, jint x) {
+</span></span></span><span style="display:flex;"><span>    <span style="color:#75715e">// For demonstration, perform a simple computation using C++ double y = 1.5 * x + 3.0;
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> y;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Here, <code>computeValue</code> is a static method (<code>static native</code>) so the C++ signature has <code>jclass</code> instead of <code>jobject</code> for the second parameter (since there’s no instance). We do a trivial computation and return a <code>jdouble</code>. After compiling this to a shared library and running the Java program, it would output the computed value. The flow is: Java calls <code>CalcDemo.computeValue(42)</code>, JVM loads <code>calc_native</code> library if not already loaded, finds <code>Java_CalcDemo_computeValue</code> and calls it, our C++ code runs and returns the result, which Java then prints.</p>
+<p><strong>Error handling:</strong> If something went wrong in the native code (say we couldn’t compute the value), we could signal an error to Java by using <code>env-&gt;ThrowNew(env-&gt;FindClass(&quot;java/lang/Exception&quot;), &quot;error message&quot;)</code> before returning. This would throw a Java exception out of the native method. Conversely, if a Java exception (like an <code>OutOfMemoryError</code>) happened during a JNI call, the native code needs to check <code>env-&gt;ExceptionOccurred()</code> and handle it (perhaps clean up and return). Proper error handling ensures that exceptions don’t crash the whole program or go uncaught.</p>
+<p><strong>Memory and pointers:</strong> JNI also allows passing around pointers by packaging them as <code>jlong</code> (64-bit) values or using direct byte buffers. For example, if you allocate a C++ object and want a Java reference to it, a common idiom is to store the pointer in a <code>long</code> field in Java. This is unsafe if the JVM is 32-bit or if pointer size isn’t exactly 64 bits, but often works in 64-bit environments. A safer way is to use <code>jobject</code> that hold native pointers (there’s <code>java.nio.Buffer</code> or JNI’s NewDirectByteBuffer for some cases). In short, managing memory between Java and C++ is tricky: the Java side can’t directly free C++ objects and vice versa. Usually, one writes additional native methods for cleanup or uses phantom references on the Java side to automatically call disposal natives. It’s an important aspect to plan in a real system.</p>
+<p><strong>Threading:</strong> When Java calls a native method, it attaches the current thread to the native code, so within that call you can use the <code>JNIEnv</code>. If you spin up new C++ threads and need to call Java from them, you must attach those threads to the JVM (using <code>jvm-&gt;AttachCurrentThread</code>) to get a JNIEnv for them. And you must detach threads before they exit. These details are beyond the scope of this overview but are spelled out in the JNI specification.</p>
+<p>To conclude the Java/C++ section, JNI provides the fundamental bridge needed for high-performance or low-level integration. The official Oracle tutorial describes JNI as <em>“a bridge between the bytecode running in the JVM and the native code (usually C or C++)”</em>, which succinctly captures its purpose. It is a mature technology (dating back to Java 1.1 in the late 90s) and has some rough edges (like manual coding, potential for memory errors, etc.), but it remains indispensable for certain tasks. My advice to an intermediate/advanced audience is to use JNI when you need that power, but to encapsulate and isolate JNI code as much as possible. For example, write a thin JNI layer that marshals data to C++ classes or functions, so the majority of your logic stays in idiomatic C++ or Java – this way, the tricky pointer juggling and <code>Env</code> calls are limited to a few functions. Also consider using JNA or other frameworks for simpler needs to reduce the amount of boilerplate you have to maintain.</p>
+<h2 id="conclusion-and-best-practices">Conclusion and Best Practices</h2>
+<p>Interfacing C++17 with Python, C, Java (and indeed other languages) opens up a world of possibilities: one can marry the strengths of each language to build more powerful software. We’ve seen how C++ can directly call C functions with minimal effort, how C++ and Python can cooperate through extension modules or embedded interpreters using tools like pybind11 to simplify the process, and how Java and C++ communicate via JNI with the option of higher-level helpers like JNA.</p>
+<p>Throughout these explorations, a few <strong>common themes</strong> and best practices emerge:</p>
+<ul>
+<li>
+<p><strong>Understand the ABI and Data Conversions:</strong> Each interface ultimately boils down to matching function signatures and data types between languages. Make sure the data types line up (e.g., a Python list might be seen as a <code>PyObject*</code> in C++, a Java <code>int</code> is a <code>jint</code>, a C <code>struct</code> might map to a C++ class layout if extern &ldquo;C&rdquo; is used, etc.). Mismatched expectations about memory layout or encoding can lead to bugs or crashes.</p>
+</li>
+<li>
+<p><strong>Memory Management and Ownership:</strong> Clearly define who allocates and who frees memory. If C++ allocates an object that Python will use, decide whether Python should ever delete it or if C++ will clean it up later. Tools and conventions (like reference counting, smart pointers, <code>std::shared_ptr</code> in pybind11, or reference queues in Java for native pointers) can help. Leaking memory across boundaries is a common problem if not designed upfront.</p>
+</li>
+<li>
+<p><strong>Error Handling and Exceptions:</strong> Different languages signal errors differently (C returns error codes, C++ throws exceptions, Python raises exceptions, Java throws exceptions). At interface boundaries, catch and translate errors appropriately. For instance, never let a C++ exception propagate into C code or Python interpreter – it should be caught and turned into an error code or Python exception. Similarly, catch Java exceptions in JNI and handle or rethrow them as C++ errors if calling Java from C++.</p>
+</li>
+<li>
+<p><strong>Performance Considerations:</strong> Every layer of indirection or conversion has a cost. If you are calling a function millions of times, a direct C++ call will be much faster than calling a Python function millions of times due to interpreter overhead or JNI overhead. In such cases, try to minimize cross-language calls (do more work per call, batch operations, or move the tight loop logic into C++ entirely). For example, if Python needs to process a large array with C++ speed, it’s better to have one function that processes the whole array in C++ than to call a C++ function for each element from Python in a loop. Choose interface tools that meet your performance needs – e.g., prefer JNI over JNA for a high-frequency low-level operation, or use pybind11 (which is C++ optimized) instead of an XML-RPC call or something heavyweight.</p>
+</li>
+<li>
+<p><strong>Maintainability and Complexity:</strong> Using multiple languages in one project adds complexity. I always weigh whether the benefit is worth the additional build and runtime complexity. If it is, I strive to keep the boundary layer as minimal and well-documented as possible. High-level tools (SWIG, pybind11, JNA, etc.) can reduce the complexity of the code you write, but they also add external dependencies or generated code to the project. Ensure your team is comfortable with whichever method you use and can debug issues in that layer. Sometimes a simpler approach (even if more manual) might be preferred if it’s more transparent.</p>
+</li>
+</ul>
+<p>Looking forward, <strong>language interoperability is improving</strong>. For instance, new proposals in the C++ world (like <em>C++ modules</em> and <em>C++/CLI</em> for .NET) and in other ecosystems (like Python’s limited multi-core support via subinterpreters, or Java’s Project Panama for direct native calls) aim to streamline these interactions. It wouldn’t surprise me if in a few years some of the boilerplate we write today becomes unnecessary. Nonetheless, the core principles discussed here will remain relevant: when bridging languages, we’re fundamentally dealing with bridging different run-time systems and must do so with care and clear understanding.</p>
+<p>In conclusion, interfacing C++17 with Python, C, and Java is a multifaceted topic that requires both <em>analytical thinking</em> and <em>practical know-how</em>. I’ve shared an overview with examples, but each bullet point could be an article (or book) in itself. As a developer, I enjoy the challenge of language interfacing because it forces me to deeply understand how things work under the hood – from Python’s memory management to Java’s bytecode expectations and the C++ ABI. By leveraging the best tools and practices available and citing authoritative references (as I’ve done throughout this post), we can confidently integrate C++ with other languages to build software that capitalises on the unique strengths of each. Bridging languages is an exercise in both creativity and precision, and when done right, it truly <em>expands</em> the horizons of what our software can achieve.</p>
+<h2 id="references">References</h2>
+<ul>
+<li>
+<p>GeeksforGeeks – <em>“Name Mangling and extern &ldquo;C&rdquo; in C++”</em> (2025) – explanation of C++ name mangling and using <code>extern &quot;C&quot;</code> for C interoperability<a href="https://www.geeksforgeeks.org/cpp/extern-c-in-c/#:~:text=When%20some%20code%20is%20put,as%20shown%20below">geeksforgeeks.org</a><a href="https://www.geeksforgeeks.org/cpp/extern-c-in-c/#:~:text=Following%20are%20the%20main%20points,block%20are%20not%20changed">geeksforgeeks.org</a>.</p>
+</li>
+<li>
+<p>Python 3 Documentation – <em>“Extending and Embedding the Python Interpreter”</em> – official guide for writing Python extensions in C/C++ and embedding Python<a href="https://docs.python.org/3/extending/index.html#:~:text=This%20document%20describes%20how%20to,operating%20system%20supports%20this%20feature">docs.python.org</a><a href="https://docs.python.org/3/c-api/intro.html#c-api-tools%23:~:text=the%20platform%20specific%20headers%20from,exec_prefix">docs.python.org</a>.</p>
+</li>
+<li>
+<p>Real Python – <em>“Python Bindings: Calling C or C++ From Python”</em> – an overview of methods (ctypes, CFFI, pybind11, etc.) for integrating Python with C/C++<a href="https://realpython.com/python-bindings-overview/#:~:text=PyBind11%20takes%20a%20quite%20different,be%20imported%20and%20used%20directly">realpython.com</a><a href="https://realpython.com/python-bindings-overview/#:~:text=The%20first%20two%20lines%20include,source">realpython.com</a>.</p>
+</li>
+<li>
+<p>Yung-Yu’s Notes – <em>“Interoperation between pybind11 and Boost.Python”</em> (2021) – discussion on using modern C++ (pybind11) vs older Boost.Python for wrapping C++ to Python<a href="https://yyc.solvcon.net/en/latest/writing/2021/pyboost11/pyboost11.html#:~:text=If%20you%20are%20creating%20a,described%20by%20the%20pybind11%20project">yyc.solvcon.net</a><a href="https://yyc.solvcon.net/en/latest/writing/2021/pyboost11/pyboost11.html#:~:text=pybind11%20and%20Boost,way%20conversion">yyc.solvcon.net</a>.</p>
+</li>
+<li>
+<p>eInfochips Blog – <em>“A Beginner’s Guide to SWIG”</em> (2025) – introduction to using SWIG for generating wrappers to connect C/C++ with languages like Python and Java<a href="https://www.einfochips.com/blog/a-beginners-guide-to-swig-simplified-wrapper-and-interface-generator/#:~:text=A%20program%20called%20SWIG%20makes,the%20generation%20of%20wrapper%20code">einfochips.com</a><a href="https://www.einfochips.com/blog/a-beginners-guide-to-swig-simplified-wrapper-and-interface-generator/#:~:text=The%20goal%20of%20SWIG%20is,to%20write%20intricate%20bindings%20manually">einfochips.com</a>.</p>
+</li>
+<li>
+<p>Baeldung – <em>“Guide to JNI (Java Native Interface)”</em> – covers the basics of why and how to use JNI in Java, including the need for native code and how JNI works<a href="https://www.baeldung.com/jni#:~:text=There%20could%20be%20some%20reasons,needing%20to%20use%20native%20code">baeldung.com</a><a href="https://www.baeldung.com/jni#:~:text=,of%20rewriting%20it%20in%20Java">baeldung.com</a>.</p>
+</li>
+<li>
+<p>Medium – Ashan D. Herath – <em>“Run C/C++ program on Java Using JNI”</em> (2025) – a step-by-step example of JNI usage on Windows, illustrating the process of declaring a native method, generating headers, and implementing in C<a href="https://medium.com/@ashandimanthalk/run-c-c-program-on-java-using-java-native-interface-jni-cfa13b74c10f#:~:text=The%20Java%20Native%20Interface%20,level%20programming">medium.com</a><a href="https://medium.com/@ashandimanthalk/run-c-c-program-on-java-using-java-native-interface-jni-cfa13b74c10f#:~:text=">medium.com</a>.</p>
+</li>
+<li>
+<p>JustAcademy Blog – <em>“JNI vs JNA: Key Differences and Use Cases”</em> (2024) – comparison of direct JNI and the higher-level JNA approach in terms of complexity, performance, and suitability<a href="https://www.justacademy.co/blog-detail/jni-vs-jna#:~:text=JNI%20,critical%20applications%20or">justacademy.co</a><a href="https://www.justacademy.co/blog-detail/jni-vs-jna#:~:text=JNI%20usually%20offers%20better%20performance,due%20to%20its%20dynamic%20nature">justacademy.co</a>.</p>
+</li>
+</ul>
+
+      </div>
+    </article>
+
+    <hr />
+
+    <div class="post-info">
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag meta-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/tags/c_cpp/">c_cpp</a></span>
+        <span class="tag"><a href="https://blog.miguens.one/tags/programming/">programming</a></span>
+        
+    </p>
+
+      
+    <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder meta-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+
+        <span class="tag"><a href="https://blog.miguens.one/categories/technical/">technical</a></span>
+        
+    </p>
+
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        6777 Words
+      </p>
+
+      <p>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        
+          2026-05-08
+        
+
+         
+          
+        
+      </p>
+    </div>
+      <hr />
+      <div class="sharing-buttons">
+        
+<a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f05%2fbridging-c-17-and-other-languages-a-comprehensive-interface-guide%2f" target="_blank" rel="noopener" aria-label="" title="Share on facebook">
+  <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f05%2fbridging-c-17-and-other-languages-a-comprehensive-interface-guide%2f" target="_blank" rel="noopener" aria-label="" title="Share on twitter">
+  <div class="resp-sharing-button resp-sharing-button--twitter resp-sharing-button--small">
+      <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.tumblr.com/widgets/share/tool?posttype=link&amp;title=Bridging%20C%2b%2b17%20and%20Other%20Languages%3a%20A%20Comprehensive%20Interface%20Guide&amp;caption=Bridging%20C%2b%2b17%20and%20Other%20Languages%3a%20A%20Comprehensive%20Interface%20Guide&amp;canonicalUrl=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f05%2fbridging-c-17-and-other-languages-a-comprehensive-interface-guide%2f" target="_blank" rel="noopener" aria-label="" title="Share on tumblr">
+  <div class="resp-sharing-button resp-sharing-button--tumblr resp-sharing-button--small">
+    <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.156 1.404h-.178l.011.002z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="mailto:?subject=Bridging%20C%2b%2b17%20and%20Other%20Languages%3a%20A%20Comprehensive%20Interface%20Guide&amp;body=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f05%2fbridging-c-17-and-other-languages-a-comprehensive-interface-guide%2f" target="_self" rel="noopener" aria-label="" title="Share via email">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://pinterest.com/pin/create/button/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f05%2fbridging-c-17-and-other-languages-a-comprehensive-interface-guide%2f&amp;media=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f05%2fbridging-c-17-and-other-languages-a-comprehensive-interface-guide%2f;description=Bridging%20C%2b%2b17%20and%20Other%20Languages%3a%20A%20Comprehensive%20Interface%20Guide" target="_blank" rel="noopener" aria-label="" title="Share on pinterest">
+  <div class="resp-sharing-button resp-sharing-button--pinterest resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f05%2fbridging-c-17-and-other-languages-a-comprehensive-interface-guide%2f&amp;title=Bridging%20C%2b%2b17%20and%20Other%20Languages%3a%20A%20Comprehensive%20Interface%20Guide&amp;summary=Bridging%20C%2b%2b17%20and%20Other%20Languages%3a%20A%20Comprehensive%20Interface%20Guide&amp;source=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f05%2fbridging-c-17-and-other-languages-a-comprehensive-interface-guide%2f" target="_blank" rel="noopener" aria-label="" title="Share on linkedin">
+  <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://reddit.com/submit/?url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f05%2fbridging-c-17-and-other-languages-a-comprehensive-interface-guide%2f&amp;resubmit=true&amp;title=Bridging%20C%2b%2b17%20and%20Other%20Languages%3a%20A%20Comprehensive%20Interface%20Guide" target="_blank" rel="noopener" aria-label="" title="Share on reddit">
+  <div class="resp-sharing-button resp-sharing-button--reddit resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://www.xing.com/app/user?op=share;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f05%2fbridging-c-17-and-other-languages-a-comprehensive-interface-guide%2f;title=Bridging%20C%2b%2b17%20and%20Other%20Languages%3a%20A%20Comprehensive%20Interface%20Guide" target="_blank" rel="noopener" aria-label="" title="Share on xing">
+  <div class="resp-sharing-button resp-sharing-button--xing resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.188 0c-.517 0-.741.325-.927.66 0 0-7.455 13.224-7.702 13.657.015.024 4.919 9.023 4.919 9.023.17.308.436.66.967.66h3.454c.211 0 .375-.078.463-.22.089-.151.089-.346-.009-.536l-4.879-8.916c-.004-.006-.004-.016 0-.022L22.139.756c.095-.191.097-.387.006-.535C22.056.078 21.894 0 21.686 0h-3.498zM3.648 4.74c-.211 0-.385.074-.473.216-.09.149-.078.339.02.531l2.34 4.05c.004.01.004.016 0 .021L1.86 16.051c-.099.188-.093.381 0 .529.085.142.239.234.45.234h3.461c.518 0 .766-.348.945-.667l3.734-6.609-2.378-4.155c-.172-.315-.434-.659-.962-.659H3.648v.016z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="whatsapp://send?text=Bridging%20C%2b%2b17%20and%20Other%20Languages%3a%20A%20Comprehensive%20Interface%20Guide%20https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f05%2fbridging-c-17-and-other-languages-a-comprehensive-interface-guide%2f" target="_blank" rel="noopener" aria-label="" title="Share on whatsapp">
+  <div class="resp-sharing-button resp-sharing-button--whatsapp resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://news.ycombinator.com/submitlink?u=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f05%2fbridging-c-17-and-other-languages-a-comprehensive-interface-guide%2f&amp;t=Bridging%20C%2b%2b17%20and%20Other%20Languages%3a%20A%20Comprehensive%20Interface%20Guide" target="_blank" rel="noopener" aria-label="" title="Share on hacker news">
+  <div class="resp-sharing-button resp-sharing-button--hackernews resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896h-1.88z"/></svg>
+    </div>
+  </div>
+</a>
+
+
+<a class="resp-sharing-button__link" href="https://telegram.me/share/url?text=Bridging%20C%2b%2b17%20and%20Other%20Languages%3a%20A%20Comprehensive%20Interface%20Guide&amp;url=https%3a%2f%2fblog.miguens.one%2fposts%2f2026%2f05%2fbridging-c-17-and-other-languages-a-comprehensive-interface-guide%2f" target="_blank" rel="noopener" aria-label="" title="Share on telegram">
+  <div class="resp-sharing-button resp-sharing-button--telegram resp-sharing-button--small"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solid">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    </div>
+  </div>
+</a>
+
+      </div>
+
+    
+    <div class="pagination">
+        
+
+        <div class="pagination__buttons">
+            
+            <span class="button previous">
+                <a href="https://blog.miguens.one/posts/2026/06/interfacing-c-17-with-python-using-pybind11/">
+                    <span class="button__icon">←</span>
+                    <span class="button__text">Interfacing C&#43;&#43;17 with Python Using Pybind11</span>
+                </a>
+            </span>
+            
+
+            
+            <span class="button next">
+                <a href="https://blog.miguens.one/posts/2026/04/implementing-common-design-patterns-in-c-17/">
+                    <span class="button__text">Implementing Common Design Patterns in C&#43;&#43;17</span>
+                    <span class="button__icon">→</span>
+                </a>
+            </span>
+            
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+
+  </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    
+    
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+<script type="text/javascript" src="https://blog.miguens.one/bundle.min.ad54ad97364f77ede35def9096b162bb1f0b3973aa50b080f5e82fa147f6882e2a7200d7535adbf9b51bebf939f1c1ca9bbe6be87530092aca720eac4a226fda.js" integrity="sha512-rVStlzZPd&#43;3jXe&#43;QlrFiux8LOXOqULCA9egvoUf2iC4qcgDXU1rb&#43;bUb6/k58cHKm75r6HUwCSrKcg6sSiJv2g=="></script>
+
+
+
+
+    </body>
+</html>
